@@ -5,12 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e9c9cd8-6111-426c-8585-1c276d6c5cc9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/UI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/UtilityTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/AssetSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/AssetSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/GamePanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/KeyHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/KeyHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/OBJ_Boots.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Boots.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/OBJ_Chest.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Chest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/OBJ_Door.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Door.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/OBJ_Key.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Key.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/SuperObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/SuperObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map02.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map02.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.bat" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tile/TileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/tile/TileManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -23,24 +52,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.game.Main.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;amudipurba&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/asus/OneDrive - Institut Teknologi Bandung/AKADEMIK/JAVA/Tubes_OOP&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Application.game.Main.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "tubesoop",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "/Users/alicia/Documents/GitHub/Tubes_OOP",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="main.Main" />
@@ -107,9 +136,9 @@
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/main/Main.java</url>
-          <line>3</line>
-          <option name="timeStamp" value="2" />
+          <url>file://$PROJECT_DIR$/main/UtilityTool.java</url>
+          <line>8</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
