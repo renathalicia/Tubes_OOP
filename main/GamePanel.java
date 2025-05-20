@@ -26,7 +26,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     // System
     public TileManager tileM = new TileManager(this);
-    KeyHandler keyH = new KeyHandler();
+    KeyHandler keyH = new KeyHandler(this);
     Sound music = new Sound();
     Sound se = new Sound();
     public CollisionChecker cChecker = new CollisionChecker(this);
@@ -38,6 +38,10 @@ public class GamePanel extends JPanel implements Runnable{
     public Player player = new Player(this, keyH);
     public SuperObject obj[] = new SuperObject[10]; // 10 untuk slot yang dapat digunakan untuk menaruh objek, boleh ditambah.
 
+    // GAME STATE
+    public int gameState;
+    public final int playState = 1;
+    public final int pauseState = 2; // ini gunanya untuk mengatur aksi lain di screen pada waktu yang bersamaan, misalnya swing a sword with enter key, dimana di saat yang bersamaan enter bisa untuk melakukan aksi lain
 
     //int playerX = 100;
     //int playerY = 100;
@@ -55,8 +59,9 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setUpGame() {
         aSetter.setObject();
-
+        
         playMusic(0);
+        gameState = playState;
     }
 
     public void startGameThread(){
@@ -108,6 +113,12 @@ public class GamePanel extends JPanel implements Runnable{
         }
     }
     public void update(){
+        if(gameState == playState){
+            player.update();
+        }
+        if(gameState == pauseState){
+            //gadak
+        }
         player.update();
     }
     public void paintComponent(Graphics g){

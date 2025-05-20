@@ -18,7 +18,7 @@ public class Player extends Entity{
     public final int screenX;
     public final int screenY;
 
-    public int hasKey = 0;
+    // public int hasKey = 0;
     
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
@@ -37,7 +37,7 @@ public class Player extends Entity{
     public void setDefaultValues(){
         worldX= gp.tileSize * 23; // ini aslinya x, y aja, tapi ini mau diubah buat view nya bisa ditengah, nanti kita ubah aja 
         worldY= gp.tileSize * 21;
-        speed = 3;
+        speed = 2; //ngatur kecepatan jalan
         direction = "down";
     }
     public void getPlayerImage(){
@@ -123,35 +123,8 @@ public class Player extends Entity{
 
         if (i != 999) {
             
-            String objectName = gp.obj[i].name;
-
-            switch (objectName) {
-                case "Key":
-                    hasKey++;
-                    gp.obj[i] = null;
-                    gp.ui.showMessage("You got a key!");
-                    break;
-                case "Door":
-                    if(hasKey > 0) {
-                        gp.obj[i] = null;
-                        hasKey--;
-                        gp.ui.showMessage("You opened a door!");
-                    }
-                    else{
-                        gp.ui.showMessage("You need a key!");
-                    }
-                    break;
-                case "Boots":
-                    speed += 1;
-                    gp.obj[i] = null;
-                    gp.ui.showMessage("Speed up!");
-                    break;
-                case "Chest":
-                    gp.ui.gameFinished = true;
-                    gp.stopMusic();
-                    gp.playSE(4);
-                    break;
-            }
+            
+            
         }
     }
 
