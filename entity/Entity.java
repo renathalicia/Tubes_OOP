@@ -12,7 +12,7 @@ import main.GamePanel;
 import main.UtilityTool;
 
 public class Entity {
-    GamePanel gp;
+    public GamePanel gp;
     public int worldX, worldY;
     public int x, y;
     public int speed;
@@ -23,9 +23,62 @@ public class Entity {
     public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
+    public String dialogues[] = new String[20];
+    public int dialogueIndex = 0;
     
     public Entity(GamePanel gp){
         this.gp = gp;
+    }
+    public void speak(){
+        if(dialogues[dialogueIndex] == null){
+            dialogueIndex = 0;
+        }
+        gp.ui.currentDialogue = dialogues[dialogueIndex];
+        dialogueIndex++;
+        switch (gp.player.direction) {
+            case "up":
+                direction = "down";               
+                break;
+            case "down":
+                direction = "up";               
+                break;
+            case "left":
+                direction = "right";               
+                break;
+            case "right":
+                direction = "left";               
+                break;
+        }
+    }
+    public void update(){
+        collisionOn = false;
+        gp.cChecker.checkTile(this);
+        if(collisionOn == false){
+            switch (direction) {
+                case "up":
+                    worldY -= speed; // aslinya y aja
+                    break;
+                case "down":
+                    worldY += speed;
+                    break;
+                case "left":
+                    worldX -= speed;
+                    break;
+                case "right":
+                    worldX += speed;
+                    break;
+                default:
+                    break;
+            }
+        }
+        spriteCounter++;
+        if(spriteCounter > 10){
+            if(spriteNum == 1){
+                spriteNum = 2;
+            }else if(spriteNum == 2){
+                spriteNum = 1;
+            } spriteCounter = 0;
+        }
     }
 
     public void draw(Graphics2D g2){
