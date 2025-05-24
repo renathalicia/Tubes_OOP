@@ -1,6 +1,10 @@
 package main;
+
+
 import java.awt.Color;
 import javax.swing.JPanel;
+import entity.NPC_1;
+import entity.Entity;
 import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
@@ -37,6 +41,7 @@ public class GamePanel extends JPanel implements Runnable{
     // entity and object
     public Player player = new Player(this, keyH);
     public SuperObject obj[] = new SuperObject[10]; // 10 untuk slot yang dapat digunakan untuk menaruh objek, boleh ditambah.
+    public Entity npc[] = new Entity[10];
 
     // GAME STATE
     public int gameState;
@@ -59,7 +64,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setUpGame() {
         aSetter.setObject();
-        
+        aSetter.setNPC();
         playMusic(0);
         gameState = playState;
     }
@@ -136,6 +141,13 @@ public class GamePanel extends JPanel implements Runnable{
         for(int i = 0; i < obj.length; i++){
             if(obj[i] != null){
                 obj[i].draw(g2, this);
+            }
+        }
+
+        // npc
+        for(int i=0; i< npc.length; i++){
+            if(npc[i] != null){
+                npc[i].draw(g2);
             }
         }
         player.draw(g2); // player

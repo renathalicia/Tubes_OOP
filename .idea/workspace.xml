@@ -5,28 +5,173 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e9c9cd8-6111-426c-8585-1c276d6c5cc9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/main/UI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main/UtilityTool.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tubes_OOP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/entity/Entity.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/entity/Player.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/AssetSetter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/CollisionChecker.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/GamePanel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/KeyHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/Main.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/Sound.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/UI.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/main/UtilityTool.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/object/OBJ_Boots.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/object/OBJ_Chest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/object/OBJ_Door.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/object/OBJ_Key.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/object/SuperObject.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/maps/map01.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/maps/map02.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/maps/map03.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/objects/boots.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/objects/chest.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/objects/door.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/objects/key.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_down_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_down_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_left_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_left_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_right_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_right_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_up_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/boy_up_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/down1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/down2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/down3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/down4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/left1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/left2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/right1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/right2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/up1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/up2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/up3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/player/up4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/BlueBoyAdventure.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/clbk.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/coin.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/fanfare.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/powerup.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/sound/unlock.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/earth.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/grass.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/sand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/tree.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/wall.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/res/tiles/water.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/tile/Tile.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/tile/TileManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Entity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/AssetSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/AssetSetter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/GamePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/KeyHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/KeyHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/OBJ_Boots.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Boots.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/OBJ_Chest.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Chest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/OBJ_Door.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Door.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/OBJ_Key.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/OBJ_Key.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/SuperObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/object/SuperObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map02.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map02.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.bat" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/Tubes_OOP.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map01.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map02.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/maps/map03.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/objects/boots.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/objects/chest.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/objects/door.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/objects/key.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_down_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_down_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_left_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_left_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_right_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_right_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_up_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/player/boy_up_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/earth.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/grass.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/sand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/tree.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/wall.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/bin/res/tiles/water.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/app/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradle.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradle/libs.versions.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/gradle/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/kompilasi.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/AssetSetter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/CollisionChecker.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Main.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/Sound.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/UI.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/UtilityTool.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/object/OBJ_Boots.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/object/OBJ_Chest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/object/OBJ_Door.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/object/OBJ_Key.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/object/SuperObject.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map01.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map03.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/objects/boots.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/objects/chest.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/objects/door.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/objects/key.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_down_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_down_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_left_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_left_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_right_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_right_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_up_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/boy_up_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/down1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/down2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/down3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/down4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/left1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/left2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/right1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/right2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/up1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/up2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/up3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/player/up4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/BlueBoyAdventure.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/clbk.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/coin.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/fanfare.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/powerup.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/sound/unlock.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/earth.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/grass.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/sand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/tree.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/wall.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/tiles/water.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/sampah/sampah.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tempCodeRunnerFile.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/Tile.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/earth.png" beforeDir="false" afterPath="$PROJECT_DIR$/res/tiles/earth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/grass.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/sand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/tree.png" beforeDir="false" afterPath="$PROJECT_DIR$/res/tiles/tree.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/wall.png" beforeDir="false" afterPath="$PROJECT_DIR$/res/tiles/wall.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/tiles/water.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/tile/TileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/tile/TileManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -43,6 +188,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -61,7 +209,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "tubesoop",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "/Users/alicia/Documents/GitHub/Tubes_OOP",
+    "last_opened_file_path": "C:/Users/asus/OneDrive - Institut Teknologi Bandung/AKADEMIK/Tubes_OOP",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -121,6 +269,7 @@
       <updated>1747463462629</updated>
       <workItem from="1747463464232" duration="3033000" />
       <workItem from="1747467170169" duration="2018000" />
+      <workItem from="1748074089839" duration="3394000" />
     </task>
     <servers />
   </component>

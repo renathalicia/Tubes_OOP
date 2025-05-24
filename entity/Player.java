@@ -12,16 +12,15 @@ import java.util.Observer;
 import java.util.Observable;
 
 public class Player extends Entity{
-    GamePanel gp;
-    KeyHandler keyH;
-
-    public final int screenX;
-    public final int screenY;
-
-    // public int hasKey = 0;
+   GamePanel gp;
+   KeyHandler keyH;
+   public final int screenX;
+   public final int screenY;
+    public int hasKey = 0;
     
     public Player(GamePanel gp, KeyHandler keyH){
-        this.gp = gp;
+        super(gp);
+         this.gp = gp;
         this.keyH = keyH;
 
         screenX = gp.screenWidth/2 - (gp.tileSize/2); //ini tampilan screen yang statis, 
@@ -41,10 +40,10 @@ public class Player extends Entity{
         direction = "down";
     }
     public void getPlayerImage(){
-        up1 = setup("up1");
-        up2 = setup("up2");
-        down1 = setup("down1");
-        down2 = setup("down2");
+        up1 = setup("up2");
+        up2 = setup("up4");
+        down1 = setup("down2");
+        down2 = setup("down4");
         left1 = setup("left1");
         left2 = setup("left2");
         right1 = setup("right1");
