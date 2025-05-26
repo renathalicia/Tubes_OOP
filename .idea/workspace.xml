@@ -6,6 +6,17 @@
   <component name="ChangeListManager">
     <list default="true" id="1e9c9cd8-6111-426c-8585-1c276d6c5cc9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/AssetSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/AssetSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/CollisionChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/CollisionChecker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/EventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/EventHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/GamePanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/UI.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/UI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/CollisionChecker.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/CollisionChecker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/EventHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/EventHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,26 +59,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.game.Main.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;tubesoop&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/amandarizki/Documents/Tubes_OOP/res/maps&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Application.game.Main.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "tubesoop",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "/Users/amandarizki/Documents/Tubes_OOP/entity",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/entity" />
       <recent name="$PROJECT_DIR$/res/maps" />
       <recent name="$PROJECT_DIR$/res/tiles" />
     </key>
@@ -138,11 +150,6 @@
           <url>file://$PROJECT_DIR$/src/game/Main.java</url>
           <line>4</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/main/UtilityTool.java</url>
-          <line>8</line>
-          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

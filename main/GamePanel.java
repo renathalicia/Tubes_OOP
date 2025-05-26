@@ -22,8 +22,9 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldRow = 50;
 
     //Map Settings (untuk pindah Map)
-    public final int maxMap = 2;
+    public final int maxMap = 10;
     public int currentMap = 0;
+
 
     // FPS
     int FPS = 60;
@@ -36,6 +37,8 @@ public class GamePanel extends JPanel implements Runnable{
     public CollisionChecker cChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
     public UI ui = new UI(this);
+    //untuk check event (pindah map)
+    public EventHandler eHandler = new EventHandler(this);
     Thread gameThread;
     //Untuk save & load
     SaveLoad saveLoad = new SaveLoad(this);
@@ -131,10 +134,9 @@ public class GamePanel extends JPanel implements Runnable{
                 }
             }
         }
-        if(gameState == pauseState){
+        if(gameState == pauseState) {
             //gadak
         }
-        player.update();
     }
 
     public void paintComponent(Graphics g){

@@ -15,7 +15,7 @@ public class Player extends Entity {
     KeyHandler keyH;
     public final int screenX;
     public final int screenY;
-    public int hasKey = 0;
+//    public int hasKey = 0;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
@@ -90,6 +90,9 @@ public class Player extends Entity {
             // CHECK NPC COLLISION
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
+
+            //CHECK EVENT
+            gp.eHandler.checkEvent();
 
             // IF COLLISION IS FALSE, PLAYER CAN MOVE
             if (!collisionOn) {
