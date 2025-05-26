@@ -15,7 +15,14 @@ public class Player extends Entity {
     KeyHandler keyH;
     public final int screenX;
     public final int screenY;
-//    public int hasKey = 0;
+    public int hasKey = 0;
+    public String name;
+    public String gender;
+    public int energy;
+    public final int maxEnergy = 100;
+    public String farmName;
+    public String partner;
+    public int gold;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
@@ -39,8 +46,15 @@ public class Player extends Entity {
         //untuk interior
         worldX = gp.tileSize * 12;
         worldY = gp.tileSize * 13;
-        speed = 3;
+        speed = 2;
         direction = "down";
+
+        name = "Bujanginam";
+        gender = "Male";
+        energy = maxEnergy;
+        gold = 0;
+        farmName = "Tanah Batak";
+        partner = "None";
     }
 
     public void getPlayerImage() {
@@ -122,6 +136,20 @@ public class Player extends Entity {
                 spriteCounter = 0;
             }
         }
+
+        if(energy <= 0){
+            if(energy > -20){
+                gp.gameState = gp.dialogueState;
+                gp.ui.currentDialogue = "Anda kelelahan! Energi: " + energy;
+            } else {
+                gp.gameState = gp.sleepState;
+                worldX = gp.tileSize * 12; // Reset posisi ke tempat tidur
+                worldY = gp.tileSize * 13; // Reset posisi ke tempat tidur
+
+                energy = maxEnergy; // Reset energi saat tidur
+                gp.player.direction = "down"; // Mengatur arah ke bawah saat tidur
+            }
+        }
     }
 
     public void pickUpObject(int i) {
@@ -138,6 +166,32 @@ public class Player extends Entity {
             }
         }
         gp.keyH.enterPressed = false;
+    }
+
+    public boolean consumeEnergy(int cost) {
+        if(energy - cost >= -20){
+            energy -= cost;
+            return true; // Energi cukup untuk dikonsumsi
+        } else {
+            gp.gameState = gp.dialogueState;
+            gp.ui.currentDialogue = "Energi tidak cukup!";
+            return false; // Energi tidak cukup
+        }
+        
+    }
+
+    public void gainEnergy(int amount) {
+        energy += amount;
+        if (energy > maxEnergy) {
+            energy = maxEnergy; // Pastikan energi tidak melebihi maksimum
+        }
+    }
+
+    public void changeGold(int amount) {
+        gold += amount;
+        if (gold < 0) {
+            gold = 0; // Pastikan gold tidak negatif
+        }
     }
 
     public void draw(Graphics2D g2) {
