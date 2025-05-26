@@ -47,6 +47,7 @@ public class UI {
             drawDialogueScreen();
         }
     }
+
     public void drawPauseScreen(){
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN,80F));
         String text = "PAUSED";
@@ -55,6 +56,7 @@ public class UI {
 
         g2.drawString(text,x,y);
     }
+
     public void drawDialogueScreen(){
         int x = gp.tileSize*2;
         int y = gp.tileSize/2;
@@ -71,6 +73,7 @@ public class UI {
             y+= 40;
         }
     }
+
     public void drawSubWindow(int x, int y, int width, int height){
         Color c = new Color(0, 0, 0, 200); //200 itu opacity(transparansi)
         g2.setColor(c);
@@ -80,9 +83,11 @@ public class UI {
         g2.setStroke(new BasicStroke(5));
         g2.drawRoundRect(x+5, y+5, width-10, height-10, 25, 25);
     }
+
     public int getXforCenteredText(String text){
         int length = (int)g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         int x = gp.screenWidth/2 - length/2;
         return x;
     }
+
 }

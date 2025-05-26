@@ -5,10 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e9c9cd8-6111-426c-8585-1c276d6c5cc9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/data/DataStorage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/SaveLoad.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Crop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Equipment.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Fish.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/FishType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Food.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Item.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Misc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/item/Seed.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/EventHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main/EventRect.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/res/maps/interior01.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/res/maps/worldV3.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entity/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Entity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/entity/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/AssetSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/AssetSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/CollisionChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/CollisionChecker.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/GamePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/GamePanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/KeyHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/KeyHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main/UI.java" beforeDir="false" afterPath="$PROJECT_DIR$/main/UI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Entity.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/NPC_1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/NPC_1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/entity/Player.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/AssetSetter.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/AssetSetter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/CollisionChecker.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/CollisionChecker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/GamePanel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/KeyHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/main/UI.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/main/UI.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map01.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/res/maps/map02.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Tubes_OOP/tile/TileManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/maps/map01.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/res/maps/map02.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tile/TileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/tile/TileManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +57,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "SamuelChris16"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/renathalicia/Tubes_OOP.git",
+    "accountId": "3a74b653-0a89-460e-9a20-07e7f6da51a7"
+  }
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -32,6 +76,9 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2xDCsFBYJyG4fppT0Q8tbFiE4Tu" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -45,7 +92,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "tubesoop",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/asus/OneDrive - Institut Teknologi Bandung/AKADEMIK/Tubes_OOP",
+    "last_opened_file_path": "/Users/amandarizki/Documents/Tubes_OOP/res/maps",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -54,6 +101,12 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/res/maps" />
+      <recent name="$PROJECT_DIR$/res/tiles" />
+    </key>
+  </component>
   <component name="RunManager" selected="Application.Main">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="main.Main" />
@@ -105,7 +158,7 @@
       <updated>1747463462629</updated>
       <workItem from="1747463464232" duration="3033000" />
       <workItem from="1747467170169" duration="2018000" />
-      <workItem from="1748074089839" duration="5435000" />
+      <workItem from="1748074089839" duration="10759000" />
     </task>
     <servers />
   </component>
@@ -127,5 +180,10 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Tubes_OOP$Main.ic" NAME="Main Coverage Results" MODIFIED="1748169196218" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>main.*</FILTER>
+    </SUITE>
   </component>
 </project>

@@ -5,9 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
 import main.GamePanel;
 import main.UtilityTool;
 
@@ -25,10 +23,13 @@ public class Entity {
     public boolean collisionOn = false;
     public String dialogues[] = new String[20];
     public int dialogueIndex = 0;
-    
+    public int SolidAreaY;
+    public int SolidAreaX;
+
     public Entity(GamePanel gp){
         this.gp = gp;
     }
+
     public void speak(){
         if(dialogues[dialogueIndex] == null){
             dialogueIndex = 0;
@@ -50,6 +51,7 @@ public class Entity {
                 break;
         }
     }
+
     public void update(){
         collisionOn = false;
         gp.cChecker.checkTile(this);
@@ -127,6 +129,7 @@ public class Entity {
             g2.drawImage( image, screenX, screenY, gp.tileSize, gp.tileSize, null);
         }
     }
+
     public BufferedImage setup(String imagePath){
         UtilityTool uTool = new UtilityTool();
         BufferedImage image = null;

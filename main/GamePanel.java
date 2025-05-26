@@ -1,16 +1,12 @@
 package main;
 
-
-import java.awt.Color;
+import java.awt.*;
 import javax.swing.JPanel;
-import entity.NPC_1;
+import data.SaveLoad;
 import entity.Entity;
 import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
 public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
@@ -25,6 +21,10 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
 
+    //Map Settings (untuk pindah Map)
+    public final int maxMap = 2;
+    public int currentMap = 0;
+
     // FPS
     int FPS = 60;
 
@@ -37,11 +37,14 @@ public class GamePanel extends JPanel implements Runnable{
     public AssetSetter aSetter = new AssetSetter(this);
     public UI ui = new UI(this);
     Thread gameThread;
+    //Untuk save & load
+    SaveLoad saveLoad = new SaveLoad(this);
+
 
     // entity and object
     public Player player = new Player(this, keyH);
-    public SuperObject obj[] = new SuperObject[10]; // 10 untuk slot yang dapat digunakan untuk menaruh objek, boleh ditambah.
-    public Entity npc[] = new Entity[10];
+    public SuperObject obj[][] = new SuperObject[maxMap][10]; // 10 untuk slot yang dapat digunakan untuk menaruh objek, boleh ditambah.
+    public Entity npc[][] = new Entity[maxMap][10];
 
     // GAME STATE
     public int gameState;
@@ -73,7 +76,8 @@ public class GamePanel extends JPanel implements Runnable{
         gameThread = new Thread(this);
         gameThread.start();
     }
-    public void run(){
+
+    public void run()   {
         double drawInterval = 1000000000/FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
         double delta = 0;
@@ -117,12 +121,13 @@ public class GamePanel extends JPanel implements Runnable{
             
         }
     }
+
     public void update(){
         if(gameState == playState){
             player.update(); //player
-            for(int i = 0; i < npc.length; i++){
-                if(npc[i] != null){
-                    npc[i].update();
+            for(int i = 0; i < npc[1].length; i++){
+                if(npc[currentMap][i] != null){
+                    npc[currentMap][i].update();
                 }
             }
         }
@@ -131,44 +136,59 @@ public class GamePanel extends JPanel implements Runnable{
         }
         player.update();
     }
+
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D)g;
 
         // debug
         long drawStart = 0;
-        if (keyH.checkDrawTime == true){
+        if (keyH.showDebugText == true){
             drawStart = System.nanoTime();
         }
 
         tileM.draw(g2); // tile
 
-        for(int i = 0; i < obj.length; i++){
-            if(obj[i] != null){
-                obj[i].draw(g2, this);
+        for(int i = 0; i < obj[1].length; i++){
+            if(obj[currentMap][i] != null){
+                obj[currentMap][i].draw(g2, this);
             }
         }
 
         // npc
-        for(int i=0; i< npc.length; i++){
-            if(npc[i] != null){
-                npc[i].draw(g2);
+        for(int i=0; i< npc[1].length; i++){
+            if(npc[currentMap][i] != null){
+                npc[currentMap][i].draw(g2);
             }
         }
         player.draw(g2); // player
 
          // debug
-        if(keyH.checkDrawTime == true){
+        if(keyH.showDebugText == true){
             long drawEnd = System.nanoTime();
             long passed = drawEnd - drawStart;
+            g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.setColor(Color.white);
-            g2.drawString("Draw Time: " + passed, 10, 400);
+            int x = 10; int y = 400; int lineHeight = 20;
+            g2.drawString("WorldX" + player.worldX, x, y); y += lineHeight;
+            g2.drawString("WorldX" + player.worldX, x, y); y += lineHeight;
+            g2.drawString("Col" + (player.worldX + player.SolidAreaX)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Row" + (player.worldY+ player.SolidAreaY)/tileSize, x, y); y += lineHeight;
+            g2.drawString("Draw Time: " + passed, x, y);
             System.out.println("Draw Time: " + passed);
         }
 
         // ui
         ui.draw(g2);
 
+        //DEBUG
+        if (keyH.showDebugText == true){
+            long drawEnd = System.nanoTime();
+            long passed = drawEnd - drawStart;
+            g2.setColor(Color.white);
+            g2.drawString("Draw Time: " + passed, 10, 400);
+            System.out.println("Draw Time: " + passed);
+        }
         g2.dispose();
     }
 
@@ -178,10 +198,12 @@ public class GamePanel extends JPanel implements Runnable{
         music.play();
         music.loop();
     }
+
     public void stopMusic() {
         
         music.stop();
     }
+
     public void playSE(int i) {
 
         se.setFile(i);

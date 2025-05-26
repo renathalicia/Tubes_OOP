@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Player extends Entity {
+
     GamePanel gp;
     KeyHandler keyH;
     public final int screenX;
@@ -33,9 +34,12 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-        worldX = gp.tileSize * 23;
-        worldY = gp.tileSize * 21;
-        speed = 2;
+//        worldX = gp.tileSize * 23;
+//        worldY = gp.tileSize * 21;
+        //untuk interior
+        worldX = gp.tileSize * 12;
+        worldY = gp.tileSize * 13;
+        speed = 3;
         direction = "down";
     }
 
@@ -127,7 +131,7 @@ public class Player extends Entity {
         if (i != 999) {
             if(gp.keyH.enterPressed == true){
                 gp.gameState = gp.dialogueState;
-                gp.npc[i].speak();
+                gp.npc[gp.currentMap][i].speak();
             }
         }
         gp.keyH.enterPressed = false;
