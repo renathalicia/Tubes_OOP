@@ -11,14 +11,14 @@ public class NPC_1 extends Entity {
         setDialogue();
     }
      public void getImage(){
-        up1 = setup("/res/npc/oldman_up_1");
-        up2 = setup("/res/npc/oldman_up_2");
-        down1 = setup("/res/npc/oldman_down_1");
-        down2 = setup("/res/npc/oldman_down_1");
-        left1 = setup("/res/npc/oldman_left_1");
-        left2 = setup("/res/npc/oldman_left_2");
-        right1 = setup("/res/npc/oldman_right_1");
-        right2 = setup("/res/npc/oldman_right_2");
+        up1 = setup("/res/npc/mayortadi/mt3");
+        up2 = setup("/res/npc/mayortadi/mt3");
+        down1 = setup("/res/npc/mayortadi/mt1");
+        down2 = setup("/res/npc/mayortadi/mt2");
+        left1 = setup("/res/npc/mayortadi/mt5");
+        left2 = setup("/res/npc/mayortadi/mt5");
+        right1 = setup("/res/npc/mayortadi/mt4");
+        right2 = setup("/res/npc/mayortadi/mt4");
     }
     public void setDialogue(){
         dialogues[0] = "Hello, bujanginam\n";
@@ -31,6 +31,5 @@ public class NPC_1 extends Entity {
         //     dialogueIndex = 0; // Reset ke awal jika mencapai akhir
         // }
         super.speak();
-        
     }
 }
