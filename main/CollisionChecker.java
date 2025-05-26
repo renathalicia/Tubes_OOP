@@ -153,7 +153,7 @@ public class CollisionChecker {
                 // Get the target's solid area position
                 target[gp.currentMap][i].solidArea.x = target[gp.currentMap][i].worldX + target[gp.currentMap][i].solidArea.x;
                 target[gp.currentMap][i].solidArea.y = target[gp.currentMap][i].worldY + target[gp.currentMap][i].solidArea.y;
-//ALTERNATIF KODE UNTUK LEBIH PENDEK!
+
                 switch (entity.direction) {
                     case "up":
                         entity.solidArea.y -= entity.speed;
@@ -181,6 +181,34 @@ public class CollisionChecker {
             }
         }
         return index;
+    }
+
+    public boolean checkPlayer(Entity entity) {
+        boolean contactPlayer = false;
+
+        //Get area solid player
+        entity.solidArea.x = entity.worldX + entity.solidArea.x;
+        entity.solidArea.y = entity.worldY + entity.solidArea.y;
+
+        //Get area solid object
+        gp.player.solidArea.x = gp.player.worldX + gp.player.solidArea.x;
+        gp.player.solidArea.y = gp.player.worldY + gp.player.solidArea.y;
+
+        switch (entity.direction) {
+            case "up":
+                entity.solidArea.y -= entity.speed;
+                break;
+            case "down":
+                entity.solidArea.y += entity.speed;
+                break;
+            case "left":
+                entity.solidArea.x -= entity.speed;
+                break;
+            case "right":
+                entity.solidArea.x += entity.speed;
+                break;
+        }
+        return contactPlayer;
     }
 }
 
