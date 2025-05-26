@@ -46,7 +46,7 @@ public class Player extends Entity {
         //untuk interior
         worldX = gp.tileSize * 12;
         worldY = gp.tileSize * 13;
-        speed = 2;
+        speed = 3;
         direction = "down";
 
         name = "Bujanginam";
@@ -104,6 +104,9 @@ public class Player extends Entity {
             // CHECK NPC COLLISION
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
+
+            //CHECK EVENT
+            gp.eHandler.checkEvent();
 
             // IF COLLISION IS FALSE, PLAYER CAN MOVE
             if (!collisionOn) {
