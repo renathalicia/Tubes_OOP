@@ -31,5 +31,6 @@ public class NPC_1 extends Entity {
         //     dialogueIndex = 0; // Reset ke awal jika mencapai akhir
         // }
         super.speak();
+        
     }
 }

@@ -25,6 +25,8 @@ public class Entity {
     public int dialogueIndex = 0;
     public int SolidAreaY;
     public int SolidAreaX;
+    
+
 
     public Entity(GamePanel gp){
         this.gp = gp;
