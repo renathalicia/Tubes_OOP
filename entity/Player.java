@@ -90,10 +90,10 @@ public class Player extends Entity {
     }
 
     public void getPlayerImage() {
-        up1 = setup("up2");
-        up2 = setup("up4");
-        down1 = setup("down2");
-        down2 = setup("down4");
+        up1 = setup("up1");
+        up2 = setup("up2");
+        down1 = setup("down1");
+        down2 = setup("down2");
         left1 = setup("left1");
         left2 = setup("left2");
         right1 = setup("right1");
