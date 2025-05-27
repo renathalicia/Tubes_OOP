@@ -9,6 +9,7 @@ public class KeyHandler implements KeyListener {
     public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
     public boolean shiftPressed;
     boolean showDebugText = false;
+    public int lastPresseedDirectionKey = 0; 
 
     public KeyHandler(GamePanel gp){
         this.gp = gp;
@@ -23,6 +24,12 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
 
+        if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP ||
+           code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN ||
+           code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT ||
+           code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+            lastPresseedDirectionKey = code; 
+        }
         // TITLE STATE
         if (gp.gameState == gp.titleState) {
             if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){
@@ -52,7 +59,7 @@ public class KeyHandler implements KeyListener {
         }
 
         // PLAY STATE
-        if(gp.gameState == gp.playState){
+        else if(gp.gameState == gp.playState){
             if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){ upPressed = true; }
             if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; } 
             if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){ leftPressed = true; }

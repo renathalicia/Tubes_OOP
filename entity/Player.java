@@ -9,6 +9,7 @@ import item.Seed;
 import javax.imageio.ImageIO;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -114,16 +115,41 @@ public class Player extends Entity {
     }
 
     public void update() {
+        boolean up = keyH.upPressed;
+        boolean down = keyH.downPressed;
+        boolean left = keyH.leftPressed;
+        boolean right = keyH.rightPressed;
+        int lastKey = keyH.lastPresseedDirectionKey;
+
+        if((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && up) {
+            direction = "up";
+        } else if((lastKey == KeyEvent.VK_S || lastKey == KeyEvent.VK_DOWN) && down) {
+            direction = "down";
+        } else if((lastKey == KeyEvent.VK_A || lastKey == KeyEvent.VK_LEFT) && left) {
+            direction = "left";
+        } else if((lastKey == KeyEvent.VK_D || lastKey == KeyEvent.VK_RIGHT) && right) {
+            direction = "right";
+        } else if(up) {
+            direction = "up";
+        } else if(down) {
+            direction = "down";
+        } else if(left) {
+            direction = "left";
+        } else if(right) {
+            direction = "right";
+        }
+
+        
         if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
-            if (keyH.upPressed) {
-                direction = "up";
-            } else if (keyH.downPressed) {
-                direction = "down";
-            } else if (keyH.leftPressed) {
-                direction = "left";
-            } else if (keyH.rightPressed) {
-                direction = "right";
-            }
+            // if (keyH.upPressed) {
+            //     direction = "up";
+            // } else if (keyH.downPressed) {
+            //     direction = "down";
+            // } else if (keyH.leftPressed) {
+            //     direction = "left";
+            // } else if (keyH.rightPressed) {
+            //     direction = "right";
+            // }
 
             // CHECK TILE COLLISION
             collisionOn = false;
