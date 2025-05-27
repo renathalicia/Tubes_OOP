@@ -55,6 +55,10 @@ public class Player extends Entity {
         gold = 0;
         farmName = "Tanah Batak";
         partner = "None";
+
+        // ENERGY
+        maxLife = 6;
+        life = maxLife;
     }
 
     public void getPlayerImage() {

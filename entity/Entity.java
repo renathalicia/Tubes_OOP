@@ -26,6 +26,10 @@ public class Entity {
     public int SolidAreaY;
     public int SolidAreaX;
 
+    // CHARACTER STATUS
+    public int maxLife;
+    public int life;
+
     public Entity(GamePanel gp){
         this.gp = gp;
     }
