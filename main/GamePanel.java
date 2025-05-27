@@ -30,7 +30,8 @@ public class GamePanel extends JPanel implements Runnable{
     public int currentMap = 0;
 
     // FPS
-    int FPS = 60;
+    int FPS = 45;
+    int drawCount = 0;
 
     // System
     public TileManager tileM = new TileManager(this);
@@ -59,6 +60,8 @@ public class GamePanel extends JPanel implements Runnable{
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
+    public final int titleState = 0;
+    public final int inventoryState = 5; 
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;
@@ -169,8 +172,20 @@ public class GamePanel extends JPanel implements Runnable{
                 }
             }
         }
-        if(gameState == pauseState){
+        else if(gameState == pauseState){
             //gadak
+        }
+        else if(gameState == inventoryState){
+            // update inventory
+            // ui.updateInventory();
+        }
+        else if(gameState == dialogueState){
+            // update dialogue
+            // ui.updateDialogue();
+        }
+        else if(gameState == sleepState){
+            // update sleep state
+            // ui.updateSleep();
         }
     }
 
