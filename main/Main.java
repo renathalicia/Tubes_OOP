@@ -7,7 +7,7 @@ public class Main {
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         window.setTitle("Spakbor Hills");
-
+        
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
 

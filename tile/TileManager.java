@@ -17,7 +17,7 @@ public class TileManager {
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
-        tile = new Tile[50];
+        tile = new Tile[55];
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
@@ -26,19 +26,19 @@ public class TileManager {
     }
 
     public void getTileImage() {
-        setup(0, "grass00", false);
-        setup(1, "grass00", false);
-        setup(2, "grass00", false);
-        setup(3, "grass00", false);
-        setup(4, "grass00", false);
-        setup(5, "grass00", false);
-        setup(6, "grass00", false);
-        setup(7, "grass00", false);
-        setup(8, "grass00", false);
-        setup(9, "grass00", false);
+        setup(0, "earth", false);
+        setup(1, "earth", false);
+        setup(2, "earth", false);
+        setup(3, "earth", false);
+        setup(4, "earth", false);
+        setup(5, "earth", false);
+        setup(6, "earth", false);
+        setup(7, "earth", false);
+        setup(8, "earth", false);
+        setup(9, "earth", false);
         //PLACE HOLDER
-        setup(10, "grass00", false);
-        setup(11, "grass01", false);
+        setup(10, "tree00", true);
+        setup(11, "tree01", true);
         setup(12, "water00", false);
         setup(13, "water01", true);
         setup(14, "water02", true);
@@ -68,11 +68,20 @@ public class TileManager {
         setup(38, "road12", false);
         setup(39, "earth", false);
         setup(40, "wall", true);
-        setup(41, "tree", true);
-        setup(42, "hut", false);
-        setup(43, "floor01", false);
-        setup(44, "table01", true);
-
+        setup(41, "hut", true);
+        setup(42, "floor01", false);
+        setup(43, "summer-grass00", false);
+        setup(44, "summer-grass01", false);
+        setup(45, "summer-grass02", false);
+        setup(46, "summer-grass03", false);
+        setup(47, "summer-grass04", false);
+        setup(48, "summer-grass05", false);
+        setup(49, "summer-grass06", false);
+        setup(50, "summer-grass07", false);
+        setup(51, "summer-grass08", false);
+        setup(52, "bush", true);
+        setup(53, "summer-grass04-texture", false);
+        setup(54, "stone", true);
     }
 
     public void setup(int index, String imageName, boolean collision) {

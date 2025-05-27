@@ -18,6 +18,7 @@ public class UI {
     public String message = "";
     public boolean messageOn = false;
     int messageCounter = 0;
+    int counter = 0;
 
     public String currentDialogue = "";
     public boolean gameFinished = false;
@@ -101,6 +102,11 @@ public class UI {
         // else if (gp.gameState == gp.sleepState) {
         //     drawSleepScreen();
         // }
+
+        //UI untuk Transisi pindah MAP
+        else if (gp.gameState == gp.transitionState){
+            drawTransition();
+        }
     }
 
     public void drawPlayerLife() {
@@ -240,7 +246,6 @@ public class UI {
         // g2.drawString("Row: " + (gp.player.worldY+ gp.player.solidArea.y)/gp.tileSize, textX, textY); textY += lineHeight;
     }
 
-
     public void drawPauseScreen() {
         String text = "PAUSED";
         int x = getXforCenteredText(text);
@@ -265,6 +270,22 @@ public class UI {
         }
     }
 
+    public void drawTransition(){
+        counter++;
+        g2.setColor(new Color(0,0,0,counter * 5));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        if (counter == 50){
+            counter = 0;
+            gp.gameState = gp.playState;
+            gp.currentMap = gp.eHandler.tempMap;
+            gp.player.worldX = gp.tileSize * gp.eHandler.tempCol;
+            gp.player.worldY = gp.tileSize * gp.eHandler.tempRow;
+            gp.eHandler.previousEventX = gp.player.worldX;
+            gp.eHandler.previousEventY = gp.player.worldY;
+        }
+    }
+
     public void drawSubWindow(int x, int y, int width, int height) {
         Color c = new Color(0, 0, 0, 210);
         g2.setColor(c);
@@ -281,4 +302,6 @@ public class UI {
         int x = gp.screenWidth / 2 - length / 2;
         return x;
     }
+
+
 }

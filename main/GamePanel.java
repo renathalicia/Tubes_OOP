@@ -53,11 +53,12 @@ public class GamePanel extends JPanel implements Runnable{
 
     // GAME STATE
     public int gameState;
+    public final int titleState = 0;
     public final int playState = 1;
     public final int pauseState = 2; // ini gunanya untuk mengatur aksi lain di screen pada waktu yang bersamaan, misalnya swing a sword with enter key, dimana di saat yang bersamaan enter bisa untuk melakukan aksi lain
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
-    public final int titleState = 0;
+    public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;

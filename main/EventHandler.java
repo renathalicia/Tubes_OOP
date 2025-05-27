@@ -3,9 +3,9 @@ package main;
 public class EventHandler {
     GamePanel gp;
     EventRect eventRect[][][];
-
     int previousEventX, previousEventY;
     boolean canTouchEvent = true;
+    int tempMap, tempCol, tempRow;
 
     public EventHandler(GamePanel gp) {
         this.gp = gp;
@@ -45,10 +45,10 @@ public class EventHandler {
         }
 
         if (canTouchEvent) {
-            if (hit(0, 12, 17, "any")) {
-                teleport(1, 12, 13);
+            if (hit(0, 10, 33, "any")) {
+                visiting(1, 12, 13);
             } else if (hit(1, 12, 13, "any")) {
-                teleport(0, 10, 39);
+                visiting(0, 10, 33);
             }
         }
     }
@@ -62,7 +62,7 @@ public class EventHandler {
             eventRect[map][col][row].x = col * gp.tileSize + eventRect[map][col][row].x;
             eventRect[map][col][row].y = row * gp.tileSize + eventRect[map][col][row].y;
 
-            if ((gp.player.solidArea.intersects(eventRect[map][col][row]) && eventRect[map][col][row].eventDone == false)) {
+            if (gp.player.solidArea.intersects(eventRect[map][col][row]) && eventRect[map][col][row].eventDone == false) {
                 if (gp.player.direction.contentEquals(reqDirection) || reqDirection.contentEquals("any")) {
                     hit = true;
                     previousEventX = gp.player.worldX;
@@ -77,14 +77,13 @@ public class EventHandler {
         return hit;
     }
 
-    public void teleport(int map, int col, int row){
-        gp.currentMap = map;
-        gp.player.worldX = gp.tileSize * col;
-        gp.player.worldY = gp.tileSize * row;
-        previousEventX = gp.player.worldX;
-        previousEventY = gp.player.worldY;
+    public void visiting(int map, int col, int row){
+        gp.gameState = gp.transitionState;
+        tempMap = map;
+        tempCol = col;
+        tempRow = row;
         canTouchEvent = false;
-//        gp.playSE(13); untuk play sound, klo mau
+////        gp.playSE(13); untuk play sound, klo mau
     }
 }
 
