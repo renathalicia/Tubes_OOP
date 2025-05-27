@@ -18,6 +18,7 @@ public class Sound {
         soundURL[2] = getClass().getResource("/res/sound/powerup.wav");
         soundURL[3] = getClass().getResource("/res/sound/unlock.wav");
         soundURL[4] = getClass().getResource("/res/sound/fanfare.wav");
+        soundURL[5] = getClass().getResource("/res/sound/cursor.wav");   
 
         if (soundURL[0] == null) {
             System.out.println("BlueBoyAdventure.wav tidak ditemukan!");

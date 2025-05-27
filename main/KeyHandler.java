@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.RenderingHints.Key;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -7,8 +8,8 @@ public class KeyHandler implements KeyListener {
     GamePanel gp;
     public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
     public boolean shiftPressed;
-    // debug
     boolean showDebugText = false;
+
     public KeyHandler(GamePanel gp){
         this.gp = gp;
     }
@@ -39,7 +40,7 @@ public class KeyHandler implements KeyListener {
             if (code == KeyEvent.VK_ENTER) {
                 if (gp.ui.commandNum == 0) {
                     gp.gameState = gp.playState;
-                    gp.playMusic(0);
+                    // gp.playMusic(0);
                 }
                 if(gp.ui.commandNum == 1) {
                     // add later
@@ -52,27 +53,17 @@ public class KeyHandler implements KeyListener {
 
         // PLAY STATE
         if(gp.gameState == gp.playState){
-            if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){
-                upPressed = true;
-            }
-            if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){
-                downPressed = true;
-            }
-            if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){
-                leftPressed = true;
-            }
-            if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){
-                rightPressed = true;
-            }
-            if(code == KeyEvent.VK_P){
-                gp.gameState = gp.pauseState;
-            }
-            if(code == KeyEvent.VK_ENTER){
-                enterPressed = true;
-            }
+            if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){ upPressed = true; }
+            if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; } 
+            if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){ leftPressed = true; }
+            if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){ rightPressed = true; }
+            if(code == KeyEvent.VK_P){ gp.gameState = gp.pauseState; }
+            if(code == KeyEvent.VK_ENTER){ enterPressed = true; }
+            if(code == KeyEvent.VK_SHIFT){shiftPressed = true; }
 
-            if(code == KeyEvent.VK_SHIFT){
-                shiftPressed = true;
+            if(code == KeyEvent.VK_I){
+                gp.gameState = gp.inventoryState; // Pindah ke inventory state
+                gp.playSE(5);
             }
 
             // debug
@@ -83,7 +74,6 @@ public class KeyHandler implements KeyListener {
                 else if(showDebugText == true){
                     showDebugText = false;
                 }
-
             }
         }
         //PAUSE STATE
@@ -99,6 +89,49 @@ public class KeyHandler implements KeyListener {
                 // enterPressed
                 gp.gameState = gp.playState;
             }
+        }
+        else if(gp.gameState == gp.inventoryState){
+            handleInventoryKeys(code); // Handle inventory keys
+        }
+    }
+
+    public void handleInventoryKeys(int code) {
+        if(code == KeyEvent.VK_I){
+            gp.gameState = gp.playState; // Kembali ke play state
+            gp.playSE(5); // Suara untuk menutup inventory
+        }
+        if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){
+            if(gp.ui.slotRow > 0){
+                gp.ui.slotRow--;
+                gp.playSE(5);
+            }
+        }
+        if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){
+            if(gp.ui.slotRow < gp.ui.inventoryMaxRow - 1){ 
+                gp.ui.slotRow++;
+                gp.playSE(5);
+            }
+        }   
+        if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){
+            if(gp.ui.slotCol > 0){
+                gp.ui.slotCol--;
+                gp.playSE(5);
+            }
+        }
+        if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){
+            if(gp.ui.slotCol < gp.ui.inventoryMaxCol - 1){ 
+                gp.ui.slotCol++;
+                gp.playSE(5);
+            } 
+        } 
+        if(code == KeyEvent.VK_ENTER){
+            // // Logika untuk memilih item
+            // int selectedItem = gp.ui.getSelectedItem();
+            // if(selectedItem != -1) {
+            //     gp.player.useItem(selectedItem);
+            //     gp.playSE(5); // Suara untuk menggunakan item
+            // }
+            enterPressed = true; 
         }
     }
 

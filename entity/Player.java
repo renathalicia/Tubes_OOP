@@ -1,10 +1,13 @@
 package entity;
 
+import java.util.ArrayList;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
-
+import item.ItemStack;
+import item.Seed;
 import javax.imageio.ImageIO;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -23,6 +26,8 @@ public class Player extends Entity {
     public String farmName;
     public String partner;
     public int gold;
+    public ArrayList<ItemStack> inventory = new ArrayList<>();
+    public final int inventorySize = 10; // Ukuran inventaris, bisa diubah sesuai kebutuhan
 
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
@@ -38,6 +43,7 @@ public class Player extends Entity {
 
         setDefaultValues();
         getPlayerImage();
+        setInitialInventoryItems();
     }
 
     public void setDefaultValues() {
@@ -59,6 +65,28 @@ public class Player extends Entity {
         // ENERGY
         maxLife = 6;
         life = maxLife;
+    }
+
+    public void setInitialInventoryItems() {
+        Seed parsnipSeed = new Seed("Parsnip Seed", 20, 10, "parsnip_seed", 4);
+        inventory.add(new ItemStack(parsnipSeed, 15)); // Menambahkan 5 Parsnip Seed ke inventaris
+    }
+
+    public BufferedImage setUpItemImage(String imagePath) {
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(getClass().getResourceAsStream("/res/item/" + imagePath + ".png"));
+            if(image != null) {
+                image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+            } else {
+                System.out.println("Gambar item tidak ditemukan: " + imagePath);
+            }
+        } catch (IOException e) {
+            System.out.println("Gagal memuat gambar item: " + imagePath + ".png");
+            e.printStackTrace();
+        }
+            return image;
     }
 
     public void getPlayerImage() {
