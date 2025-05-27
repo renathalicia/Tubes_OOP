@@ -4,6 +4,10 @@ import java.awt.*;
 import javax.swing.JPanel;
 import data.SaveLoad;
 import entity.Entity;
+import entity.NPC_1;
+import entity.NPC_2;
+import entity.NPC_3;
+import entity.NPC_4;
 import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
@@ -53,6 +57,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int pauseState = 2; // ini gunanya untuk mengatur aksi lain di screen pada waktu yang bersamaan, misalnya swing a sword with enter key, dimana di saat yang bersamaan enter bisa untuk melakukan aksi lain
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
+    public final int titleState = 0;
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;
@@ -69,9 +74,39 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setUpGame() {
         aSetter.setObject();
-        aSetter.setNPC();
+        initializeNPCs();
         playMusic(0);
-        gameState = playState;
+        gameState = titleState;
+
+    }
+
+    public void initializeNPCs() {
+
+        int mapNum = 0;
+        
+        // NPC 1 (yang sudah ada)
+        npc[mapNum][0] = new NPC_1(this);
+        npc[mapNum][0].worldX = tileSize * 21; // Contoh posisi X
+        npc[mapNum][0].worldY = tileSize * 21; // Contoh posisi Y
+
+        // NPC 2 (baru)
+        npc[mapNum][1] = new NPC_2(this);
+        npc[mapNum][1].worldX = tileSize * 25; // Atur posisi yang berbeda
+        npc[mapNum][1].worldY = tileSize * 21;
+
+        // NPC 3 (baru)
+        npc[mapNum][2] = new NPC_3(this);
+        npc[mapNum][2].worldX = tileSize * 28;
+        npc[mapNum][2].worldY = tileSize * 21;
+
+        // NPC 4 (baru)
+        npc[mapNum][3] = new NPC_4(this);
+        npc[mapNum][3].worldX = tileSize * 16;
+        npc[mapNum][3].worldY = tileSize * 21;
+
+        // Pastikan posisi worldX dan worldY ini berada dalam batas peta Anda
+        // (maxWorldCol * tileSize dan maxWorldRow * tileSize)
+        // dan tidak bertabrakan dengan tile yang solid secara default.
     }
 
     public void startGameThread(){
@@ -127,7 +162,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void update(){
         if(gameState == playState){
             player.update(); //player
-            for(int i = 0; i < npc[1].length; i++){
+            for(int i = 0; i < npc.length; i++){
                 if(npc[currentMap][i] != null){
                     npc[currentMap][i].update();
                 }
@@ -148,6 +183,11 @@ public class GamePanel extends JPanel implements Runnable{
             drawStart = System.nanoTime();
         }
 
+        // TITLE SCREEN
+        if (gameState == titleState) {
+            ui.draw(g2);
+        }
+
         tileM.draw(g2); // tile
 
         for(int i = 0; i < obj[1].length; i++){
@@ -157,11 +197,12 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
         // npc
-        for(int i=0; i< npc[1].length; i++){
-            if(npc[currentMap][i] != null){
-                npc[currentMap][i].draw(g2);
+        for(int i=0; i< npc.length; i++){
+                if(npc[currentMap][i] != null){
+                    npc[currentMap][i].draw(g2);
+                }
             }
-        }
+        
         player.draw(g2); // player
 
          // debug

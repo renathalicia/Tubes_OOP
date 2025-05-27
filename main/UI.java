@@ -16,6 +16,8 @@ public class UI {
     public String currentDialogue = "";
     public boolean gameFinished = false;
 
+    public int commandNum = 0;
+
     // Untuk debugging (opsional, jika Anda ingin menampilkan info FPS/waktu draw di UI)
     // double playTime;
     // DecimalFormat dFormat = new DecimalFormat("#0.00");
@@ -46,6 +48,11 @@ public class UI {
 
         g2.setFont(arial_40); // Font default
         g2.setColor(Color.white); // Warna teks default
+
+        // title state
+        if (gp.gameState == gp.titleState) {
+            drawTitleScreen();
+        }
 
         // UI untuk Play State
         if (gp.gameState == gp.playState) {
@@ -78,6 +85,57 @@ public class UI {
         // else if (gp.gameState == gp.sleepState) {
         //     drawSleepScreen();
         // }
+    }
+
+    public void drawTitleScreen() {
+
+        g2.setColor(new Color(0, 0, 0));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        // TITLE NAME
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD,96F));
+        String text = "Spakbor Hills";
+        int x = getXforCenteredText(text);
+        int y = gp.tileSize*3;
+
+        // SHADOW
+        g2.setColor(Color.gray);
+        g2.drawString(text, x+5, y+5);
+
+        g2.setColor(Color.white);
+        g2.drawString(text, x, y);
+
+        // CHARACTER IMAGE
+        x = gp.screenWidth/2 - (gp.tileSize*2)/2;
+        y += gp.tileSize*3;
+        g2.drawImage(gp.player.down1, x, y, gp.tileSize*2, gp.tileSize*2, null);
+
+        // MENU
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD,48F));
+
+        text = "NEW GAME";
+        x = getXforCenteredText(text);
+        y += gp.tileSize*6;
+        g2.drawString(text, x, y);
+        if (commandNum == 0) {
+            g2.drawString(">", x-gp.tileSize, y);
+        }
+
+        text = "LOAD GAME";
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == 1) {
+            g2.drawString(">", x-gp.tileSize, y);
+        }
+        
+        text = "QUIT";
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == 2) {
+            g2.drawString(">", x-gp.tileSize, y);
+        }
     }
 
     public void drawPlayerStatus() {
