@@ -60,7 +60,6 @@ public class GamePanel extends JPanel implements Runnable{
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
-    public final int titleState = 0;
     public final int inventoryState = 5; 
     //int playerX = 100;
     //int playerY = 100;
