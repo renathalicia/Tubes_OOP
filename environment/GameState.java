@@ -16,6 +16,12 @@ public class GameState {
             timeManager.setTime(hour, minute); // Memanggil metode baru di TimeManager
         }
     }
+    
+    public void advanceToNextMorning() {
+        if (timeManager != null) {
+            timeManager.advanceToNextMorning();
+        }
+    }
 
     public void advanceTimeByMinutes(int minutes) {
         if (timeManager != null) {

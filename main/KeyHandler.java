@@ -90,12 +90,13 @@ public class KeyHandler implements KeyListener {
         }
         
         //DIALOGUE STATE
-        else if(gp.gameState == gp.dialogueState){
-            if(code == KeyEvent.VK_ENTER){
-                // enterPressed
-                gp.gameState = gp.playState;
+        else if (gp.gameState == gp.dialogueState) {
+            if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true; // PENTING: Set flag ini agar GamePanel bisa memprosesnya
+                // HAPUS BARIS INI: gp.gameState = gp.playState;
             }
         }
+
         else if(gp.gameState == gp.inventoryState){
             handleInventoryKeys(code); // Handle inventory keys
         }
