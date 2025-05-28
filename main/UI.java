@@ -3,8 +3,8 @@ package main;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
-import object.OBJ_Heart;
-import object.SuperObject;
+// import object.OBJ_Heart;
+// import object.SuperObject;
 import item.ItemStack;
 import item.Item;
 import java.awt.font.TextLayout;
@@ -13,7 +13,7 @@ public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
-    Font maruMonica, purisaB; // Font tambahan jika Anda ingin
+    // Font maruMonica, purisaB;
 
     // Modifikasi inventory wak
     Color stardewPanelBg = new Color(130, 78, 57, 230);
@@ -23,7 +23,15 @@ public class UI {
     Color stardewHighlightBorder = new Color(255, 230, 100); 
     Color stardewTitleText = new Color(247, 213, 120);
 
-    BufferedImage heart_full, heart_half, heart_blank;
+    // modifikasi bar energi
+    Color stardewWoodFrameDark = new Color(112, 66, 36);     
+    Color stardewWoodFrameLight = new Color(189, 125, 77);    
+    Color stardewEnergyTrackBg = new Color(78, 51, 32, 200);
+    Color stardewEnergyGreen = new Color(84, 215, 50);     
+    Color stardewEnergyYellowGreen = new Color(170, 220, 30); 
+    Color stardewEnergyYellow = new Color(255, 233, 58);   
+    Color stardewEnergyOrange = new Color(255, 152, 25);   
+    Color stardewEnergyRed = new Color(203, 56, 41); 
 
     public String message = "";
     public boolean messageOn = false;
@@ -36,13 +44,7 @@ public class UI {
     public int slotRow = 0;
     public final int inventoryMaxCol = 5;
     public final int inventoryMaxRow = 4;
-
     public int commandNum = 0;
-
-    // Untuk debugging (opsional, jika Anda ingin menampilkan info FPS/waktu draw di UI)
-    // double playTime;
-    // DecimalFormat dFormat = new DecimalFormat("#0.00");
-
 
     public UI(GamePanel gp) {
         this.gp = gp;
@@ -59,10 +61,10 @@ public class UI {
         // }
 
         // CREATE HUD OBJECT
-        SuperObject heart = new OBJ_Heart(gp);
-        heart_full = heart.image;
-        heart_half = heart.image2;
-        heart_blank = heart.image3;
+        // SuperObject heart = new OBJ_Heart(gp);
+        // heart_full = heart.image;
+        // heart_half = heart.image2;
+        // heart_blank = heart.image3;
     }
 
     public void showMessage(String text){
@@ -73,8 +75,8 @@ public class UI {
     public void draw(Graphics2D g2) {
         this.g2 = g2;
 
-        g2.setFont(arial_40); // Font default
-        g2.setColor(Color.white); // Warna teks default
+        g2.setFont(arial_40); 
+        g2.setColor(Color.white); 
 
         // title state
         if (gp.gameState == gp.titleState) {
@@ -100,17 +102,17 @@ public class UI {
                 drawPlayerStatus(); // <-- Panggil metode baru ini
             }
 
-            drawPlayerLife();
+            drawPlayerEnergy();
         }
         // UI untuk Pause State
         else if (gp.gameState == gp.pauseState) {
             drawPauseScreen();
-            drawPlayerLife();
+            drawPlayerEnergy();
         }
         // UI untuk Dialogue State
         else if (gp.gameState == gp.dialogueState) {
             drawDialogueScreen();
-            drawPlayerLife();
+            drawPlayerEnergy();
         }
         else if( gp.gameState == gp.inventoryState) {
             drawInventory(); 
@@ -126,36 +128,80 @@ public class UI {
         }
     }
 
-    public void drawPlayerLife() {
+    public void drawPlayerEnergy() {
+         // --- PENGATURAN POSISI DAN UKURAN DASAR ---
+        // Kita akan membuat bingkai kayu, jadi bar energi sebenarnya akan sedikit lebih kecil di dalamnya.
+        int framePadding = 4; // Padding antara bingkai kayu dan bar energi di dalamnya
+        int frameThickness = 6; // Ketebalan "dinding" bingkai kayu (luar dan dalam)
 
-        gp.player.life = 5;
+        // Posisi dan Ukuran untuk KESELURUHAN elemen (Bingkai Kayu + Bar Energi)
+        // Anda bisa menyesuaikan ini agar pas dengan HUD Anda.
+        // Untuk bar horizontal top-left:
+        int outerFrameX = gp.tileSize / 2;
+        int outerFrameY = gp.tileSize / 2;
+        int outerFrameWidth = gp.tileSize * 4 + (frameThickness * 2); // Lebar total termasuk bingkai
+        int outerFrameHeight = gp.tileSize / 2 + (frameThickness * 2); // Tinggi total termasuk bingkai
+        if (outerFrameHeight < 24) outerFrameHeight = 24; // Minimal tinggi
 
-        int x = gp.tileSize/2;
-        int y = gp.tileSize/2;
-        int i = 0;
+        // Posisi dan Ukuran untuk BAR ENERGI AKTUAL (di dalam bingkai kayu)
+        int barX = outerFrameX + frameThickness;
+        int barY = outerFrameY + frameThickness;
+        int barWidth = outerFrameWidth - (frameThickness * 2);
+        int barHeight = outerFrameHeight - (frameThickness * 2);
 
-        // DRAW MAX LIFE
-        while (i < gp.player.maxLife/2) {
-            g2.drawImage(heart_blank, x, y, null);
-            i++;
-            x += gp.tileSize;
-        }
+        // Ambil nilai energi
+        int currentEnergy = Math.max(0, Math.min(gp.player.energy, gp.player.maxEnergy));
+        int maxEnergy = gp.player.maxEnergy;
+        if (maxEnergy <= 0) return;
+        double energyPercentage = (double) currentEnergy / maxEnergy;
+        int currentEnergyWidth = (int) (barWidth * energyPercentage);
 
-        // RESET
-        x = gp.tileSize/2;
-        y = gp.tileSize/2;
-        i = 0;
+        // --- GAMBAR BINGKAI KAYU SEDERHANA ---
+        // Bagian gelap utama bingkai
+        g2.setColor(stardewWoodFrameDark);
+        g2.fillRect(outerFrameX, outerFrameY, outerFrameWidth, outerFrameHeight);
 
-        // DRAW CURRENT LIFE
-        while (i < gp.player.life) {
-            g2.drawImage(heart_half, x, y, null);
-            i++;
-            if (i < gp.player.life) {
-                g2.drawImage(heart_full, x, y, null);
+        // Highlight sederhana (efek bevel)
+        g2.setColor(stardewWoodFrameLight);
+        g2.fillRect(outerFrameX, outerFrameY, outerFrameWidth, frameThickness / 2); // Highlight atas
+        g2.fillRect(outerFrameX, outerFrameY, frameThickness / 2, outerFrameHeight); // Highlight kiri
+        // Anda bisa menambahkan shadow di kanan dan bawah jika ingin lebih detail
+
+
+        // --- GAMBAR BAR ENERGI ---
+        // 1. Latar Belakang/Trek Bar Energi (di dalam bingkai kayu)
+        g2.setColor(stardewEnergyTrackBg);
+        g2.fillRect(barX, barY, barWidth, barHeight);
+
+        // 2. Isi Energi Saat Ini
+        if (currentEnergy > 0) {
+            Color fillColor;
+            if (energyPercentage > 0.75) {
+                fillColor = stardewEnergyGreen;
+            } else if (energyPercentage > 0.50) {
+                fillColor = stardewEnergyYellowGreen;
+            } else if (energyPercentage > 0.25) {
+                fillColor = stardewEnergyYellow;
+            } else if (energyPercentage > 0.10) {
+                fillColor = stardewEnergyOrange;
+            } else {
+                fillColor = stardewEnergyRed;
             }
-            i++;
-            x += gp.tileSize;
+            g2.setColor(fillColor);
+            g2.fillRect(barX, barY, currentEnergyWidth, barHeight);
         }
+
+        // 3. Opsional: Ikon "E" kecil di sebelah kiri bar (jika horizontal)
+        //    Untuk ini Anda mungkin perlu menyiapkan gambar ikon atau menggambar huruf 'E'
+        g2.setFont(arial_40.deriveFont(Font.BOLD, (float)barHeight * 0.8f)); // Ukuran 'E' disesuaikan tinggi bar
+        g2.setColor(stardewTitleText); // Atau warna lain untuk ikon 'E'
+        FontMetrics fmE = g2.getFontMetrics();
+        String eSymbol = "E";
+        int eX = outerFrameX - fmE.stringWidth(eSymbol) - 4; // Di sebelah kiri bingkai
+        if (eX < 4) eX = outerFrameX + outerFrameWidth + 4; // Atau di sebelah kanan jika tidak muat kiri
+        int eY = outerFrameY + fmE.getAscent() + (outerFrameHeight - fmE.getHeight()) / 2;
+        // g2.drawString(eSymbol, eX, eY);
+        g2.setFont(arial_40);
     }
 
     public void drawTitleScreen() {

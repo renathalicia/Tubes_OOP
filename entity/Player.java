@@ -235,7 +235,6 @@ public class Player extends Entity {
             gp.ui.currentDialogue = "Energi tidak cukup!";
             return false; // Energi tidak cukup
         }
-        
     }
 
     public void gainEnergy(int amount) {
