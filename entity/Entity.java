@@ -5,6 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.imageio.ImageIO;
 import main.GamePanel;
 import main.UtilityTool;
@@ -26,11 +29,17 @@ public class Entity {
     public int SolidAreaY;
     public int SolidAreaX;
     
+    public final int maxHeartPoints = 150;
     public int heartPoints = 0;
     public boolean isProposedTo = false;
     public boolean isMarriedTo = false;
     public String name = "NPC"; // Nama default, bisa di-override di subclass NPC
 
+    public List<String> lovedItems = new ArrayList<>();
+    public List<String> likedItems = new ArrayList<>();
+    public List<String> hatedItems = new ArrayList<>(
+        
+    );
     // CHARACTER STATUS
     public int maxLife;
     public int life;
@@ -89,6 +98,27 @@ public class Entity {
             }else if(spriteNum == 2){
                 spriteNum = 1;
             } spriteCounter = 0;
+        }
+    }
+
+    public int processGift(String itemName) {
+        if (lovedItems.contains(itemName)) {
+            return 25;
+        } else if (likedItems.contains(itemName)) {
+            return 20;
+        } else if (hatedItems.contains(itemName)) {
+            return -25;
+        }
+        return 0; // Default untuk item netral selain Mayor Tadi
+    }
+
+    public void updateHeartPoints(int amount) {
+        this.heartPoints += amount;
+        if (this.heartPoints > maxHeartPoints) { // maxHeartPoints harus sudah didefinisikan
+            this.heartPoints = maxHeartPoints;
+        }
+        if (this.heartPoints < 0) {
+            this.heartPoints = 0;
         }
     }
 

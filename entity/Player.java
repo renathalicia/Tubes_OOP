@@ -35,6 +35,32 @@ public class Player extends Entity {
 
     public Entity currentInteractingNPC = null; // Menyimpan NPC yang sedang diajak interaksi
 
+    public boolean removeItem(String itemName, int quantityToRemove) {
+        for (int i = 0; i < inventory.size(); i++) {
+            ItemStack currentItemStack = inventory.get(i);
+            if (currentItemStack.getItem() != null && currentItemStack.getItem().getName().equals(itemName)) {
+                if (currentItemStack.getQuantity() >= quantityToRemove) {
+                    currentItemStack.removeQuantity(quantityToRemove); // Gunakan method dari ItemStack
+                    if (currentItemStack.getQuantity() <= 0) {
+                        inventory.remove(i);
+                    }
+                    System.out.println("Removed " + quantityToRemove + " of " + itemName + " from inventory.");
+                    return true;
+                } else {
+                    System.out.println("Not enough " + itemName + " ("+ currentItemStack.getQuantity() +") to remove " + quantityToRemove + ".");
+                    return false; // Tidak cukup kuantitas
+                }
+            }
+        }
+        System.out.println(itemName + " not found in inventory to remove.");
+        return false; // Item tidak ditemukan
+    }
+
+    public void addTestGiftableItems() {
+        
+        System.out.println("Test giftable items added to player inventory.");
+    }
+
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
         this.gp = gp;
@@ -88,6 +114,8 @@ public class Player extends Entity {
 
         FishingRod fishingRod = new FishingRod();
         inventory.add(new ItemStack(fishingRod, 1));
+
+        inventory.add(new ItemStack(new ProposalRing(), 1));
     }
 
     public BufferedImage setUpItemImage(String imagePath) {

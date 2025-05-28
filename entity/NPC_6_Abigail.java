@@ -1,10 +1,13 @@
 package entity;
+import java.util.Arrays;
+
 import entity.Entity;
 import main.GamePanel;
 
 public class NPC_6_Abigail extends Entity {
     public NPC_6_Abigail(GamePanel gp){
         super(gp);
+        this.name = "Abigail";
         direction = "down"; // Menghadap ke kanan secara default
         speed = 0;
         getImage();
@@ -27,6 +30,18 @@ public class NPC_6_Abigail extends Entity {
         dialogues[1] = "Pernah dengar legenda naga gunung?";
         dialogues[2] = "Katanya dia menjaga harta karun yang luar biasa!";
         dialogues[3] = "Tapi jangan coba-coba mencarinya sendirian.";
+    }
+
+    public void setGiftPreferences() {
+        lovedItems.addAll(Arrays.asList(
+            "Blueberry", "Melon", "Pumpkin", "Grape", "Cranberry" // [cite: 94]
+        ));
+        likedItems.addAll(Arrays.asList(
+            "Baguette", "Pumpkin Pie", "Wine" // [cite: 94]
+        ));
+        hatedItems.addAll(Arrays.asList(
+            "Hot Pepper", "Cauliflower", "Parsnip", "Wheat" // [cite: 94]
+        ));
     }
 
     @Override

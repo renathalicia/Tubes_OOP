@@ -1,10 +1,13 @@
 package entity;
+import java.util.Arrays;
+
 import entity.Entity;
 import main.GamePanel;
 
 public class NPC_4_Dasco extends Entity {
     public NPC_4_Dasco(GamePanel gp){
         super(gp);
+        this.name = "Dasco";
         direction = "down"; // Menghadap ke kanan secara default
         speed = 0;
         getImage();
@@ -27,6 +30,18 @@ public class NPC_4_Dasco extends Entity {
         dialogues[1] = "Pernah dengar legenda naga gunung?";
         dialogues[2] = "Katanya dia menjaga harta karun yang luar biasa!";
         dialogues[3] = "Tapi jangan coba-coba mencarinya sendirian.";
+    }
+
+    public void setGiftPreferences() {
+        lovedItems.addAll(Arrays.asList(
+            "The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad" // [cite: 85]
+        ));
+        likedItems.addAll(Arrays.asList(
+            "Fish Sandwich", "Fish Stew", "Baguette", "Fish n’ Chips" // [cite: 85]
+        ));
+        hatedItems.addAll(Arrays.asList(
+            "Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon" // [cite: 85]
+        ));
     }
 
     @Override

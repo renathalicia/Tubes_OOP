@@ -1,10 +1,13 @@
 package entity;
+import java.util.Arrays;
+
 import entity.Entity;
 import main.GamePanel;
 
 public class NPC_2_Caroline extends Entity {
     public NPC_2_Caroline(GamePanel gp){
         super(gp);
+        this.name = "Caroline";
         direction = "down";
         speed = 0; // NPC ini tidak bergerak
         getImage();
@@ -27,6 +30,12 @@ public class NPC_2_Caroline extends Entity {
         dialogues[1] = "Selamat datang di desa kami.";
         dialogues[2] = "Ada yang bisa saya bantu?";
         dialogues[3] = "Jangan lupa untuk istirahat yang cukup!";
+    }
+
+    public void setGiftPreferences() {
+        lovedItems.addAll(Arrays.asList("Firewood", "Coal")); // [cite: 77]
+        likedItems.addAll(Arrays.asList("Potato", "Wheat")); // [cite: 77]
+        hatedItems.addAll(Arrays.asList("Hot Pepper")); // [cite: 77]
     }
 
     @Override

@@ -15,6 +15,7 @@ import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
 import environment.GameState;
+import item.ItemStack;
 import environment.EnvironmentManager;
 
 
@@ -221,28 +222,135 @@ public class GamePanel extends JPanel implements Runnable{
                 if (currentNpc != null) {
                     int selectedOption = ui.commandNum; 
 
-                    if (selectedOption == 0) { 
-                        ui.currentDialogue = currentNpc.name + ": Hadiah? Ide bagus! (Fitur belum lengkap)";
-                        currentNpc.heartPoints += 10; 
-                        System.out.println(currentNpc.name + " HeartPoints: " + currentNpc.heartPoints);
-                        gameState = dialogueState; 
-                    } else if (selectedOption == 1) { 
-                        if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) { 
-                            currentNpc.isMarriedTo = true;
-                            ui.currentDialogue = "Kita akhirnya menikah, " + player.name + "!\nAku sangat bahagia!";
+                    if (selectedOption == 0) { // Asumsi 0 adalah "Gifting"
+                        // --- AWAL LOGIKA GIFTING ---
+                        if (player.inventory.isEmpty()) {
+                            ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
                             gameState = dialogueState;
-                        } else if (!currentNpc.isProposedTo) { 
-                            if (currentNpc.heartPoints >= 150) {
-                                currentNpc.isProposedTo = true;
-                                ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
-                            } else {
-                                ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
+                        } else {
+                            // TAHAP INI MASIH MEMBUTUHKAN UI PEMILIHAN ITEM DARI INVENTORY.
+                            // Untuk sekarang, kita ambil item PERTAMA dari inventory sebagai placeholder.
+                            ItemStack itemToGiftStack = player.inventory.get(0); // Ambil item pertama.
+
+                            if (itemToGiftStack == null || itemToGiftStack.getItem() == null) {
+                                ui.currentDialogue = "Item yang dipilih tidak valid.";
+                                gameState = dialogueState;
+                                keyH.enterPressed = false; // Reset key press
+                                return; // Keluar dari blok if gifting
                             }
-                            gameState = dialogueState;
-                        } else if (currentNpc.isMarriedTo) { 
-                            ui.currentDialogue = "Kita sudah menikah, sayangku " + player.name + "!";
-                            gameState = dialogueState;
+                            
+                            String itemName = itemToGiftStack.getItem().getName(); // Cara yang benar mendapatkan nama item
+
+                            if (player.consumeEnergy(5)) { // Biaya energi -5 [cite: 163]
+                                int heartPointsChange = currentNpc.processGift(itemName);
+                                currentNpc.updateHeartPoints(heartPointsChange);
+
+                                player.removeItem(itemName, 1); // Hapus 1 item dari inventory
+
+                                // Kurangi waktu dalam game -10 menit [cite: 163]
+                                gameStateSystem.tickTime(10); // Asumsi tickTime(X) memajukan X menit
+
+                                String reaction = "";
+                                if (heartPointsChange > 15) reaction = " sangat senang!"; // Loved: +25 [cite: 163]
+                                else if (heartPointsChange > 0) reaction = " terlihat senang."; // Liked: +20 [cite: 163]
+                                else if (heartPointsChange == 0) reaction = " menerimanya."; // Neutral: 0 [cite: 163]
+                                else reaction = " terlihat tidak senang."; // Hated: -25 [cite: 163]
+                                
+                                ui.currentDialogue = currentNpc.name + reaction + "\n(Hati: " + currentNpc.heartPoints + "/" + currentNpc.maxHeartPoints + ")";
+                                gameState = dialogueState;
+                            } else {
+                                ui.currentDialogue = "Energi tidak cukup untuk memberi hadiah."; // [cite: 58]
+                                gameState = dialogueState;
+                            }
                         }
+                    } else if (selectedOption == 1) { // OPSI UNTUK "PROPOSE" / "MARRY"
+
+                        // Langkah 1: Selalu cek apakah Player memiliki "Proposal Ring"
+                        boolean hasProposalRing = false;
+                        for (ItemStack stack : player.inventory) {
+                            // Pastikan item dan nama item tidak null sebelum membandingkan
+                            if (stack != null && stack.getItem() != null && stack.getItem().getName() != null &&
+                                stack.getItem().getName().equals("Proposal Ring")) {
+                                hasProposalRing = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasProposalRing) {
+                            ui.currentDialogue = "Kamu membutuhkan Cincin Lamaran untuk ini!";
+                            gameState = dialogueState;
+                        } else {
+                            // Player memiliki cincin, lanjutkan dengan logika melamar atau menikah
+
+                            // KASUS 1: MENIKAHI NPC YANG SUDAH MENJADI TUNANGAN (FIANCE)
+                            if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
+                                // TODO: Implementasi syarat "Marry dapat dilakukan paling cepat satu hari setelah NPC tersebut menjadi fiance." [cite: 163]
+                                //       Ini memerlukan penyimpanan tanggal lamaran dan perbandingan dengan tanggal saat ini.
+                                //       Untuk sekarang, kita abaikan syarat ini demi kesederhanaan.
+
+                                if (player.consumeEnergy(80)) { // Biaya energi -80 untuk menikah [cite: 163]
+                                    currentNpc.isMarriedTo = true;
+                                    player.partner = currentNpc.name; // Set partner pemain
+
+                                    // Time skip ke 22.00 [cite: 163]
+                                    if (gameStateSystem != null) { // Pastikan gameStateSystem tidak null
+                                        gameStateSystem.setTime(22, 0); // Anda mungkin perlu membuat metode ini di GameState.java
+                                    }
+
+                                    // TODO: Implementasi "Player dikembalikan ke rumah." [cite: 163]
+                                    //       Ini berarti mengubah player.worldX dan player.worldY ke koordinat rumah.
+                                    //       Contoh: player.worldX = gp.tileSize * 10; player.worldY = gp.tileSize * 10; // Ganti dgn koordinat rumah
+
+                                    ui.currentDialogue = "Kita akhirnya menikah, " + player.name + "!\nAku sangat bahagia!";
+                                } else {
+                                    ui.currentDialogue = "Tidak cukup energi untuk upacara pernikahan.";
+                                }
+                                gameState = dialogueState;
+
+                            // KASUS 2: MELAMAR NPC (PROPOSING)
+                            } else if (!currentNpc.isProposedTo) {
+                                if (currentNpc.heartPoints >= 150) { // NPC harus memiliki heartPoints maksimal (150) [cite: 163]
+                                    // Lamaran diterima
+                                    if (player.consumeEnergy(10)) { // Biaya energi -10 jika lamaran diterima [cite: 163]
+                                        currentNpc.isProposedTo = true; // NPC menjadi tunangan (fiance)
+
+                                        // Mengurangi 1 jam in-game [cite: 163]
+                                        if (gameStateSystem != null) {
+                                            // Jika 1x tickTime = 5 menit, maka 1 jam = 12x tickTime
+                                            // for(int i=0; i<12; i++) { gameStateSystem.tickTime(5); }
+                                            // Atau lebih baik buat metode:
+                                            gameStateSystem.advanceTimeByMinutes(60); // Anda mungkin perlu membuat metode ini
+                                        }
+                                        ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
+                                    } else {
+                                        ui.currentDialogue = "Tidak cukup energi untuk melamar saat ini.";
+                                    }
+                                } else { // Heart points tidak cukup
+                                    // Lamaran ditolak
+                                    if (player.consumeEnergy(20)) { // Biaya energi -20 jika lamaran ditolak [cite: 163]
+                                        // Mengurangi 1 jam in-game [cite: 163]
+                                        if (gameStateSystem != null) {
+                                            gameStateSystem.advanceTimeByMinutes(60); // Anda mungkin perlu membuat metode ini
+                                        }
+                                        ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
+                                    } else {
+                                        ui.currentDialogue = "Tidak cukup energi (dan hati juga belum cukup).";
+                                    }
+                                }
+                                gameState = dialogueState;
+
+                            // KASUS 3: SUDAH MENIKAH DENGAN NPC INI
+                            } else if (currentNpc.isMarriedTo) {
+                                ui.currentDialogue = "Kita sudah menikah, sayangku " + player.name + "!";
+                                gameState = dialogueState;
+                            } else {
+                                // Kondisi lain yang mungkin (misalnya, sudah tunangan tapi memilih opsi ini lagi sebelum menikah)
+                                // Anda bisa tambahkan dialog spesifik atau biarkan default.
+                                ui.currentDialogue = currentNpc.name + " tersenyum padamu.";
+                                gameState = dialogueState;
+                            }
+                        }
+                    // keyH.enterPressed = false; // Ini sudah ada di luar blok selectedOption
                     } else if (selectedOption == 2) { 
                         gameState = playState;
                         player.currentInteractingNPC = null; 
