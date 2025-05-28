@@ -7,6 +7,6 @@ public enum Weather {
 
     public static Weather randomWeather() {
         Random rand = new Random();
-        return rand.nextBoolean() ? SUNNY:RAINY;
+        return rand.nextDouble() < 0.7 ? SUNNY : RAINY;
     }
 }

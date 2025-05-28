@@ -1,7 +1,7 @@
 package environment;
 
 public class TimeManager {
-    private int hour = 15, minute = 55, day = 1;
+    private int hour = 6, minute = 0, day = 1;
     private Season season = Season.SPRING;
     private Weather weather = Weather.randomWeather();
 
