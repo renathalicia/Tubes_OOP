@@ -47,7 +47,6 @@ public class KeyHandler implements KeyListener {
             if (code == KeyEvent.VK_ENTER) {
                 if (gp.ui.commandNum == 0) {
                     gp.gameState = gp.playState;
-                    // gp.playMusic(0);
                 }
                 if(gp.ui.commandNum == 1) {
                     // add later
@@ -100,7 +99,39 @@ public class KeyHandler implements KeyListener {
         else if(gp.gameState == gp.inventoryState){
             handleInventoryKeys(code); // Handle inventory keys
         }
+
+        // NPC INTERACTION STATE
+        else if (gp.gameState == gp.npcInteractionState) {
+            npcInteractionState(code);
+        }
     }
+
+    public void npcInteractionState(int code) {
+            if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+                gp.ui.commandNum--;
+                // Menu interaksi NPC memiliki 3 opsi (0: Gift, 1: Propose/Marry, 2: Cancel)
+                if (gp.ui.commandNum < 0) {
+                    gp.ui.commandNum = 2; // Kembali ke opsi terakhir (Cancel)
+                }
+        
+            }
+            if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+                gp.ui.commandNum++;
+                // Menu interaksi NPC memiliki 3 opsi
+                if (gp.ui.commandNum > 2) {
+                    gp.ui.commandNum = 0; // Kembali ke opsi pertama (Gift)
+                }
+            }
+            if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true; // GamePanel akan menangani aksi berdasarkan commandNum
+            }
+            if (code == KeyEvent.VK_ESCAPE) { // Opsional: Tombol Escape untuk membatalkan
+                gp.gameState = gp.playState;
+                if(gp.player != null) { // Pastikan player tidak null
+                    gp.player.currentInteractingNPC = null; // Selesai interaksi
+                }
+            }
+        }
 
     public void handleInventoryKeys(int code) {
         if(code == KeyEvent.VK_I){
