@@ -186,7 +186,7 @@ public class Player extends Entity {
         }
 
     if (keyH.enterPressed) {
-        boolean acted = tillLand();  // coba bajak dulu
+        boolean acted = plantSeed() || tileLand();
 
         if (!acted) {
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
@@ -341,7 +341,7 @@ public class Player extends Entity {
     }
 
     // action tilling
-    public boolean tillLand() {
+    public boolean tileLand() {
     int centerX = worldX + solidArea.x + (solidArea.width / 2);
     int centerY = worldY + solidArea.y + (solidArea.height / 2);
 
@@ -375,6 +375,44 @@ public boolean hasItem(String itemName) {
         }
     }
     return false;
+}
+
+// action planting
+public boolean plantSeed() {
+    int centerX = worldX + solidArea.x + (solidArea.width / 2);
+    int centerY = worldY + solidArea.y + (solidArea.height / 2);
+    int col = centerX / gp.tileSize;
+    int row = centerY / gp.tileSize;
+
+    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+    if (tileIndex == 55) { // 55 = tilled soil
+        ItemStack seed = getSeedFromInventory();
+        if (seed == null) {
+            gp.ui.currentDialogue = "Kamu tidak punya seed!";
+            gp.gameState = gp.dialogueState;
+            return true;
+        }
+
+        if (!consumeEnergy(5)) return true;
+
+        // Tanam: ubah tile menjadi planted (index 56)
+        gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
+        removeItem(seed.getItem().getName(), 1); // Kurangi seed dari inventory
+        gp.ui.currentDialogue = "Berhasil menanam " + seed.getItem().getName();
+        gp.gameState = gp.dialogueState;
+        return true;
+    }
+
+    return false;
+}
+public ItemStack getSeedFromInventory() {
+    for (ItemStack stack : inventory) {
+        if (stack.getItem() != null && stack.getItem() instanceof Seed) {
+            return stack;
+        }
+    }
+    return null;
 }
 
 }

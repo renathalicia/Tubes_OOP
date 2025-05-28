@@ -108,7 +108,7 @@ public class KeyHandler implements KeyListener {
 
         // tilling
         if (code == KeyEvent.VK_ENTER) {
-            gp.player.tillLand(); // enter untuk bajak tanah
+            gp.player.tileLand(); // enter untuk bajak tanah
         }
 
     }
