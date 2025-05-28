@@ -5,6 +5,18 @@ public class TimeManager {
     private Season season = Season.SPRING;
     private Weather weather = Weather.randomWeather();
 
+    public void advanceToNextMorning() {
+        this.day++; // Maju ke hari berikutnya
+        updateSeason(); // Perbarui musim berdasarkan hari yang baru
+        this.weather = Weather.randomWeather(); // Dapatkan cuaca acak untuk hari baru
+
+        this.hour = 6; // Set waktu ke 06:00 pagi
+        this.minute = 0;
+
+        System.out.println("TimeManager: Advanced to next morning. Day: " + this.day + ", Season: " + this.season + ", Weather: " + this.weather);
+        // Di sini Anda bisa menambahkan logika lain yang perlu di-reset setiap hari jika ada.
+    }
+
     public void advanceTime(int minutes) {
         minute += minutes;
         while (minute >= 60) {
@@ -13,7 +25,7 @@ public class TimeManager {
         }
 
         if (hour >= 24) {
-            hour = 6;
+            hour -= 24;
             day++;
             updateSeason();
             weather = Weather.randomWeather();

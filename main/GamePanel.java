@@ -31,6 +31,9 @@ public class GamePanel extends JPanel implements Runnable{
     private int currentlyPlayingMusicIndex = -1;
     private boolean musicIsPlaying = false;
 
+    private boolean pendingSleep = false;
+    private String sleepTriggerMessage = "";
+
     // world settings
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
@@ -76,6 +79,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     public final int inventoryState = 6; 
     public final int npcInteractionState = 7;
+    
 
   
     //int playerX = 100;
@@ -100,7 +104,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void setUpGame() {
         aSetter.setObject();
         initializeNPCs();
-        playMusic(0);
+        // playMusic(0);
         gameState = titleState;
     }
 
@@ -191,146 +195,162 @@ public class GamePanel extends JPanel implements Runnable{
         }
     }
 
-    public void update(){
-        if(gameState == playState){
-            player.update(); //player
-            for(int i = 0; i < npc[currentMap].length; i++){
-                if(npc[currentMap][i] != null){
+    // Di dalam file GamePanel.java Anda
+
+    public void update() {
+        
+
+        if (gameState == playState && !pendingSleep) {
+            boolean autoSleepConditionMet = false;
+            String autoSleepMessage = "";
+
+            if (player.energy <= -20) {
+                autoSleepMessage = "Kamu pingsan karena kelelahan!";
+                autoSleepConditionMet = true;
+            } else if (gameStateSystem.getTimeManager().getHour() == 2) {
+                autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur...";
+                autoSleepConditionMet = true;
+            }
+
+            if (autoSleepConditionMet) {
+                System.out.println(">>> AUTO-SLEEP DETECTED! Pesan: " + autoSleepMessage);
+                pendingSleep = true;
+                ui.currentDialogue = autoSleepMessage;
+                gameState = dialogueState;
+                keyH.enterPressed = false;
+                System.out.println(">>> AUTO-SLEEP: pendingSleep di-set TRUE, gameState di-set ke dialogueState (" + dialogueState + ")");
+            }
+        }
+
+        if (gameState == titleState) {
+            if (keyH.enterPressed) {
+                gameState = playState;
+                keyH.enterPressed = false;
+                playMusic(0); 
+                System.out.println(">>> TITLESCREEN: Enter ditekan, pindah ke playState (" + playState + ")");
+            }
+        } else if (gameState == playState) {
+            player.update();
+            for (int i = 0; i < npc[currentMap].length; i++) {
+                if (npc[currentMap][i] != null) {
                     npc[currentMap][i].update();
                 }
             }
-        }
-        else if(gameState == pauseState){
-            //gadak
-        }
-        else if(gameState == inventoryState){
-            // update inventory
-            // ui.updateInventory();
-        }
-        else if(gameState == dialogueState){
-            // update dialogue
-            // ui.updateDialogue();
-        }
-        else if(gameState == sleepState){
-            // update sleep state
-            // ui.updateSleep();
-        }
-        else if(gameState == npcInteractionState) {
-            // Di sini, kita akan memproses input dari menu interaksi NPC
+        } else if (gameState == pauseState) {
+            // Tidak ada update logika game saat pause
+        } else if (gameState == inventoryState) {
+            // Logika update saat inventory terbuka
+        } else if (gameState == dialogueState) {
+            System.out.println("--- In dialogueState --- keyH.enterPressed: " + keyH.enterPressed + ", pendingSleep: " + pendingSleep);
             if (keyH.enterPressed) {
-                Entity currentNpc = player.currentInteractingNPC; 
-                if (currentNpc != null) {
-                    int selectedOption = ui.commandNum; 
+                keyH.enterPressed = false;
+                System.out.println(">>> DIALOGUE_STATE: Enter DITEKAN. Nilai pendingSleep saat ini: " + pendingSleep);
+                if (pendingSleep) {
+                    System.out.println(">>> DIALOGUE_STATE: Kondisi 'if (pendingSleep)' adalah TRUE. Memanggil executeSleepSequence().");
+                    executeSleepSequence();
+                } else {
+                    
+                    if (player.currentInteractingNPC != null ) {
+                        System.out.println(">>> DIALOGUE_STATE: Dialog biasa dari NPC, kembali ke npcInteractionState (" + npcInteractionState + ")");
+                        gameState = npcInteractionState;
+                    } else {
+                        System.out.println(">>> DIALOGUE_STATE: Dialog biasa sistem, kembali ke playState (" + playState + ")");
+                        gameState = playState;
+                    }
+                }
+            }
+        } else if (gameState == sleepState) {
+            // Bisa untuk animasi tidur
+            
+        } else if (gameState == npcInteractionState) {
+            Entity currentNpc = player.currentInteractingNPC;
+            
 
-                    if (selectedOption == 0) { // Asumsi 0 adalah "Gifting"
-                        // --- AWAL LOGIKA GIFTING ---
+            if (keyH.enterPressed) {
+                
+                if (currentNpc != null) {
+                    int selectedOption = ui.commandNum;
+                    
+
+                    if (selectedOption == 0) { // Gifting
+                        
                         if (player.inventory.isEmpty()) {
+                            
                             ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
                             gameState = dialogueState;
                         } else {
-                            // TAHAP INI MASIH MEMBUTUHKAN UI PEMILIHAN ITEM DARI INVENTORY.
-                            // Untuk sekarang, kita ambil item PERTAMA dari inventory sebagai placeholder.
-                            ItemStack itemToGiftStack = player.inventory.get(0); // Ambil item pertama.
-
+                            ItemStack itemToGiftStack = player.inventory.get(0); 
+                            
                             if (itemToGiftStack == null || itemToGiftStack.getItem() == null) {
                                 ui.currentDialogue = "Item yang dipilih tidak valid.";
                                 gameState = dialogueState;
-                                keyH.enterPressed = false; // Reset key press
-                                return; // Keluar dari blok if gifting
-                            }
-                            
-                            String itemName = itemToGiftStack.getItem().getName(); // Cara yang benar mendapatkan nama item
-
-                            if (player.consumeEnergy(5)) { // Biaya energi -5 [cite: 163]
-                                int heartPointsChange = currentNpc.processGift(itemName);
-                                currentNpc.updateHeartPoints(heartPointsChange);
-
-                                player.removeItem(itemName, 1); // Hapus 1 item dari inventory
-
-                                // Kurangi waktu dalam game -10 menit [cite: 163]
-                                gameStateSystem.tickTime(10); // Asumsi tickTime(X) memajukan X menit
-
-                                String reaction = "";
-                                if (heartPointsChange > 15) reaction = " sangat senang!"; // Loved: +25 [cite: 163]
-                                else if (heartPointsChange > 0) reaction = " terlihat senang."; // Liked: +20 [cite: 163]
-                                else if (heartPointsChange == 0) reaction = " menerimanya."; // Neutral: 0 [cite: 163]
-                                else reaction = " terlihat tidak senang."; // Hated: -25 [cite: 163]
-                                
-                                ui.currentDialogue = currentNpc.name + reaction + "\n(Hati: " + currentNpc.heartPoints + "/" + currentNpc.maxHeartPoints + ")";
-                                gameState = dialogueState;
                             } else {
-                                ui.currentDialogue = "Energi tidak cukup untuk memberi hadiah."; // [cite: 58]
-                                gameState = dialogueState;
+                                String itemName = itemToGiftStack.getItem().getName();
+                                
+                                if (player.consumeEnergy(5)) { // [cite: 163]
+                                    
+                                    int heartPointsChange = currentNpc.processGift(itemName);
+                                    currentNpc.updateHeartPoints(heartPointsChange);
+                                    player.removeItem(itemName, 1);
+                                    gameStateSystem.tickTime(10); // [cite: 163]
+                                    String reaction = "";
+                                    if (heartPointsChange > 15) reaction = " sangat senang!"; // Loved: +25 [cite: 163]
+                                    else if (heartPointsChange > 0) reaction = " terlihat senang."; // Liked: +20 [cite: 163]
+                                    else if (heartPointsChange == 0) reaction = " menerimanya."; // Neutral: 0 [cite: 163]
+                                    else reaction = " terlihat tidak senang."; // Hated: -25 [cite: 163]
+                                    ui.currentDialogue = currentNpc.name + reaction + "\n(Hati: " + currentNpc.heartPoints + "/" + currentNpc.maxHeartPoints + ")";
+                                    gameState = dialogueState;
+                                } else {
+                                    
+                                    ui.currentDialogue = "Energi tidak cukup untuk memberi hadiah."; // [cite: 58]
+                                    gameState = dialogueState;
+                                }
                             }
                         }
-                    } else if (selectedOption == 1) { // OPSI UNTUK "PROPOSE" / "MARRY"
-
-                        // Langkah 1: Selalu cek apakah Player memiliki "Proposal Ring"
+                    } else if (selectedOption == 1) { // Propose/Marry
+                        
                         boolean hasProposalRing = false;
                         for (ItemStack stack : player.inventory) {
-                            // Pastikan item dan nama item tidak null sebelum membandingkan
                             if (stack != null && stack.getItem() != null && stack.getItem().getName() != null &&
                                 stack.getItem().getName().equals("Proposal Ring")) {
                                 hasProposalRing = true;
                                 break;
                             }
                         }
-
+                        
                         if (!hasProposalRing) {
                             ui.currentDialogue = "Kamu membutuhkan Cincin Lamaran untuk ini!";
                             gameState = dialogueState;
                         } else {
-                            // Player memiliki cincin, lanjutkan dengan logika melamar atau menikah
-
-                            // KASUS 1: MENIKAHI NPC YANG SUDAH MENJADI TUNANGAN (FIANCE)
                             if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-                                // TODO: Implementasi syarat "Marry dapat dilakukan paling cepat satu hari setelah NPC tersebut menjadi fiance." [cite: 163]
-                                //       Ini memerlukan penyimpanan tanggal lamaran dan perbandingan dengan tanggal saat ini.
-                                //       Untuk sekarang, kita abaikan syarat ini demi kesederhanaan.
-
-                                if (player.consumeEnergy(80)) { // Biaya energi -80 untuk menikah [cite: 163]
+                                
+                                if (player.consumeEnergy(80)) { // [cite: 163]
                                     currentNpc.isMarriedTo = true;
-                                    player.partner = currentNpc.name; // Set partner pemain
-
-                                    // Time skip ke 22.00 [cite: 163]
-                                    if (gameStateSystem != null) { // Pastikan gameStateSystem tidak null
-                                        gameStateSystem.setTime(22, 0); // Anda mungkin perlu membuat metode ini di GameState.java
+                                    player.partner = currentNpc.name;
+                                    if (gameStateSystem != null) {
+                                        gameStateSystem.setTime(22, 0); // [cite: 163]
                                     }
-
-                                    // TODO: Implementasi "Player dikembalikan ke rumah." [cite: 163]
-                                    //       Ini berarti mengubah player.worldX dan player.worldY ke koordinat rumah.
-                                    //       Contoh: player.worldX = gp.tileSize * 10; player.worldY = gp.tileSize * 10; // Ganti dgn koordinat rumah
-
                                     ui.currentDialogue = "Kita akhirnya menikah, " + player.name + "!\nAku sangat bahagia!";
                                 } else {
                                     ui.currentDialogue = "Tidak cukup energi untuk upacara pernikahan.";
                                 }
                                 gameState = dialogueState;
-
-                            // KASUS 2: MELAMAR NPC (PROPOSING)
                             } else if (!currentNpc.isProposedTo) {
-                                if (currentNpc.heartPoints >= 150) { // NPC harus memiliki heartPoints maksimal (150) [cite: 163]
-                                    // Lamaran diterima
-                                    if (player.consumeEnergy(10)) { // Biaya energi -10 jika lamaran diterima [cite: 163]
-                                        currentNpc.isProposedTo = true; // NPC menjadi tunangan (fiance)
-
-                                        // Mengurangi 1 jam in-game [cite: 163]
+                                
+                                if (currentNpc.heartPoints >= 150) { // [cite: 163]
+                                    if (player.consumeEnergy(10)) { // [cite: 163]
+                                        currentNpc.isProposedTo = true;
                                         if (gameStateSystem != null) {
-                                            // Jika 1x tickTime = 5 menit, maka 1 jam = 12x tickTime
-                                            // for(int i=0; i<12; i++) { gameStateSystem.tickTime(5); }
-                                            // Atau lebih baik buat metode:
-                                            gameStateSystem.advanceTimeByMinutes(60); // Anda mungkin perlu membuat metode ini
+                                            gameStateSystem.advanceTimeByMinutes(60); // [cite: 163]
                                         }
                                         ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
                                     } else {
                                         ui.currentDialogue = "Tidak cukup energi untuk melamar saat ini.";
                                     }
-                                } else { // Heart points tidak cukup
-                                    // Lamaran ditolak
-                                    if (player.consumeEnergy(20)) { // Biaya energi -20 jika lamaran ditolak [cite: 163]
-                                        // Mengurangi 1 jam in-game [cite: 163]
+                                } else {
+                                    if (player.consumeEnergy(20)) { // [cite: 163]
                                         if (gameStateSystem != null) {
-                                            gameStateSystem.advanceTimeByMinutes(60); // Anda mungkin perlu membuat metode ini
+                                            gameStateSystem.advanceTimeByMinutes(60); // [cite: 163]
                                         }
                                         ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
                                     } else {
@@ -338,34 +358,64 @@ public class GamePanel extends JPanel implements Runnable{
                                     }
                                 }
                                 gameState = dialogueState;
-
-                            // KASUS 3: SUDAH MENIKAH DENGAN NPC INI
                             } else if (currentNpc.isMarriedTo) {
+                                
                                 ui.currentDialogue = "Kita sudah menikah, sayangku " + player.name + "!";
                                 gameState = dialogueState;
                             } else {
-                                // Kondisi lain yang mungkin (misalnya, sudah tunangan tapi memilih opsi ini lagi sebelum menikah)
-                                // Anda bisa tambahkan dialog spesifik atau biarkan default.
                                 ui.currentDialogue = currentNpc.name + " tersenyum padamu.";
                                 gameState = dialogueState;
                             }
                         }
-                    // keyH.enterPressed = false; // Ini sudah ada di luar blok selectedOption
                     } else if (selectedOption == 2) { 
+                        System.out.println("NPC INTERACTION: Opsi 'Batal' dipilih. Mengubah gameState ke playState.");
                         gameState = playState;
-                        player.currentInteractingNPC = null; 
+                        player.currentInteractingNPC = null;
+                    } else {
+                        System.out.println("NPC INTERACTION: selectedOption tidak dikenal: " + selectedOption + ". Tidak ada aksi.");
                     }
                 }
                 keyH.enterPressed = false; 
             }
         }
-        // Update waktu otomatis setiap 1 detik
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastTimeUpdate >= timeUpdateInterval) {
-            gameStateSystem.tickTime(5);
-            lastTimeUpdate = currentTime;
-        }
 
+        if (gameState == playState) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastTimeUpdate >= timeUpdateInterval) {
+                gameStateSystem.tickTime(5);
+                lastTimeUpdate = currentTime;
+            }
+        }
+    }
+
+    public void executeSleepSequence() {
+        System.out.println("GAME PANEL: executeSleepSequence() dipanggil.");
+        
+        int currentEnergy = player.energy;
+        int maxEnergy = player.maxEnergy;
+        int restoredEnergy;
+
+        if (currentEnergy < (maxEnergy * 0.10f)) { // [cite: 163]
+            restoredEnergy = maxEnergy / 2; // [cite: 163]
+        } else {
+            restoredEnergy = maxEnergy; // [cite: 163]
+        }
+        player.energy = restoredEnergy;
+        if (player.energy > maxEnergy) player.energy = maxEnergy;
+        System.out.println("GAME PANEL (executeSleepSequence): Energi dipulihkan menjadi: " + player.energy);
+
+        gameStateSystem.advanceToNextMorning();
+        System.out.println("GAME PANEL (executeSleepSequence): Waktu dimajukan. Info Waktu Baru: " +
+                        "Hari ke-" + gameStateSystem.getTimeManager().getDay() +
+                        ", Pukul " + gameStateSystem.getTimeManager().getFormattedTime());
+
+        ui.currentDialogue = "Selamat pagi! Hari baru telah dimulai.";
+
+        pendingSleep = false;
+        System.out.println("GAME PANEL (executeSleepSequence): pendingSleep direset ke false.");
+
+        gameState = playState;
+        System.out.println("GAME PANEL (executeSleepSequence): gameState diubah ke playState.");
     }
 
     public void paintComponent(Graphics g){
