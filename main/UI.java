@@ -57,7 +57,7 @@ public class UI {
         //     is = getClass().getResourceAsStream("/font/Purisa Bold.ttf");
         //     purisaB = Font.createFont(Font.BOLD, is);
         // } catch (FontFormatException | IOException e) {
-        //     e.printStackTrace();
+        //     e.printStackTrace();if (gp.gameState == gp.playState) {
         // }
 
         // CREATE HUD OBJECT
@@ -103,6 +103,8 @@ public class UI {
             }
 
             drawPlayerEnergy();
+            drawTime();
+
         }
         // UI untuk Pause State
         else if (gp.gameState == gp.pauseState) {
@@ -253,6 +255,33 @@ public class UI {
         if (commandNum == 2) {
             g2.drawString(">", x-gp.tileSize, y);
         }
+    }
+
+    // menampilkan time
+    public void drawTime() {
+        environment.TimeManager tm = gp.gameStateSystem.getTimeManager();
+
+        String time = "⏰ " + tm.getFormattedTime();
+        String day = "Day " + tm.getDay();
+        String season = tm.getSeason().toString();
+        String weather = tm.getWeather().toString();
+
+        // Styling
+        g2.setFont(arial_40.deriveFont(Font.BOLD, 20f));
+        g2.setColor(new Color(0, 0, 0, 150)); // semi-transparent background
+        int panelWidth = gp.tileSize * 5;
+        int panelHeight = gp.tileSize * 2;
+        int x = gp.screenWidth - panelWidth - 20;
+        int y = 20;
+        g2.fillRoundRect(x, y, panelWidth, panelHeight, 20, 20);
+
+        g2.setColor(Color.white);
+        int textX = x + 15;
+        int textY = y + 30;
+        int lineHeight = 22;
+
+        g2.drawString(time, textX, textY); textY += lineHeight;
+        g2.drawString(day + " | " + season + " | " + weather, textX, textY);
     }
 
     public void drawPlayerStatus() {
