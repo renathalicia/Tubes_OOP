@@ -39,7 +39,7 @@ public class GamePanel extends JPanel implements Runnable{
     public int currentMap = 0;
 
     // FPS
-    int FPS = 60;
+    int FPS = 45;
     int drawCount = 0;
 
     // System
