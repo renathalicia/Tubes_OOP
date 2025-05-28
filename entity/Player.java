@@ -140,7 +140,8 @@ public class Player extends Entity {
         }
 
         
-        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
+            
             // if (keyH.upPressed) {
             //     direction = "up";
             // } else if (keyH.downPressed) {
@@ -167,23 +168,15 @@ public class Player extends Entity {
             gp.eHandler.checkEvent();
 
             // IF COLLISION IS FALSE, PLAYER CAN MOVE
-            if (!collisionOn) {
+            if (!collisionOn && !keyH.enterPressed) {
                 switch (direction) {
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+                    case "up":worldY -= speed;break;
+                    case "down": worldY += speed;break;
+                    case "left":worldX -= speed; break;
+                    case "right":worldX += speed; break;
                 }
             }
-
+            gp.keyH.enterPressed = false; // jumpa npc tinggal enter tanpa WASD
             spriteCounter++;
             if (spriteCounter > 10) {
                 if (spriteNum == 1) {
