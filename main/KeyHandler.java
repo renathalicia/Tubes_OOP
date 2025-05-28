@@ -47,7 +47,6 @@ public class KeyHandler implements KeyListener {
             if (code == KeyEvent.VK_ENTER) {
                 if (gp.ui.commandNum == 0) {
                     gp.gameState = gp.playState;
-                    // gp.playMusic(0);
                 }
                 if(gp.ui.commandNum == 1) {
                     // add later
@@ -114,7 +113,7 @@ public class KeyHandler implements KeyListener {
                 if (gp.ui.commandNum < 0) {
                     gp.ui.commandNum = 2; // Kembali ke opsi terakhir (Cancel)
                 }
-                gp.playSE(0); // Contoh: Mainkan suara navigasi menu (Anda perlu file SE-nya)
+        
             }
             if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
                 gp.ui.commandNum++;
@@ -122,7 +121,6 @@ public class KeyHandler implements KeyListener {
                 if (gp.ui.commandNum > 2) {
                     gp.ui.commandNum = 0; // Kembali ke opsi pertama (Gift)
                 }
-                gp.playSE(0); // Contoh: Mainkan suara navigasi menu
             }
             if (code == KeyEvent.VK_ENTER) {
                 enterPressed = true; // GamePanel akan menangani aksi berdasarkan commandNum
