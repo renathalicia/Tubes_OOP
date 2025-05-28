@@ -17,7 +17,7 @@ public class TileManager {
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
-        tile = new Tile[55];
+        tile = new Tile[60];
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
@@ -26,6 +26,7 @@ public class TileManager {
     }
 
     public void getTileImage() {
+        //dummy biar pembuatan txt lebih enak
         setup(0, "earth", false);
         setup(1, "earth", false);
         setup(2, "earth", false);
@@ -82,6 +83,9 @@ public class TileManager {
         setup(52, "bush", true);
         setup(53, "summer-grass04-texture", false);
         setup(54, "stone", true);
+        setup(55, "tilled", false);
+        setup(56, "planted", false);
+
     }
 
     public void setup(int index, String imageName, boolean collision) {

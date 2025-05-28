@@ -1,5 +1,7 @@
 package main;
 
+import java.awt.*;
+
 public class EventHandler {
     GamePanel gp;
     EventRect eventRect[][][];
@@ -47,8 +49,11 @@ public class EventHandler {
         if (canTouchEvent) {
             if (hit(0, 10, 33, "any")) {
                 visiting(1, 12, 13);
+                eventRect[0][10][33].eventDone = true; //menandai bahwa visiting telah berhasil
             } else if (hit(1, 12, 13, "any")) {
                 visiting(0, 10, 33);
+                eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
+
             }
         }
     }
@@ -56,23 +61,43 @@ public class EventHandler {
     public boolean hit(int map, int col, int row, String reqDirection) {
         boolean hit = false;
 
+        // Pastikan kita berada di map yang benar
         if (map == gp.currentMap) {
-            gp.player.solidArea.x = gp.player.worldX + gp.player.solidArea.x;
-            gp.player.solidArea.y = gp.player.worldY + gp.player.solidArea.y;
-            eventRect[map][col][row].x = col * gp.tileSize + eventRect[map][col][row].x;
-            eventRect[map][col][row].y = row * gp.tileSize + eventRect[map][col][row].y;
+            // Ambil solidArea player dan eventRect dari default (relatif) mereka
+            // Kemudian hitung posisi dunia mereka.
+            // Gunakan RECTANGLE SEMENTARA untuk perhitungan tabrakan
+            // Ini mencegah perubahan pada objek asli gp.player.solidArea dan eventRect
 
-            if (gp.player.solidArea.intersects(eventRect[map][col][row]) && eventRect[map][col][row].eventDone == false) {
+            Rectangle playerSolidAreaWorld = new Rectangle(
+                    gp.player.worldX + gp.player.solidAreaDefaultX,
+                    gp.player.worldY + gp.player.solidAreaDefaultY,
+                    gp.player.solidArea.width, // Gunakan lebar dari solidArea asli
+                    gp.player.solidArea.height // Gunakan tinggi dari solidArea asli
+            );
+
+            // Pastikan eventRect[map][col][row] tidak null
+            if (eventRect[map][col][row] == null) {
+                System.err.println("Error: eventRect[" + map + "][" + col + "][" + row + "] is null!");
+                return false; // Jangan lanjutkan jika EventRect null
+            }
+
+            Rectangle eventWorldRect = new Rectangle(
+                    col * gp.tileSize + eventRect[map][col][row].eventRectDefaultX,
+                    row * gp.tileSize + eventRect[map][col][row].eventRectDefaultY,
+                    eventRect[map][col][row].width,
+                    eventRect[map][col][row].height
+            );
+
+            // Cek tabrakan dan status event
+            if (playerSolidAreaWorld.intersects(eventWorldRect) && !eventRect[map][col][row].eventDone) {
                 if (gp.player.direction.contentEquals(reqDirection) || reqDirection.contentEquals("any")) {
                     hit = true;
-                    previousEventX = gp.player.worldX;
+                    previousEventX = gp.player.worldX; // Simpan posisi player saat event dipicu
                     previousEventY = gp.player.worldY;
                 }
             }
-            gp.player.solidArea.x = gp.player.solidAreaDefaultX;
-            gp.player.solidArea.y = gp.player.solidAreaDefaultY;
-            eventRect[map][col][row].x = eventRect[map][col][row].eventRectDefaultX;
-            eventRect[map][col][row].y = eventRect[map][col][row].eventRectDefaultY;
+            // TIDAK PERLU MERESET gp.player.solidArea.x/y dan eventRect[map][col][row].x/y di sini
+            // karena kita menggunakan objek Rectangle sementara yang baru dibuat setiap kali.
         }
         return hit;
     }

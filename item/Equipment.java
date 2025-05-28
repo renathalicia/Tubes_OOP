@@ -2,8 +2,13 @@ package item;
 
 public class Equipment extends Item {
     //konstruktor
-    public Equipment(String name, int buyPrice, int sellPrice) {
-        super(name, buyPrice, sellPrice);
+    public Equipment(String name, String description) {
+        super(name, 0,0, description);
+    }
+
+    @Override
+    public boolean isStackable() {
+        return false; // Peralatan biasanya tidak bisa ditumpuk
     }
 
     @Override

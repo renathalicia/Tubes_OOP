@@ -1,11 +1,13 @@
 package entity;
 
 import java.util.ArrayList;
+
+import item.*;
+import main.AssetSetter;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
-import item.ItemStack;
-import item.Seed;
+
 import javax.imageio.ImageIO;
 
 import java.awt.*;
@@ -17,6 +19,7 @@ public class Player extends Entity {
 
     GamePanel gp;
     KeyHandler keyH;
+    AssetSetter aSetter;
     public final int screenX;
     public final int screenY;
     public int hasKey = 0;
@@ -51,8 +54,8 @@ public class Player extends Entity {
 //        worldX = gp.tileSize * 23;
 //        worldY = gp.tileSize * 21;
         //untuk interior
-        worldX = gp.tileSize * 12;
-        worldY = gp.tileSize * 13;
+        worldX = gp.tileSize * 27;
+        worldY = gp.tileSize * 15;
         speed = 3;
         direction = "down";
 
@@ -69,8 +72,18 @@ public class Player extends Entity {
     }
 
     public void setInitialInventoryItems() {
-        Seed parsnipSeed = new Seed("Parsnip Seed", 20, 10, "parsnip_seed", 4);
-        inventory.add(new ItemStack(parsnipSeed, 15)); // Menambahkan 5 Parsnip Seed ke inventaris
+        //Item (Equipment) yang default dimiliki oleh Player
+        Hoe hoe = new Hoe();
+        inventory.add(new ItemStack(hoe, 1));
+
+        Pickaxe pickAxe = new Pickaxe();
+        inventory.add(new ItemStack(pickAxe, 1));
+
+        WateringCan wateringCan = new WateringCan();
+        inventory.add(new ItemStack(wateringCan, 1));
+
+        FishingRod fishingRod = new FishingRod();
+        inventory.add(new ItemStack(fishingRod, 1));
     }
 
     public BufferedImage setUpItemImage(String imagePath) {

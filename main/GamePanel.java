@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import data.SaveLoad;
 import entity.Entity;
@@ -20,7 +21,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int tileSize = originalTileSize * scale;
     public final int maxScreenCol = 16;
     public final int maxScreenRow = 16;
-    public final int screenWidth= tileSize * maxScreenCol;
+    public final int screenWidth = tileSize * maxScreenCol;
     public final int screenHeight = tileSize * maxScreenRow;
 
     // world settings
@@ -32,7 +33,7 @@ public class GamePanel extends JPanel implements Runnable{
     public int currentMap = 0;
 
     // FPS
-    int FPS = 45;
+    int FPS = 60;
     int drawCount = 0;
 
     // System
@@ -91,7 +92,6 @@ public class GamePanel extends JPanel implements Runnable{
         initializeNPCs();
         playMusic(0);
         gameState = titleState;
-
     }
 
     public void initializeNPCs() {

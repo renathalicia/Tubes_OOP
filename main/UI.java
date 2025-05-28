@@ -20,7 +20,7 @@ public class UI {
     Color stardewSlotBg = new Color(217, 160, 102, 200);
     Color stardewSlotBorder = new Color(87, 52, 34);
     Color stardewText = new Color(255, 255, 255);
-    Color stardewHighlightBorder = new Color(255, 230, 100); 
+    Color stardewHighlightBorder = new Color(255, 230, 100);
     Color stardewTitleText = new Color(247, 213, 120);
 
     BufferedImage heart_full, heart_half, heart_blank;
@@ -32,7 +32,7 @@ public class UI {
 
     public String currentDialogue = "";
     public boolean gameFinished = false;
-    public int slotCol = 0; 
+    public int slotCol = 0;
     public int slotRow = 0;
     public final int inventoryMaxCol = 5;
     public final int inventoryMaxRow = 4;
@@ -114,7 +114,7 @@ public class UI {
             drawPlayerLife();
         }
         else if( gp.gameState == gp.inventoryState) {
-            drawInventory(); 
+            drawInventory();
         }
         // UI untuk Sleep State
         // else if (gp.gameState == gp.sleepState) {
@@ -200,7 +200,7 @@ public class UI {
         if (commandNum == 1) {
             g2.drawString(">", x-gp.tileSize, y);
         }
-        
+
         text = "QUIT";
         x = getXforCenteredText(text);
         y += gp.tileSize;
@@ -239,28 +239,28 @@ public class UI {
 
     public void drawPlayerStatus() {
         // --- KONFIGURASI TAMPILAN STATUS ---
-        int titleFontSize = 28;         
-        int statusFontSize = 20;        
-        int statusLineHeight = 24;      // Jarak vertikal antar baris detail status 
+        int titleFontSize = 28;
+        int statusFontSize = 20;
+        int statusLineHeight = 24;      // Jarak vertikal antar baris detail status
         int panelPadding = 15;          // Padding umum di dalam tepi panel status
 
         // Data yang ditampilkan
-        String statusTitle = gp.player.name + " - Status"; 
+        String statusTitle = gp.player.name + " - Status";
         String[] statusLabels = {
-            "Gender :",
-            "Energi :",
-            "Farm   :",
-            "Partner:",
-            "Gold   :",
-            "Items  :"
+                "Gender :",
+                "Energi :",
+                "Farm   :",
+                "Partner:",
+                "Gold   :",
+                "Items  :"
         };
         String[] statusValues = {
-            gp.player.gender,
-            gp.player.energy + "/" + gp.player.maxEnergy,
-            gp.player.farmName,
-            gp.player.partner,
-            gp.player.gold + " G", // Tambahkan "G" untuk Gold
-            (gp.player.inventory != null ? gp.player.inventory.size() + " jenis" : "0 jenis")
+                gp.player.gender,
+                gp.player.energy + "/" + gp.player.maxEnergy,
+                gp.player.farmName,
+                gp.player.partner,
+                gp.player.gold + " G", // Tambahkan "G" untuk Gold
+                (gp.player.inventory != null ? gp.player.inventory.size() + " jenis" : "0 jenis")
         };
 
         // --- KALKULASI DIMENSI DAN POSISI PANEL ---
@@ -280,13 +280,13 @@ public class UI {
             tl = new TextLayout("Ag", statusTextFont, g2.getFontRenderContext()); // Ambil tinggi satu baris
             totalStatusTextHeight = statusLabels.length * statusLineHeight - (statusLineHeight - (int) tl.getBounds().getHeight());
         }
-        
-        int frameHeight = panelPadding + titleHeightWithPadding + totalStatusTextHeight + panelPadding;
-        int paddingBottom = gp.tileSize / 2; 
 
-        
+        int frameHeight = panelPadding + titleHeightWithPadding + totalStatusTextHeight + panelPadding;
+        int paddingBottom = gp.tileSize / 2;
+
+
         int frameX = (gp.screenWidth - frameWidth) / 2;
-        int frameY = gp.screenHeight - frameHeight - paddingBottom; 
+        int frameY = gp.screenHeight - frameHeight - paddingBottom;
 
         // Pastikan panel tidak keluar layar bawah
         if (frameY + frameHeight > gp.screenHeight - (gp.tileSize / 2)) {
@@ -298,28 +298,28 @@ public class UI {
 
         // --- GAMBAR PANEL STATUS ---
         // Latar Belakang Panel
-        g2.setColor(stardewPanelBg); 
+        g2.setColor(stardewPanelBg);
         g2.fillRect(frameX, frameY, frameWidth, frameHeight);
 
         // Border Panel
-        g2.setColor(stardewSlotBorder); 
-        g2.setStroke(new BasicStroke(3)); 
+        g2.setColor(stardewSlotBorder);
+        g2.setStroke(new BasicStroke(3));
         g2.drawRect(frameX - 1, frameY - 1, frameWidth + 2, frameHeight + 2);
         g2.setStroke(new BasicStroke(1));
 
         // --- GAMBAR JUDUL STATUS ---
         g2.setFont(titleFont);
-        g2.setColor(stardewTitleText); 
+        g2.setColor(stardewTitleText);
         FontMetrics titleFm = g2.getFontMetrics();
         int titleActualWidth = titleFm.stringWidth(statusTitle);
-        int titleX = frameX + (frameWidth - titleActualWidth) / 2; 
-        int titleY = frameY + panelPadding + titleFm.getAscent(); 
+        int titleX = frameX + (frameWidth - titleActualWidth) / 2;
+        int titleY = frameY + panelPadding + titleFm.getAscent();
         g2.drawString(statusTitle, titleX, titleY);
 
         // --- GAMBAR DETAIL STATUS ---
         g2.setFont(statusTextFont);
-        g2.setColor(stardewText); 
-        FontMetrics statusFm = g2.getFontMetrics(); 
+        g2.setColor(stardewText);
+        FontMetrics statusFm = g2.getFontMetrics();
 
         // Posisi X untuk semua label dan value status
         int currentTextX = frameX + panelPadding;
@@ -327,10 +327,10 @@ public class UI {
 
         for (int i = 0; i < statusLabels.length; i++) {
             if (currentTextY + statusFm.getDescent() > frameY + frameHeight - panelPadding) {
-                break; 
+                break;
             }
             g2.drawString(statusLabels[i] + " " + statusValues[i], currentTextX, currentTextY);
-            currentTextY += statusLineHeight; 
+            currentTextY += statusLineHeight;
         }
     }
 
@@ -391,18 +391,18 @@ public class UI {
         return x;
     }
 
-        public void drawInventory() {
+    public void drawInventory() {
         // --- Frame Inventaris Utama (Panel) ---
-        int panelContentWidth = gp.tileSize * inventoryMaxCol; 
-        int panelPaddingX = gp.tileSize; 
-        int frameWidth = panelContentWidth + (panelPaddingX * 2); 
-        int titleAreaHeight = gp.tileSize; 
-        int panelContentHeight = gp.tileSize * inventoryMaxRow; 
+        int panelContentWidth = gp.tileSize * inventoryMaxCol;
+        int panelPaddingX = gp.tileSize;
+        int frameWidth = panelContentWidth + (panelPaddingX * 2);
+        int titleAreaHeight = gp.tileSize;
+        int panelContentHeight = gp.tileSize * inventoryMaxRow;
         int panelPaddingY = gp.tileSize / 2;
         int frameHeight = titleAreaHeight + panelContentHeight + (panelPaddingY * 2);
 
-        int frameX = (gp.screenWidth - frameWidth) / 2; 
-        int frameY = gp.tileSize * 2;                  
+        int frameX = (gp.screenWidth - frameWidth) / 2;
+        int frameY = gp.tileSize * 2;
 
         // Gambar Latar Belakang Panel Utama Inventaris
         g2.setColor(stardewPanelBg);
@@ -410,9 +410,9 @@ public class UI {
 
         // Gambar Border Panel Utama
         g2.setColor(stardewSlotBorder);
-        g2.setStroke(new BasicStroke(4)); 
+        g2.setStroke(new BasicStroke(4));
         g2.drawRect(frameX - 2, frameY - 2, frameWidth + 4, frameHeight + 4); // Sedikit di luar untuk efek visual
-        g2.setStroke(new BasicStroke(1)); 
+        g2.setStroke(new BasicStroke(1));
 
 
         // --- Judul Inventaris (Opsional) ---
@@ -428,15 +428,15 @@ public class UI {
 
         // --- Slot-slot Inventaris ---
         final int slotStartX = frameX + panelPaddingX;
-        final int slotStartY = frameY + titleAreaHeight + panelPaddingY; 
+        final int slotStartY = frameY + titleAreaHeight + panelPaddingY;
         int currentSlotX = slotStartX;
         int currentSlotY = slotStartY;
         int itemIndex = 0;
 
-        Font quantityFont = arial_40.deriveFont(18F); 
+        Font quantityFont = arial_40.deriveFont(18F);
 
-        for (int row = 0; row < inventoryMaxRow; row++) { 
-            for (int col = 0; col < inventoryMaxCol; col++) { 
+        for (int row = 0; row < inventoryMaxRow; row++) {
+            for (int col = 0; col < inventoryMaxCol; col++) {
                 // Gambar Latar Belakang Slot
                 g2.setColor(stardewSlotBg);
                 g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
@@ -475,8 +475,8 @@ public class UI {
                 currentSlotX += gp.tileSize;
                 itemIndex++;
             }
-            currentSlotX = slotStartX; 
-            currentSlotY += gp.tileSize;  
+            currentSlotX = slotStartX;
+            currentSlotY += gp.tileSize;
         }
 
         // --- Kursor Pemilihan Slot ---
@@ -498,11 +498,11 @@ public class UI {
                 Item selectedItem = selectedItemStack.getItem();
 
                 // Posisi dan ukuran panel deskripsi
-                int descPanelHeight = gp.tileSize * 2 + 20; 
-                int descPanelY = frameY + frameHeight + 15; 
-                
+                int descPanelHeight = gp.tileSize * 2 + 20;
+                int descPanelY = frameY + frameHeight + 15;
+
                 if (descPanelY + descPanelHeight > gp.screenHeight - 10) {
-                    descPanelY = frameY - descPanelHeight - 15; 
+                    descPanelY = frameY - descPanelHeight - 15;
                     if (descPanelY < 10) {
                         descPanelY = 10;
                         descPanelHeight = frameY - 20;
@@ -511,7 +511,7 @@ public class UI {
 
                 // Gambar latar belakang panel deskripsi
                 g2.setColor(stardewPanelBg);
-                g2.fillRect(frameX, descPanelY, frameWidth, descPanelHeight); 
+                g2.fillRect(frameX, descPanelY, frameWidth, descPanelHeight);
                 g2.setColor(stardewSlotBorder);
                 g2.setStroke(new BasicStroke(2));
                 g2.drawRect(frameX, descPanelY, frameWidth, descPanelHeight);
@@ -519,7 +519,7 @@ public class UI {
 
                 // Teks Deskripsi
                 g2.setColor(stardewText);
-                Font descFont = arial_40.deriveFont(Font.PLAIN, 18F); 
+                Font descFont = arial_40.deriveFont(Font.PLAIN, 18F);
                 g2.setFont(descFont);
                 int textPadding = 15;
                 int currentTextX = frameX + textPadding;
@@ -528,7 +528,7 @@ public class UI {
 
                 // Gambar Nama Item
                 g2.drawString(selectedItem.getName(), currentTextX, currentTextY);
-                currentTextY += g2.getFontMetrics(descFont).getHeight() + 5; 
+                currentTextY += g2.getFontMetrics(descFont).getHeight() + 5;
 
                 // Gambar Deskripsi Item (dengan word wrapping sederhana)
                 String description = (selectedItem.description != null && !selectedItem.description.isEmpty()) ? selectedItem.description : "Tidak ada deskripsi.";
@@ -542,7 +542,7 @@ public class UI {
                                 currentTextY += g2.getFontMetrics().getHeight(); // Jarak antar baris deskripsi
                                 line = new StringBuilder(word + " ");
                             } else {
-                                break; 
+                                break;
                             }
                         } else {
                             line.append(word).append(" ");

@@ -57,4 +57,9 @@ public class AssetSetter {
         gp.npc[mapNum][0].worldY = gp.tileSize*21;
         i++;
     }
+
+    //untuk menyimpan sprite masing-masing equipment sebagai default
+    public void setInitialInventory(){
+
+    }
 }
