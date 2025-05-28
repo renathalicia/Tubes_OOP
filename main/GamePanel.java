@@ -4,13 +4,16 @@ import java.awt.*;
 import javax.swing.JPanel;
 import data.SaveLoad;
 import entity.Entity;
-import entity.NPC_1;
-import entity.NPC_2;
-import entity.NPC_3;
-import entity.NPC_4;
+import entity.NPC_1_MayorTadi;
+import entity.NPC_2_Caroline;
+import entity.NPC_3_Perry;
+import entity.NPC_4_Dasco;
+import entity.NPC_5_Emily;
+import entity.NPC_6_Abigail;
 import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
+
 
 public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
@@ -20,6 +23,9 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxScreenRow = 16;
     public final int screenWidth= tileSize * maxScreenCol;
     public final int screenHeight = tileSize * maxScreenRow;
+
+    private int currentlyPlayingMusicIndex = -1;
+    private boolean musicIsPlaying = false;
 
     // world settings
     public final int maxWorldCol = 50;
@@ -60,7 +66,8 @@ public class GamePanel extends JPanel implements Runnable{
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
-    public final int inventoryState = 5; 
+    public final int inventoryState = 6; 
+    public final int npcInteractionState = 7;
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;
@@ -88,24 +95,32 @@ public class GamePanel extends JPanel implements Runnable{
         int mapNum = 0;
         
         // NPC 1 (yang sudah ada)
-        npc[mapNum][0] = new NPC_1(this);
+        npc[mapNum][0] = new NPC_1_MayorTadi(this);
         npc[mapNum][0].worldX = tileSize * 21; // Contoh posisi X
         npc[mapNum][0].worldY = tileSize * 21; // Contoh posisi Y
 
         // NPC 2 (baru)
-        npc[mapNum][1] = new NPC_2(this);
+        npc[mapNum][1] = new NPC_2_Caroline(this);
         npc[mapNum][1].worldX = tileSize * 25; // Atur posisi yang berbeda
         npc[mapNum][1].worldY = tileSize * 21;
 
         // NPC 3 (baru)
-        npc[mapNum][2] = new NPC_3(this);
+        npc[mapNum][2] = new NPC_3_Perry(this);
         npc[mapNum][2].worldX = tileSize * 28;
         npc[mapNum][2].worldY = tileSize * 21;
 
         // NPC 4 (baru)
-        npc[mapNum][3] = new NPC_4(this);
-        npc[mapNum][3].worldX = tileSize * 16;
+        npc[mapNum][3] = new NPC_4_Dasco(this);
+        npc[mapNum][3].worldX = tileSize * 17;
         npc[mapNum][3].worldY = tileSize * 21;
+        
+        npc[mapNum][4] = new NPC_5_Emily(this);
+        npc[mapNum][4].worldX = tileSize * 13;
+        npc[mapNum][4].worldY = tileSize * 21;
+        
+        npc[mapNum][5] = new NPC_6_Abigail(this);
+        npc[mapNum][5].worldX = tileSize * 23;
+        npc[mapNum][5].worldY = tileSize * 25;
 
         // Pastikan posisi worldX dan worldY ini berada dalam batas peta Anda
         // (maxWorldCol * tileSize dan maxWorldRow * tileSize)
@@ -165,7 +180,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void update(){
         if(gameState == playState){
             player.update(); //player
-            for(int i = 0; i < npc.length; i++){
+            for(int i = 0; i < npc[currentMap].length; i++){
                 if(npc[currentMap][i] != null){
                     npc[currentMap][i].update();
                 }
@@ -186,6 +201,43 @@ public class GamePanel extends JPanel implements Runnable{
             // update sleep state
             // ui.updateSleep();
         }
+        else if(gameState == npcInteractionState) {
+            // Di sini, kita akan memproses input dari menu interaksi NPC
+            if (keyH.enterPressed) {
+                Entity currentNpc = player.currentInteractingNPC; 
+                if (currentNpc != null) {
+                    int selectedOption = ui.commandNum; 
+
+                    if (selectedOption == 0) { 
+                        ui.currentDialogue = currentNpc.name + ": Hadiah? Ide bagus! (Fitur belum lengkap)";
+                        currentNpc.heartPoints += 10; 
+                        System.out.println(currentNpc.name + " HeartPoints: " + currentNpc.heartPoints);
+                        gameState = dialogueState; 
+                    } else if (selectedOption == 1) { 
+                        if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) { 
+                            currentNpc.isMarriedTo = true;
+                            ui.currentDialogue = "Kita akhirnya menikah, " + player.name + "!\nAku sangat bahagia!";
+                            gameState = dialogueState;
+                        } else if (!currentNpc.isProposedTo) { 
+                            if (currentNpc.heartPoints >= 150) {
+                                currentNpc.isProposedTo = true;
+                                ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
+                            } else {
+                                ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
+                            }
+                            gameState = dialogueState;
+                        } else if (currentNpc.isMarriedTo) { 
+                            ui.currentDialogue = "Kita sudah menikah, sayangku " + player.name + "!";
+                            gameState = dialogueState;
+                        }
+                    } else if (selectedOption == 2) { 
+                        gameState = playState;
+                        player.currentInteractingNPC = null; 
+                    }
+                }
+                keyH.enterPressed = false; 
+            }
+        }
     }
 
     public void paintComponent(Graphics g){
@@ -205,20 +257,23 @@ public class GamePanel extends JPanel implements Runnable{
 
         tileM.draw(g2); // tile
 
-        for(int i = 0; i < obj[1].length; i++){
+        for(int i = 0; i < obj[currentMap].length; i++){
             if(obj[currentMap][i] != null){
                 obj[currentMap][i].draw(g2, this);
             }
         }
 
         // npc
-        for(int i=0; i< npc.length; i++){
-                if(npc[currentMap][i] != null){
-                    npc[currentMap][i].draw(g2);
-                }
+        for(int i=0; i< npc[currentMap].length; i++){
+            if(npc[currentMap][i] != null){
+                npc[currentMap][i].draw(g2);
             }
+        }
         
         player.draw(g2); // player
+
+        // ui
+        ui.draw(g2);
 
          // debug
         if(keyH.showDebugText == true){
@@ -235,9 +290,6 @@ public class GamePanel extends JPanel implements Runnable{
             System.out.println("Draw Time: " + passed);
         }
 
-        // ui
-        ui.draw(g2);
-
         //DEBUG
         if (keyH.showDebugText == true){
             long drawEnd = System.nanoTime();
@@ -250,15 +302,27 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void playMusic(int i) {
-        
+        System.out.println("DEBUG: playMusic dipanggil dengan indeks: " + i + " dari gameState: " + gameState);
+        if (currentlyPlayingMusicIndex == i && musicIsPlaying) {
+            // Jika musik yang diminta adalah musik yang sama dan sedang diputar, jangan lakukan apa-apa
+            return;
+        }
+        // Jika ada musik lain yang sedang berjalan atau musik yang sama tapi ingin di-restart, hentikan dulu
+        if (musicIsPlaying) {
+            music.stop();
+        }
+
         music.setFile(i);
         music.play();
         music.loop();
+        currentlyPlayingMusicIndex = i;
+        musicIsPlaying = true; // Tandai bahwa musik sedang diputar
     }
 
     public void stopMusic() {
-        
         music.stop();
+        currentlyPlayingMusicIndex = -1; // Reset pelacak
+        musicIsPlaying = false; // Tandai bahwa musik berhenti
     }
 
     public void playSE(int i) {

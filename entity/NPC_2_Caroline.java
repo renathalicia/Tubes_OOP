@@ -2,8 +2,8 @@ package entity;
 import entity.Entity;
 import main.GamePanel;
 
-public class NPC_2 extends Entity {
-    public NPC_2(GamePanel gp){
+public class NPC_2_Caroline extends Entity {
+    public NPC_2_Caroline(GamePanel gp){
         super(gp);
         direction = "down";
         speed = 0; // NPC ini tidak bergerak
@@ -12,14 +12,14 @@ public class NPC_2 extends Entity {
     }
 
     public void getImage(){
-        up1 = setup("/res/npc/dasco/d3");
-        up2 = setup("/res/npc/dasco/d3");
-        down1 = setup("/res/npc/dasco/d1");
-        down2 = setup("/res/npc/dasco/d2");
-        left1 = setup("/res/npc/dasco/d5");
-        left2 = setup("/res/npc/dasco/d5");
-        right1 = setup("/res/npc/dasco/d4");
-        right2 = setup("/res/npc/dasco/d4");
+        up1 = setup("/res/npc/caroline/c3");
+        up2 = setup("/res/npc/caroline/c3");
+        down1 = setup("/res/npc/caroline/c1");
+        down2 = setup("/res/npc/caroline/c2");
+        left1 = setup("/res/npc/caroline/c5");
+        left2 = setup("/res/npc/caroline/c5");
+        right1 = setup("/res/npc/caroline/c4");
+        right2 = setup("/res/npc/caroline/c4");
     }
 
     public void setDialogue(){

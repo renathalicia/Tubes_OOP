@@ -2,8 +2,8 @@ package entity;
 import entity.Entity;
 import main.GamePanel;
 
-public class NPC_1 extends Entity {
-    public NPC_1(GamePanel gp){
+public class NPC_1_MayorTadi extends Entity {
+    public NPC_1_MayorTadi(GamePanel gp){
         super(gp);
         direction = "down";
         speed = 0;

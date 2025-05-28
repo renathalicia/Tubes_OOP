@@ -2,10 +2,10 @@ package entity;
 import entity.Entity;
 import main.GamePanel;
 
-public class NPC_4 extends Entity {
-    public NPC_4(GamePanel gp){
+public class NPC_3_Perry extends Entity {
+    public NPC_3_Perry(GamePanel gp){
         super(gp);
-        direction = "down"; // Menghadap ke kanan secara default
+        direction = "down"; // Menghadap ke kiri secara default
         speed = 0;
         getImage();
         setDialogue();
@@ -23,10 +23,10 @@ public class NPC_4 extends Entity {
     }
 
     public void setDialogue(){
-        dialogues[0] = "Hei, kamu!";
-        dialogues[1] = "Pernah dengar legenda naga gunung?";
-        dialogues[2] = "Katanya dia menjaga harta karun yang luar biasa!";
-        dialogues[3] = "Tapi jangan coba-coba mencarinya sendirian.";
+        dialogues[0] = "Hmm? Siapa di sana?";
+        dialogues[1] = "Oh, seorang pengembara.";
+        dialogues[2] = "Desa ini menyimpan banyak rahasia.";
+        dialogues[3] = "Berhati-hatilah di perjalananmu.";
     }
 
     @Override

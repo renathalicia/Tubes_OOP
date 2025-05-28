@@ -30,6 +30,8 @@ public class Player extends Entity {
     public ArrayList<ItemStack> inventory = new ArrayList<>();
     public final int inventorySize = 10; // Ukuran inventaris, bisa diubah sesuai kebutuhan
 
+    public Entity currentInteractingNPC = null; // Menyimpan NPC yang sedang diajak interaksi
+
     public Player(GamePanel gp, KeyHandler keyH) {
         super(gp);
         this.gp = gp;
@@ -41,6 +43,8 @@ public class Player extends Entity {
         solidArea = new Rectangle(8, 16, 32, 32);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
+
+        name = "Player";
 
         setDefaultValues();
         getPlayerImage();
@@ -120,6 +124,7 @@ public class Player extends Entity {
         boolean left = keyH.leftPressed;
         boolean right = keyH.rightPressed;
         int lastKey = keyH.lastPresseedDirectionKey;
+        boolean isMoving = false;
 
         if((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && up) {
             direction = "up";
@@ -139,17 +144,20 @@ public class Player extends Entity {
             direction = "right";
         }
 
-        
-        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
-            // if (keyH.upPressed) {
-            //     direction = "up";
-            // } else if (keyH.downPressed) {
-            //     direction = "down";
-            // } else if (keyH.leftPressed) {
-            //     direction = "left";
-            // } else if (keyH.rightPressed) {
-            //     direction = "right";
-            // }
+        if (keyH.enterPressed) {
+            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+            interactNPC(npcIndex);
+        }
+        else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
+            if (keyH.upPressed) {
+                direction = "up";
+            } else if (keyH.downPressed) {
+                direction = "down";
+            } else if (keyH.leftPressed) {
+                direction = "left";
+            } else if (keyH.rightPressed) {
+                direction = "right";
+            }
 
             // CHECK TILE COLLISION
             collisionOn = false;
@@ -167,31 +175,24 @@ public class Player extends Entity {
             gp.eHandler.checkEvent();
 
             // IF COLLISION IS FALSE, PLAYER CAN MOVE
-            if (!collisionOn) {
+            if (!collisionOn && !keyH.enterPressed && (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed)) {
                 switch (direction) {
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+                    case "up": worldY -= speed; isMoving = true; break;
+                    case "down": worldY += speed; isMoving = true; break;
+                    case "left": worldX -= speed; isMoving = true; break;
+                    case "right": worldX += speed; isMoving = true; break;
                 }
+                isMoving = true;
             }
 
+            if (isMoving && gp.gameState == gp.playState) {
             spriteCounter++;
-            if (spriteCounter > 10) {
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
+                if (spriteCounter > 10) { // Kecepatan animasi
+                    spriteNum = (spriteNum == 1) ? 2 : 1;
+                    spriteCounter = 0;
                 }
-                spriteCounter = 0;
+            } else {
+
             }
         }
 
@@ -217,14 +218,20 @@ public class Player extends Entity {
     }
 
     public void interactNPC(int i) {
-        if (i != 999) {
-            if(gp.keyH.enterPressed == true){
-                gp.gameState = gp.dialogueState;
-                gp.npc[gp.currentMap][i].speak();
-            }
+    if (gp.keyH.enterPressed) { 
+        if (i != 999) { 
+            currentInteractingNPC = gp.npc[gp.currentMap][i];
+
+            gp.gameState = gp.npcInteractionState; 
+            gp.ui.commandNum = 0; 
+
+            gp.keyH.enterPressed = false;
         }
-        gp.keyH.enterPressed = false;
+        else {
+            gp.keyH.enterPressed = false;
+        }
     }
+}
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){

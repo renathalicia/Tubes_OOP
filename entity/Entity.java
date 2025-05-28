@@ -25,6 +25,11 @@ public class Entity {
     public int dialogueIndex = 0;
     public int SolidAreaY;
     public int SolidAreaX;
+    
+    public int heartPoints = 0;
+    public boolean isProposedTo = false;
+    public boolean isMarriedTo = false;
+    public String name = "NPC"; // Nama default, bisa di-override di subclass NPC
 
     // CHARACTER STATUS
     public int maxLife;

@@ -1,5 +1,6 @@
 package main;
 
+import entity.Entity;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
@@ -115,6 +116,15 @@ public class UI {
         else if( gp.gameState == gp.inventoryState) {
             drawInventory(); 
         }
+
+        // NPC INTERACTION STATE
+        if(gp.gameState == gp.npcInteractionState) {
+            // Gambar layar dialog biasa terlebih dahulu agar ada latar belakang jika NPC bicara sebelum menu
+            // drawDialogueScreen(); // Opsional, tergantung desain Anda
+            // Lalu gambar menu interaksi di atasnya
+            drawNPCInteractionScreen();
+        }
+
         // UI untuk Sleep State
         // else if (gp.gameState == gp.sleepState) {
         //     drawSleepScreen();
@@ -355,6 +365,64 @@ public class UI {
         g2.setColor(c);
         g2.setStroke(new BasicStroke(5));
         g2.drawRoundRect(x, y, width, height, 35, 35);
+    }
+
+    public void drawNPCInteractionScreen() {
+        // Anda bisa menggambar kotak dialog NPC dulu jika ingin NPC mengatakan sesuatu sebelum menu muncul
+        // drawDialogueScreen(); // Misalnya, NPC berkata "Ada yang bisa kubantu?"
+        // Untuk sekarang, kita langsung gambar menu interaksinya.
+
+        // Tentukan posisi dan ukuran window untuk menu interaksi
+        int frameWidth = gp.tileSize * 7; // Lebar window
+        int frameHeight = gp.tileSize * 5; // Tinggi window (cukup untuk 3-4 opsi)
+        int frameX = gp.screenWidth - frameWidth - gp.tileSize; // Posisi X (pojok kanan atas)
+        int frameY = gp.tileSize; // Posisi Y
+
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight); // Gambar latar belakang window menu
+
+        g2.setColor(Color.white);
+        g2.setFont(arial_40.deriveFont(28F)); // Font untuk opsi menu, sesuaikan ukurannya
+
+        // Ambil NPC yang sedang diajak interaksi
+        Entity currentNpc = gp.player.currentInteractingNPC;
+        if (currentNpc == null) {
+            // Seharusnya tidak terjadi jika gameState adalah npcInteractionState, tapi sebagai pengaman
+            return;
+        }
+
+        // Teks Opsi
+        int textX = frameX + gp.tileSize - 10; // Posisi X untuk teks opsi
+        int textY = frameY + gp.tileSize;    // Posisi Y awal untuk teks opsi
+        int lineHeight = 35; // Jarak antar baris opsi
+
+        // Opsi 1: Gift Item
+        String optionText = "Beri Hadiah";
+        g2.drawString(optionText, textX, textY);
+        if (commandNum == 0) {
+            g2.drawString(">", textX - 20, textY); // Indikator pilihan
+        }
+
+        // Opsi 2: Propose atau Marry
+        textY += lineHeight;
+        if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
+            optionText = "Menikah";
+        } else if (!currentNpc.isProposedTo) {
+            optionText = "Lamar (" + currentNpc.heartPoints + "/150)";
+        } else { // Sudah menikah
+            optionText = "(Sudah Menikah)";
+        }
+        g2.drawString(optionText, textX, textY);
+        if (commandNum == 1) {
+            g2.drawString(">", textX - 20, textY);
+        }
+
+        // Opsi 3: Cancel
+        textY += lineHeight;
+        optionText = "Batal";
+        g2.drawString(optionText, textX, textY);
+        if (commandNum == 2) {
+            g2.drawString(">", textX - 20, textY);
+        }
     }
 
     public int getXforCenteredText(String text) {
