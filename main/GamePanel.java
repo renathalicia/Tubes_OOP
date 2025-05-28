@@ -13,6 +13,8 @@ import entity.NPC_6_Abigail;
 import entity.Player;
 import object.SuperObject;
 import tile.TileManager;
+import environment.GameState;
+import environment.EnvironmentManager;
 
 
 public class GamePanel extends JPanel implements Runnable{
@@ -49,6 +51,10 @@ public class GamePanel extends JPanel implements Runnable{
     public UI ui = new UI(this);
     public EventHandler eHandler = new EventHandler(this);
     Thread gameThread;
+    // Timer untuk update waktu game
+    private long lastTimeUpdate = System.currentTimeMillis();
+    private final int timeUpdateInterval = 1000; // tiap 1 detik (1000 ms)
+
     //Untuk save & load
     SaveLoad saveLoad = new SaveLoad(this);
 
@@ -68,12 +74,19 @@ public class GamePanel extends JPanel implements Runnable{
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     public final int inventoryState = 6; 
     public final int npcInteractionState = 7;
+
+  
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;
 
+    // untuk time
+    public GameState gameStateSystem = new GameState();
+    public EnvironmentManager envManager = new EnvironmentManager(this);
 
-    
+
+
+
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.black);
@@ -238,6 +251,13 @@ public class GamePanel extends JPanel implements Runnable{
                 keyH.enterPressed = false; 
             }
         }
+        // Update waktu otomatis setiap 1 detik
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastTimeUpdate >= timeUpdateInterval) {
+            gameStateSystem.tickTime(5);
+            lastTimeUpdate = currentTime;
+        }
+
     }
 
     public void paintComponent(Graphics g){
@@ -289,6 +309,11 @@ public class GamePanel extends JPanel implements Runnable{
             g2.drawString("Draw Time: " + passed, x, y);
             System.out.println("Draw Time: " + passed);
         }
+        // lighting/overlay
+        envManager.draw(g2);
+
+        // ui
+        ui.draw(g2);
 
         //DEBUG
         if (keyH.showDebugText == true){

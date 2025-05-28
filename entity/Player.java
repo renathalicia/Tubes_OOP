@@ -149,15 +149,6 @@ public class Player extends Entity {
             interactNPC(npcIndex);
         }
         else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
-            if (keyH.upPressed) {
-                direction = "up";
-            } else if (keyH.downPressed) {
-                direction = "down";
-            } else if (keyH.leftPressed) {
-                direction = "left";
-            } else if (keyH.rightPressed) {
-                direction = "right";
-            }
 
             // CHECK TILE COLLISION
             collisionOn = false;
@@ -186,6 +177,7 @@ public class Player extends Entity {
             }
 
             if (isMoving && gp.gameState == gp.playState) {
+            gp.keyH.enterPressed = false; // jumpa npc tinggal enter tanpa WASD
             spriteCounter++;
                 if (spriteCounter > 10) { // Kecepatan animasi
                     spriteNum = (spriteNum == 1) ? 2 : 1;
@@ -242,7 +234,6 @@ public class Player extends Entity {
             gp.ui.currentDialogue = "Energi tidak cukup!";
             return false; // Energi tidak cukup
         }
-        
     }
 
     public void gainEnergy(int amount) {
