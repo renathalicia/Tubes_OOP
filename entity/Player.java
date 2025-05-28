@@ -185,10 +185,17 @@ public class Player extends Entity {
             direction = "right";
         }
 
-        if (keyH.enterPressed) {
+    if (keyH.enterPressed) {
+        boolean acted = tillLand();  // coba bajak dulu
+
+        if (!acted) {
             int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
             interactNPC(npcIndex);
         }
+
+        keyH.enterPressed = false;
+    }
+
         else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
 
             // CHECK TILE COLLISION
@@ -332,4 +339,42 @@ public class Player extends Entity {
             System.out.println("Gambar player null untuk direction: " + direction);
         }
     }
+
+    // action tilling
+    public boolean tillLand() {
+    int centerX = worldX + solidArea.x + (solidArea.width / 2);
+    int centerY = worldY + solidArea.y + (solidArea.height / 2);
+
+    int col = centerX / gp.tileSize;
+    int row = centerY / gp.tileSize;
+
+    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+    if (tileIndex >= 43 && tileIndex <= 51) {
+        if (!hasItem("Hoe")) {
+            gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
+            gp.gameState = gp.dialogueState;
+            return true;
+        }
+
+        if (!consumeEnergy(5)) return true;
+
+        gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // jadi tilec
+        gp.ui.currentDialogue = "Tanah berhasil dibajak.";
+        gp.gameState = gp.dialogueState;
+        return true;
+    }
+
+    return false;
+}
+
+public boolean hasItem(String itemName) {
+    for (ItemStack stack : inventory) {
+        if (stack.getItem() != null && stack.getItem().getName().equalsIgnoreCase(itemName)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }

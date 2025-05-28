@@ -104,7 +104,14 @@ public class KeyHandler implements KeyListener {
         else if (gp.gameState == gp.npcInteractionState) {
             npcInteractionState(code);
         }
+
+        // tilling
+        if (code == KeyEvent.VK_ENTER) {
+            gp.player.tillLand(); // enter untuk bajak tanah
+        }
+
     }
+    
 
     public void npcInteractionState(int code) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
