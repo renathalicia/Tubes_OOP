@@ -3,17 +3,23 @@ package main;
 import entity.Entity;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 // import object.OBJ_Heart;
 // import object.SuperObject;
 import item.ItemStack;
 import item.Item;
+
+import javax.imageio.ImageIO;
 import java.awt.font.TextLayout;
 
 public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
+    BufferedImage backgroundImage;
+    Font stardewFont;
     // Font maruMonica, purisaB;
 
     // Modifikasi inventory wak
@@ -58,6 +64,43 @@ public class UI {
     public final int inventoryMaxCol = 5;
     public final int inventoryMaxRow = 4;
     public int commandNum = 0;
+    private String currentDialogueMode = "";
+
+    public void setDialogue(String dialogue, String mode) {
+        this.currentDialogue = dialogue;
+        this.currentDialogueMode = mode;
+        // Jika mode adalah CHAT atau NPC_GIFT_RESULT, GamePanel akan tahu cara menanganinya
+        // Jika mode adalah TV_CONFIRM, GamePanel tahu ini adalah Ya/Tidak untuk TV
+    }
+
+    public String getCurrentDialogueMode() {
+        return currentDialogueMode;
+    }
+
+    public void clearDialogueMode() {
+        this.currentDialogueMode = ""; // Atau set ke mode default "SYSTEM_MESSAGE"
+    }
+
+    public boolean isDialogueFromNpcAction() {
+        // Anda bisa lebih spesifik dengan mode-mode yang Anda set dari GamePanel
+        // setelah aksi NPC. Contoh:
+        return "NPC_GIFT_RESULT".equals(currentDialogueMode) ||
+               "NPC_PROPOSE_RESULT".equals(currentDialogueMode) ||
+               "CHAT_NPC".equals(currentDialogueMode); // Jika chat juga dianggap aksi NPC yang perlu kembali ke menu
+                                                       // Namun, untuk chat, kita sudah tangani untuk kembali ke playState.
+                                                       // Jadi, fokus pada hasil aksi seperti Gifting atau Proposing.
+        // Untuk contoh Gifting dan Proposing yang saya berikan di GamePanel (npcInteractionState):
+        // Saya belum secara eksplisit menyuruh Anda set mode "NPC_GIFT_RESULT".
+        // Anda perlu menambahkannya saat memproses gifting/proposing di GamePanel.
+        // Contoh di GamePanel (npcInteractionState, setelah gifting):
+        //   ui.currentDialogue = "Hasil gifting...";
+        //   ui.setDialogueMode("NPC_GIFT_RESULT"); // <--- PENTING DI GAMEPANEL
+        //   gameState = dialogueState;
+    }
+
+    public int getSelectedItemIndex() {
+        return slotRow * inventoryMaxCol + slotCol;
+    }
 
     public UI(GamePanel gp) {
         this.gp = gp;
@@ -78,6 +121,31 @@ public class UI {
         // heart_full = heart.image;
         // heart_half = heart.image2;
         // heart_blank = heart.image3;
+        // Load background image once
+        try {
+            InputStream is = getClass().getResourceAsStream("/title/background.jpg");
+            if (is == null) {
+                System.out.println("❌ background.jpg not found!");
+            } else {
+                backgroundImage = ImageIO.read(is);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Load Stardew Valley font once
+        try {
+            InputStream fontStream = getClass().getResourceAsStream("/title/StardewValley.ttf");
+            if (fontStream == null) {
+                System.out.println("❌ Font file not found!");
+                stardewFont = new Font("Arial", Font.BOLD, 48); // fallback
+            } else {
+                stardewFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.BOLD, 48f);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            stardewFont = new Font("Arial", Font.BOLD, 48); // fallback
+        }
     }
 
     public void showMessage(String text){
@@ -94,6 +162,8 @@ public class UI {
         // title state
         if (gp.gameState == gp.titleState) {
             drawTitleScreen();
+        } else if (gp.gameState == gp.helpState) {
+            drawHelpScreen();
         }
 
         // UI untuk Play State
@@ -215,55 +285,127 @@ public class UI {
         g2.setFont(arial_40);
     }
 
-    public void drawTitleScreen() {
+//    public void drawTitleScreen() {
+//
+//        g2.setColor(new Color(0, 0, 0));
+//        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+//
+//        // TITLE NAME
+//        g2.setFont(g2.getFont().deriveFont(Font.BOLD,96F));
+//        String text = "Spakbor Hills";
+//        int x = getXforCenteredText(text);
+//        int y = gp.tileSize*3;
+//
+//        // SHADOW
+//        g2.setColor(Color.gray);
+//        g2.drawString(text, x+5, y+5);
+//
+//        g2.setColor(Color.white);
+//        g2.drawString(text, x, y);
+//
+//        // CHARACTER IMAGE
+//        x = gp.screenWidth/2 - (gp.tileSize*2)/2;
+//        y += gp.tileSize*3;
+//        g2.drawImage(gp.player.down1, x, y, gp.tileSize*2, gp.tileSize*2, null);
+//
+//        // MENU
+//        g2.setFont(g2.getFont().deriveFont(Font.BOLD,48F));
+//
+//        text = "NEW GAME";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize*6;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 0) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//
+//        text = "LOAD GAME";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 1) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//
+//        text = "QUIT";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 2) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//    }
+public void drawTitleScreen() {
+    try {
+        // load font
+        InputStream is = getClass().getResourceAsStream("/res/title/StardewValley.ttf");
+        Font stardewFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.BOLD, 48f);
+        g2.setFont(stardewFont);
+    } catch (Exception e) {
+        e.printStackTrace();
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f)); // fallback
+    }
 
-        g2.setColor(new Color(0, 0, 0));
+    // masukin bg
+    try {
+        BufferedImage background = ImageIO.read(getClass().getResourceAsStream("/res/title/background.jpg"));
+        g2.drawImage(background, 0, 0, gp.screenWidth, gp.screenHeight, null);
+    } catch (IOException e) {
+        e.printStackTrace();
+        // jadi gelap
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+    }
+
+    // TITLE NAME
+    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 100f));
+    String text = "Spakbor Hills";
+    int x = getXforCenteredText(text);
+    int y = gp.tileSize * 7;
+
+    // shadow
+    g2.setColor(Color.gray);
+    g2.drawString(text, x + 5, y + 5);
+    g2.setColor(Color.white);
+    g2.drawString(text, x, y);
+
+    // menu
+    String[] options = { "NEW GAME", "LOAD GAME", "HELP", "QUIT" };
+    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f));
+    y += gp.tileSize * 1;
+
+    for (int i = 0; i < options.length; i++) {
+        text = options[i];
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == i) {
+            g2.drawString(">", x - gp.tileSize, y);
+        }
+    }
+}
+
+    public void drawHelpScreen() {
+        g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
-        // TITLE NAME
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD,96F));
-        String text = "Spakbor Hills";
-        int x = getXforCenteredText(text);
-        int y = gp.tileSize*3;
+        g2.setColor(Color.WHITE);
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 36f));
 
-        // SHADOW
-        g2.setColor(Color.gray);
-        g2.drawString(text, x+5, y+5);
+        int x = gp.tileSize;
+        int y = gp.tileSize;
 
-        g2.setColor(Color.white);
-        g2.drawString(text, x, y);
+        g2.drawString("HELP & HOW TO PLAY", x, y);
 
-        // CHARACTER IMAGE
-        x = gp.screenWidth/2 - (gp.tileSize*2)/2;
-        y += gp.tileSize*3;
-        g2.drawImage(gp.player.down1, x, y, gp.tileSize*2, gp.tileSize*2, null);
-
-        // MENU
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD,48F));
-
-        text = "NEW GAME";
-        x = getXforCenteredText(text);
-        y += gp.tileSize*6;
-        g2.drawString(text, x, y);
-        if (commandNum == 0) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
-
-        text = "LOAD GAME";
-        x = getXforCenteredText(text);
+        g2.setFont(stardewFont.deriveFont(24f));
+        y += gp.tileSize * 2;
+        g2.drawString("- Use W/S to move in menu", x, y);
         y += gp.tileSize;
-        g2.drawString(text, x, y);
-        if (commandNum == 1) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
-
-        text = "QUIT";
-        x = getXforCenteredText(text);
+        g2.drawString("- Use arrow keys to move player", x, y);
         y += gp.tileSize;
-        g2.drawString(text, x, y);
-        if (commandNum == 2) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
+        g2.drawString("- Press ENTER to interact", x, y);
+        y += gp.tileSize;
+        g2.drawString("- Press ESC to return", x, y);
     }
 
     // menampilkan time
@@ -581,7 +723,7 @@ public class UI {
         int lineHeight = 35; // Jarak antar baris opsi
 
         // Opsi 1: Gift Item
-        String optionText = "Beri Hadiah";
+        String optionText = "Gift Item";
         g2.drawString(optionText, textX, textY);
         if (commandNum == 0) {
             g2.drawString(">", textX - 20, textY); // Indikator pilihan
@@ -590,22 +732,30 @@ public class UI {
         // Opsi 2: Propose atau Marry
         textY += lineHeight;
         if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-            optionText = "Menikah";
+            optionText = "Marry";
         } else if (!currentNpc.isProposedTo) {
-            optionText = "Lamar (" + currentNpc.heartPoints + "/150)";
+            optionText = "Propose (" + currentNpc.heartPoints + "/150)";
         } else { // Sudah menikah
-            optionText = "(Sudah Menikah)";
+            optionText = "(Married)";
         }
         g2.drawString(optionText, textX, textY);
         if (commandNum == 1) {
             g2.drawString(">", textX - 20, textY);
         }
 
-        // Opsi 3: Cancel
+        // Opsi 3: Chatting
         textY += lineHeight;
-        optionText = "Batal";
+        optionText = "Chat";
         g2.drawString(optionText, textX, textY);
         if (commandNum == 2) {
+            g2.drawString(">", textX - 20, textY);
+        }
+
+        // Opsi 3: Chatting
+        textY += lineHeight;
+        optionText = "Exit";
+        g2.drawString(optionText, textX, textY);
+        if (commandNum == 3) {
             g2.drawString(">", textX - 20, textY);
         }
     }
@@ -617,87 +767,93 @@ public class UI {
     }
 
     public void drawInventory() {
-        // --- KONFIGURASI PANEL INVENTARIS ---
-        int panelInternalPadding = gp.tileSize / 3;
-        // --- UBAH KETEBALAN GRID DI SINI ---
-        int slotGridStrokeThickness = 4; 
-        int panelBorderThickness = 5;   
 
-        // ... (Dimensi Panel Utama Inventaris tetap sama) ...
-        int slotGridWidth = gp.tileSize * inventoryMaxCol;
-        int slotGridHeight = gp.tileSize * inventoryMaxRow;
-        int frameWidth = slotGridWidth + (panelInternalPadding * 2);
-        int frameHeight = slotGridHeight + (panelInternalPadding * 2);
-        int frameX = (gp.screenWidth - frameWidth) / 2;
-        int frameY = (gp.screenHeight - frameHeight) / 2 - gp.tileSize;
-        if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
+    String title;
+    if (gp.isSelectingItemForGift && gp.npcForGifting != null) {
+        title = "Berikan hadiah untuk: " + gp.npcForGifting.name;
+    } else {
+        title = "Inventory";
+    }
 
+    // --- KONFIGURASI PANEL INVENTARIS --- (biarkan seperti sebelumnya)
+    int panelInternalPadding = gp.tileSize / 3;
+    int slotGridStrokeThickness = 4;
+    int panelBorderThickness = 5;
 
-        // --- GAMBAR PANEL UTAMA INVENTARIS ---
-        // 1. Latar Belakang Panel Utama
-        g2.setColor(invPanelBg);
-        g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+    int slotGridWidth = gp.tileSize * inventoryMaxCol;
+    int slotGridHeight = gp.tileSize * inventoryMaxRow;
+    int frameWidth = slotGridWidth + (panelInternalPadding * 2);
+    int frameHeight = slotGridHeight + (panelInternalPadding * 2);
+    int frameX = (gp.screenWidth - frameWidth) / 2;
+    int frameY = (gp.screenHeight - frameHeight) / 2 - gp.tileSize;
+    if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
 
-        // 2. Border Panel Utama
-        g2.setColor(invPanelBorder);
-        g2.setStroke(new BasicStroke(panelBorderThickness));
-        g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+    // --- GAMBAR PANEL UTAMA INVENTARIS --- (biarkan seperti sebelumnya)
+    g2.setColor(invPanelBg);
+    g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+    g2.setColor(invPanelBorder);
+    g2.setStroke(new BasicStroke(panelBorderThickness));
+    g2.drawRect(frameX, frameY, frameWidth, frameHeight);
 
+    // --- SLOT-SLOT INVENTARIS ---
+    final int slotStartX = frameX + panelInternalPadding;
+    final int slotStartY = frameY + panelInternalPadding;
+    int currentSlotX = slotStartX;
+    int currentSlotY = slotStartY;
+    int itemIndex = 0;
 
-        // --- SLOT-SLOT INVENTARIS ---
-        final int slotStartX = frameX + panelInternalPadding;
-        final int slotStartY = frameY + panelInternalPadding;
-        int currentSlotX = slotStartX;
-        int currentSlotY = slotStartY;
-        int itemIndex = 0;
+    Font quantityFont = arial_40.deriveFont(18F);
 
-        Font quantityFont = arial_40.deriveFont(18F);
+    // --- TENTUKAN UKURAN BARU UNTUK GAMBAR ITEM ---
+    int itemPadding = 8; // Padding di setiap sisi item di dalam slot (misalnya 4 pixel)
+                         // Anda bisa juga menggunakan persentase, misal: gp.tileSize / 10
+    int itemDrawSize = gp.tileSize - (itemPadding * 2); // Ukuran gambar item saat digambar
 
-        for (int row = 0; row < inventoryMaxRow; row++) {
-            for (int col = 0; col < inventoryMaxCol; col++) {
-                // Gambar Latar Belakang Slot
-                g2.setColor(invSlotBg);
-                g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+    for (int row = 0; row < inventoryMaxRow; row++) {
+        for (int col = 0; col < inventoryMaxCol; col++) {
+            g2.setColor(invSlotBg);
+            g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+            g2.setColor(invPanelGrid);
+            g2.setStroke(new BasicStroke(slotGridStrokeThickness));
+            g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
 
-                // --- GAMBAR GARIS GRID / BORDER SLOT DENGAN PENYESUAIAN ---
-                g2.setColor(invPanelGrid); 
-                g2.setStroke(new BasicStroke(slotGridStrokeThickness)); 
-                g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+            if (itemIndex < gp.player.inventory.size()) {
+                ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
+                Item currentItem = currentItemStack.getItem();
+                BufferedImage itemImage = (currentItem != null) ? currentItem.image : null;
 
-                // ... (Sisa kode untuk menggambar item dan kuantitas tetap sama) ...
-                if (itemIndex < gp.player.inventory.size()) {
-                    ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
-                    Item currentItem = currentItemStack.getItem();
-                    BufferedImage itemImage = (currentItem != null) ? currentItem.image : null;
+                if (itemImage != null) {
+                    // Hitung posisi X dan Y agar item tergambar di tengah slot dengan ukuran barunya
+                    int itemX = currentSlotX + itemPadding;
+                    int itemY = currentSlotY + itemPadding;
 
-                    if (itemImage != null) {
-                        int imgX = currentSlotX + (gp.tileSize - itemImage.getWidth(null)) / 2;
-                        int imgY = currentSlotY + (gp.tileSize - itemImage.getHeight(null)) / 2;
-                        g2.drawImage(itemImage, imgX, imgY, null);
+                    // Gambar item dengan ukuran yang sudah ditentukan (itemDrawSize)
+                    g2.drawImage(itemImage, itemX, itemY, itemDrawSize, itemDrawSize, null);
 
-                        if (currentItemStack.getQuantity() > 1) {
-                            g2.setFont(quantityFont);
-                            String quantityText = String.valueOf(currentItemStack.getQuantity());
-                            FontMetrics fmQty = g2.getFontMetrics();
-                            int qtyTextWidth = fmQty.stringWidth(quantityText);
-                            int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - 4;
-                            int qtyY = currentSlotY + gp.tileSize - 4;
-                            
-                            g2.setColor(Color.black);
-                            g2.drawString(quantityText, qtyX + 1, qtyY + 1);
-                            g2.setColor(stardewText);
-                            g2.drawString(quantityText, qtyX, qtyY);
-                        }
+                    // Logika untuk kuantitas (biarkan seperti sebelumnya)
+                    if (currentItemStack.getQuantity() > 1) {
+                        g2.setFont(quantityFont);
+                        String quantityText = String.valueOf(currentItemStack.getQuantity());
+                        FontMetrics fmQty = g2.getFontMetrics();
+                        int qtyTextWidth = fmQty.stringWidth(quantityText);
+                        // Posisi teks kuantitas sedikit disesuaikan agar tidak terlalu menempel jika item lebih kecil
+                        int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - (itemPadding > 2 ? itemPadding : 4);
+                        int qtyY = currentSlotY + gp.tileSize - (itemPadding > 2 ? itemPadding : 4);
+                        
+                        g2.setColor(Color.black);
+                        g2.drawString(quantityText, qtyX + 1, qtyY + 1);
+                        g2.setColor(stardewText); // Atau warna teks kuantitas Anda
+                        g2.drawString(quantityText, qtyX, qtyY);
                     }
                 }
-                currentSlotX += gp.tileSize;
-                itemIndex++;
             }
-            currentSlotX = slotStartX;
-            currentSlotY += gp.tileSize;
+            currentSlotX += gp.tileSize;
+            itemIndex++;
         }
-        g2.setStroke(new BasicStroke(1));
-
+        currentSlotX = slotStartX;
+        currentSlotY += gp.tileSize;
+    }
+    g2.setStroke(new BasicStroke(1));
 
         // --- KURSOR PEMILIHAN SLOT ---
         int cursorX = slotStartX + (gp.tileSize * slotCol);

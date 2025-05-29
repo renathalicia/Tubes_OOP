@@ -427,6 +427,7 @@ import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
 import javax.imageio.ImageIO;
+import environment.Weather;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -534,19 +535,6 @@ public class Player extends Entity {
         else {
             System.out.println("Item tidak ditemukan di ItemRepository.");
         }
-        // Hoe hoe = new Hoe();
-        // inventory.add(new ItemStack(hoe, 1));
-
-        // Pickaxe pickAxe = new Pickaxe();
-        // inventory.add(new ItemStack(pickAxe, 1));
-
-        // WateringCan wateringCan = new WateringCan();
-        // inventory.add(new ItemStack(wateringCan, 1));
-
-        // FishingRod fishingRod = new FishingRod();
-        // inventory.add(new ItemStack(fishingRod, 1));
-
-        // inventory.add(new ItemStack(new ProposalRing(), 1));
     }
 
     public BufferedImage setUpItemImage(String imagePath) {
@@ -660,25 +648,16 @@ public class Player extends Entity {
 
             }
         }
-
-        if(energy <= 0){
-            if(energy > -20){
-                gp.gameState = gp.dialogueState;
-                gp.ui.currentDialogue = "Anda kelelahan! Energi: " + energy;
-            } else {
-                gp.gameState = gp.sleepState;
-                worldX = gp.tileSize * 12; // Reset posisi ke tempat tidur
-                worldY = gp.tileSize * 13; // Reset posisi ke tempat tidur
-
-                energy = maxEnergy; // Reset energi saat tidur
-                gp.player.direction = "down"; // Mengatur arah ke bawah saat tidur
-            }
-        }
     }
 
     public void pickUpObject(int i) {
-        if (i != 999) {
-            // Logika untuk mengambil objek (akan diimplementasikan)
+    if (i != 999 && gp.obj[gp.currentMap][i] != null) {
+        String objectName = gp.obj[gp.currentMap][i].name;
+
+        if (objectName.equals("Television")) {
+            watchTV();
+        }
+        // else if untuk object lain seperti bed, stove, dsb
         }
     }
 
@@ -838,4 +817,24 @@ public ItemStack getSeedFromInventory() {
     return null;
 }
 
+// watching
+public boolean watchTV() {
+    Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
+    // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
+    if (gp.currentMap != 0) { 
+        gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
+        gp.gameState = gp.dialogueState;
+        return true;
+    }
+
+    // Cek energi cukup
+    if (!consumeEnergy(5)) return true;
+
+    // Tambah waktu menggunakan GameState (biar konsisten)
+    gp.gameStateSystem.advanceTimeByMinutes(15);
+
+    gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
+    gp.gameState = gp.dialogueState;
+    return true;
+}
 }

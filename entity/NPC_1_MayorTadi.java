@@ -12,6 +12,8 @@ public class NPC_1_MayorTadi extends Entity {
         speed = 0;
         getImage();
         setDialogue();
+        setChatDialogues();
+        setGiftPreferences();
     }
      public void getImage(){
         up1 = setup("/res/npc/mayortadi/mt3");
@@ -23,11 +25,19 @@ public class NPC_1_MayorTadi extends Entity {
         right1 = setup("/res/npc/mayortadi/mt4");
         right2 = setup("/res/npc/mayortadi/mt4");
     }
-    public void setDialogue(){
-        dialogues[0] = "Hello, bujanginam\n";
-        dialogues[1] = "horas\n";
-        dialogues[2] = "namaku samuel christ \nmichael bagasta simanjuntak";
-        dialogues[3] = "hobiku gondrong\n";
+
+    @Override
+    public void setDialogue() { // Dialog standar jika pemain hanya "speak" tanpa memilih chat
+        dialogues[0] = "Hmph, ada apa?";
+    }
+
+    @Override
+    public void setChatDialogues() {
+        chatDialogues = new String[3];
+        chatDialogues[0] = "Ah, kamu lagi. Ada perlu apa?";
+        chatDialogues[1] = "Kota ini butuh banyak perbaikan, tapi dana selalu jadi masalah.";
+        chatDialogues[2] = "Jangan lupa bayar pajak ya, haha!";
+        // Anda bisa tambahkan hingga chatDialogues[4] jika arraynya berukuran 5
     }
 
     public void setGiftPreferences() {

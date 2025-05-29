@@ -12,6 +12,8 @@ public class NPC_3_Perry extends Entity {
         speed = 0;
         getImage();
         setDialogue();
+        setChatDialogues();
+        setGiftPreferences();
     }
 
     public void getImage(){
@@ -26,10 +28,18 @@ public class NPC_3_Perry extends Entity {
     }
 
     public void setDialogue(){
+        chatDialogues = new String[4];
         dialogues[0] = "Hmm? Siapa di sana?";
         dialogues[1] = "Oh, seorang pengembara.";
         dialogues[2] = "Desa ini menyimpan banyak rahasia.";
         dialogues[3] = "Berhati-hatilah di perjalananmu.";
+    }
+
+    @Override
+    public void setChatDialogues() {
+        chatDialogues[0] = "Oh... halo.";
+        chatDialogues[1] = "Menulis itu... kadang sulit mencari inspirasi.";
+        chatDialogues[2] = "Maaf, saya agak sibuk hari ini.";
     }
 
     public void setGiftPreferences() {

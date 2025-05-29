@@ -1,7 +1,6 @@
 package entity;
 import java.util.Arrays;
 
-import entity.Entity;
 import main.GamePanel;
 
 public class NPC_5_Emily extends Entity {
@@ -12,6 +11,8 @@ public class NPC_5_Emily extends Entity {
         speed = 0;
         getImage();
         setDialogue();
+        setChatDialogues();
+        setGiftPreferences();
     }
 
     public void getImage(){
@@ -26,10 +27,18 @@ public class NPC_5_Emily extends Entity {
     }
 
     public void setDialogue(){
+        chatDialogues = new String[4];
         dialogues[0] = "Hei, kamu!";
         dialogues[1] = "Pernah dengar legenda naga gunung?";
         dialogues[2] = "Katanya dia menjaga harta karun yang luar biasa!";
         dialogues[3] = "Tapi jangan coba-coba mencarinya sendirian.";
+    }
+
+    @Override
+    public void setChatDialogues() {
+        chatDialogues[0] = "Selamat datang di toko! Ada yang bisa saya bantu hari ini?";
+        chatDialogues[1] = "Saya baru saja memanen sayuran segar dari kebun untuk restoran.";
+        chatDialogues[2] = "Jika butuh sesuatu, jangan ragu bertanya ya!";
     }
 
     public void setGiftPreferences() {
