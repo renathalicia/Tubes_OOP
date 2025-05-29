@@ -641,87 +641,85 @@ public class UI {
     }
 
     public void drawInventory() {
-        // --- KONFIGURASI PANEL INVENTARIS ---
-        int panelInternalPadding = gp.tileSize / 3;
-        // --- UBAH KETEBALAN GRID DI SINI ---
-        int slotGridStrokeThickness = 4; 
-        int panelBorderThickness = 5;   
+    // --- KONFIGURASI PANEL INVENTARIS --- (biarkan seperti sebelumnya)
+    int panelInternalPadding = gp.tileSize / 3;
+    int slotGridStrokeThickness = 4;
+    int panelBorderThickness = 5;
 
-        // ... (Dimensi Panel Utama Inventaris tetap sama) ...
-        int slotGridWidth = gp.tileSize * inventoryMaxCol;
-        int slotGridHeight = gp.tileSize * inventoryMaxRow;
-        int frameWidth = slotGridWidth + (panelInternalPadding * 2);
-        int frameHeight = slotGridHeight + (panelInternalPadding * 2);
-        int frameX = (gp.screenWidth - frameWidth) / 2;
-        int frameY = (gp.screenHeight - frameHeight) / 2 - gp.tileSize;
-        if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
+    int slotGridWidth = gp.tileSize * inventoryMaxCol;
+    int slotGridHeight = gp.tileSize * inventoryMaxRow;
+    int frameWidth = slotGridWidth + (panelInternalPadding * 2);
+    int frameHeight = slotGridHeight + (panelInternalPadding * 2);
+    int frameX = (gp.screenWidth - frameWidth) / 2;
+    int frameY = (gp.screenHeight - frameHeight) / 2 - gp.tileSize;
+    if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
 
+    // --- GAMBAR PANEL UTAMA INVENTARIS --- (biarkan seperti sebelumnya)
+    g2.setColor(invPanelBg);
+    g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+    g2.setColor(invPanelBorder);
+    g2.setStroke(new BasicStroke(panelBorderThickness));
+    g2.drawRect(frameX, frameY, frameWidth, frameHeight);
 
-        // --- GAMBAR PANEL UTAMA INVENTARIS ---
-        // 1. Latar Belakang Panel Utama
-        g2.setColor(invPanelBg);
-        g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+    // --- SLOT-SLOT INVENTARIS ---
+    final int slotStartX = frameX + panelInternalPadding;
+    final int slotStartY = frameY + panelInternalPadding;
+    int currentSlotX = slotStartX;
+    int currentSlotY = slotStartY;
+    int itemIndex = 0;
 
-        // 2. Border Panel Utama
-        g2.setColor(invPanelBorder);
-        g2.setStroke(new BasicStroke(panelBorderThickness));
-        g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+    Font quantityFont = arial_40.deriveFont(18F);
 
+    // --- TENTUKAN UKURAN BARU UNTUK GAMBAR ITEM ---
+    int itemPadding = 8; // Padding di setiap sisi item di dalam slot (misalnya 4 pixel)
+                         // Anda bisa juga menggunakan persentase, misal: gp.tileSize / 10
+    int itemDrawSize = gp.tileSize - (itemPadding * 2); // Ukuran gambar item saat digambar
 
-        // --- SLOT-SLOT INVENTARIS ---
-        final int slotStartX = frameX + panelInternalPadding;
-        final int slotStartY = frameY + panelInternalPadding;
-        int currentSlotX = slotStartX;
-        int currentSlotY = slotStartY;
-        int itemIndex = 0;
+    for (int row = 0; row < inventoryMaxRow; row++) {
+        for (int col = 0; col < inventoryMaxCol; col++) {
+            g2.setColor(invSlotBg);
+            g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+            g2.setColor(invPanelGrid);
+            g2.setStroke(new BasicStroke(slotGridStrokeThickness));
+            g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
 
-        Font quantityFont = arial_40.deriveFont(18F);
+            if (itemIndex < gp.player.inventory.size()) {
+                ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
+                Item currentItem = currentItemStack.getItem();
+                BufferedImage itemImage = (currentItem != null) ? currentItem.image : null;
 
-        for (int row = 0; row < inventoryMaxRow; row++) {
-            for (int col = 0; col < inventoryMaxCol; col++) {
-                // Gambar Latar Belakang Slot
-                g2.setColor(invSlotBg);
-                g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+                if (itemImage != null) {
+                    // Hitung posisi X dan Y agar item tergambar di tengah slot dengan ukuran barunya
+                    int itemX = currentSlotX + itemPadding;
+                    int itemY = currentSlotY + itemPadding;
 
-                // --- GAMBAR GARIS GRID / BORDER SLOT DENGAN PENYESUAIAN ---
-                g2.setColor(invPanelGrid); 
-                g2.setStroke(new BasicStroke(slotGridStrokeThickness)); 
-                g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+                    // Gambar item dengan ukuran yang sudah ditentukan (itemDrawSize)
+                    g2.drawImage(itemImage, itemX, itemY, itemDrawSize, itemDrawSize, null);
 
-                // ... (Sisa kode untuk menggambar item dan kuantitas tetap sama) ...
-                if (itemIndex < gp.player.inventory.size()) {
-                    ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
-                    Item currentItem = currentItemStack.getItem();
-                    BufferedImage itemImage = (currentItem != null) ? currentItem.image : null;
-
-                    if (itemImage != null) {
-                        int imgX = currentSlotX + (gp.tileSize - itemImage.getWidth(null)) / 2;
-                        int imgY = currentSlotY + (gp.tileSize - itemImage.getHeight(null)) / 2;
-                        g2.drawImage(itemImage, imgX, imgY, null);
-
-                        if (currentItemStack.getQuantity() > 1) {
-                            g2.setFont(quantityFont);
-                            String quantityText = String.valueOf(currentItemStack.getQuantity());
-                            FontMetrics fmQty = g2.getFontMetrics();
-                            int qtyTextWidth = fmQty.stringWidth(quantityText);
-                            int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - 4;
-                            int qtyY = currentSlotY + gp.tileSize - 4;
-                            
-                            g2.setColor(Color.black);
-                            g2.drawString(quantityText, qtyX + 1, qtyY + 1);
-                            g2.setColor(stardewText);
-                            g2.drawString(quantityText, qtyX, qtyY);
-                        }
+                    // Logika untuk kuantitas (biarkan seperti sebelumnya)
+                    if (currentItemStack.getQuantity() > 1) {
+                        g2.setFont(quantityFont);
+                        String quantityText = String.valueOf(currentItemStack.getQuantity());
+                        FontMetrics fmQty = g2.getFontMetrics();
+                        int qtyTextWidth = fmQty.stringWidth(quantityText);
+                        // Posisi teks kuantitas sedikit disesuaikan agar tidak terlalu menempel jika item lebih kecil
+                        int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - (itemPadding > 2 ? itemPadding : 4);
+                        int qtyY = currentSlotY + gp.tileSize - (itemPadding > 2 ? itemPadding : 4);
+                        
+                        g2.setColor(Color.black);
+                        g2.drawString(quantityText, qtyX + 1, qtyY + 1);
+                        g2.setColor(stardewText); // Atau warna teks kuantitas Anda
+                        g2.drawString(quantityText, qtyX, qtyY);
                     }
                 }
-                currentSlotX += gp.tileSize;
-                itemIndex++;
             }
-            currentSlotX = slotStartX;
-            currentSlotY += gp.tileSize;
+            currentSlotX += gp.tileSize;
+            itemIndex++;
         }
-        g2.setStroke(new BasicStroke(1));
-
+        currentSlotX = slotStartX;
+        currentSlotY += gp.tileSize;
+    }
+    g2.setStroke(new BasicStroke(1));
 
         // --- KURSOR PEMILIHAN SLOT ---
         int cursorX = slotStartX + (gp.tileSize * slotCol);
