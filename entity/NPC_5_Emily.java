@@ -27,6 +27,7 @@ public class NPC_5_Emily extends Entity {
     }
 
     public void setDialogue(){
+        chatDialogues = new String[4];
         dialogues[0] = "Hei, kamu!";
         dialogues[1] = "Pernah dengar legenda naga gunung?";
         dialogues[2] = "Katanya dia menjaga harta karun yang luar biasa!";

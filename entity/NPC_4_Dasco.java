@@ -36,6 +36,7 @@ public class NPC_4_Dasco extends Entity {
 
     @Override
     public void setChatDialogues() {
+        chatDialogues = new String[3];
         chatDialogues[0] = "Yo! Mau coba peruntungan di kasino saya malam ini?";
         chatDialogues[1] = "Bisnis sedang bagus, tapi selalu ada ruang untuk lebih banyak pelanggan setia.";
         chatDialogues[2] = "Ingat, rumah selalu menang pada akhirnya, hehe.";

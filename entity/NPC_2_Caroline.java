@@ -36,6 +36,7 @@ public class NPC_2_Caroline extends Entity {
 
     @Override
     public void setChatDialogues() {
+        chatDialogues = new String[3];
         chatDialogues[0] = "Halo! Senang bertemu denganmu.";
         chatDialogues[1] = "Saya sedang mengerjakan proyek kayu baru, cukup menarik.";
         chatDialogues[2] = "Hati-hati di luar sana.";
