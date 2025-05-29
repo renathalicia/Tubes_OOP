@@ -10,6 +10,8 @@ import main.UtilityTool;
 
 import javax.imageio.ImageIO;
 
+import environment.Weather;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -246,8 +248,13 @@ public class Player extends Entity {
     }
 
     public void pickUpObject(int i) {
-        if (i != 999) {
-            // Logika untuk mengambil objek (akan diimplementasikan)
+    if (i != 999 && gp.obj[gp.currentMap][i] != null) {
+        String objectName = gp.obj[gp.currentMap][i].name;
+
+        if (objectName.equals("Television")) {
+            watchTV();
+        }
+        // else if untuk object lain seperti bed, stove, dsb
         }
     }
 
@@ -407,4 +414,24 @@ public ItemStack getSeedFromInventory() {
     return null;
 }
 
+// watching
+public boolean watchTV() {
+    Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
+    // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
+    if (gp.currentMap != 0) { 
+        gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
+        gp.gameState = gp.dialogueState;
+        return true;
+    }
+
+    // Cek energi cukup
+    if (!consumeEnergy(5)) return true;
+
+    // Tambah waktu menggunakan GameState (biar konsisten)
+    gp.gameStateSystem.advanceTimeByMinutes(15);
+
+    gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
+    gp.gameState = gp.dialogueState;
+    return true;
+}
 }
