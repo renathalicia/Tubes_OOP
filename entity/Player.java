@@ -231,20 +231,6 @@ public class Player extends Entity {
 
             }
         }
-
-        if(energy <= 0){
-            if(energy > -20){
-                gp.gameState = gp.dialogueState;
-                gp.ui.currentDialogue = "Anda kelelahan! Energi: " + energy;
-            } else {
-                gp.gameState = gp.sleepState;
-                worldX = gp.tileSize * 12; // Reset posisi ke tempat tidur
-                worldY = gp.tileSize * 13; // Reset posisi ke tempat tidur
-
-                energy = maxEnergy; // Reset energi saat tidur
-                gp.player.direction = "down"; // Mengatur arah ke bawah saat tidur
-            }
-        }
     }
 
     public void pickUpObject(int i) {
