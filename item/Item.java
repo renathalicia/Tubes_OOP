@@ -36,11 +36,30 @@ public abstract class Item {
     //method abstak untuk mengenali item termasuk ke kategori apa saja, wajib diimplementasikan di setiap inheritance dari kelas Item.java
     public abstract String getCategory();
 
+    // public BufferedImage setUpImage(String imagePath) {
+    //     UtilityTool uTool = new UtilityTool();
+    //     BufferedImage scaledImage = null;  
+    //     try {
+    //         BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream(imagePath+ ".png"));
+    //         scaledImage = uTool.scaleImage(originalImage, gp.tileSize, gp.tileSize);
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //         System.out.println("Error loading image: " + imagePath);
+    //     }
+    //     return scaledImage;
+    // }
     public BufferedImage setUpImage(String imagePath) {
         UtilityTool uTool = new UtilityTool();
         BufferedImage scaledImage = null;  
         try {
-            BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream(imagePath+ ".png"));
+            String fullPath = imagePath + ".png";
+            var is = getClass().getResourceAsStream(fullPath);
+            if (is == null) {
+                System.out.println("GAGAL LOAD IMAGE: " + fullPath);
+                throw new IllegalArgumentException("File tidak ditemukan: " + fullPath);
+            }
+
+            BufferedImage originalImage = ImageIO.read(is);
             scaledImage = uTool.scaleImage(originalImage, gp.tileSize, gp.tileSize);
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,6 +67,7 @@ public abstract class Item {
         }
         return scaledImage;
     }
+
 
     public void use(){
         // Default implementation for using an item

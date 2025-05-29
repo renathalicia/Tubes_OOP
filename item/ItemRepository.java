@@ -1,5 +1,6 @@
 package item;
 import java.awt.image.CropImageFilter;
+import java.security.PublicKey;
 
 import item.Crop;
 import item.Equipment;
@@ -8,6 +9,11 @@ import item.Food;
 import item.Misc;
 import item.Seed;
 import main.GamePanel;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 public class ItemRepository {
     public static Crop Parsnip;
@@ -37,6 +43,7 @@ public class ItemRepository {
     public static Equipment Pickaxe;
     public static Equipment Fishing_Rod;
     public static Equipment Watering_Can;
+    public static Equipment ProposalRing;
     public static Misc Coal;
     public static Misc Firewood;
     public static Seed Parsnip_Seeds;
@@ -60,21 +67,21 @@ public class ItemRepository {
 
     public static void initFish(GamePanel gp) {
         // Common Fish
-        Bullhead = new Fish("Bullhead", gp, "Ikan lele umum yang hidup di danau.", "/items/fish/bullhead",
+        Bullhead = new Fish("Bullhead", gp, "Ikan lele umum yang hidup di danau.", "/res/item/fish/common/bullhead",
                 Set.of("Any"), // Seasons
                 List.of(), // Time (Any - ditangani khusus di kalkulasi harga jika list kosong)
                 Set.of("Any"), // Weather
                 Set.of("Mountain Lake"), 
                 "Common");
 
-        Carp = new Fish("Carp", gp, "Ikan air tawar yang umum di danau dan kolam.", "/items/fish/carp",
+        Carp = new Fish("Carp", gp, "Ikan air tawar yang umum di danau dan kolam.", "/res/item/fish/common/carp",
                 Set.of("Any"),
                 List.of(), // Time (Any)
                 Set.of("Any"),
                 Set.of("Mountain Lake", "Pond"),
                 "Common");
 
-        Chub = new Fish("Chub", gp, "Ikan kecil yang sering ditemui di sungai dan danau.", "/items/fish/chub",
+        Chub = new Fish("Chub", gp, "Ikan kecil yang sering ditemui di sungai dan danau.", "/res/item/fish/common/chub",
                 Set.of("Any"),
                 List.of(), // Time (Any)
                 Set.of("Any"),
@@ -82,14 +89,14 @@ public class ItemRepository {
                 "Common");
 
         // Regular Fish
-        Largemouth_Bass = new Fish("Largemouth Bass", gp, "Ikan predator danau.", "/items/fish/largemouth_bass",
+        Largemouth_Bass = new Fish("Largemouth Bass", gp, "Ikan predator danau.", "/res/item/fish/regular/largemouthbass",
                 Set.of("Any"), // Seasons
                 List.of(new Fish.TimeWindow(6, 18)), // 06.00-18.00
                 Set.of("Any"), // Weather
                 Set.of("Mountain Lake"), 
                 "Regular");
 
-        Halibut = new Fish("Halibut", gp, "Ikan pipih besar dari laut.", "/items/fish/halibut",
+        Halibut = new Fish("Halibut", gp, "Ikan pipih besar dari laut.", "/res/item/fish/regular/halibut",
                 Set.of("Any"), // Seasons
                 List.of(new Fish.TimeWindow(6, 11), new Fish.TimeWindow(19, 2)), // 06.00-11.00 & 19.00-02.00
                 Set.of("Any"), // Weather
@@ -97,7 +104,7 @@ public class ItemRepository {
                 "Regular");
 
         // Legendary Fish
-        Legend = new Fish("Legend", gp, "Ikan legendaris yang sangat sulit ditangkap!", "/items/fish/legend",
+        Legend = new Fish("Legend", gp, "Ikan legendaris yang sangat sulit ditangkap!", "/res/item/fish/legendary/legend",
                 Set.of("Spring"), // Seasons
                 List.of(new Fish.TimeWindow(8, 20)), // 08.00-20.00
                 Set.of("Rainy"), // Weather
@@ -173,7 +180,7 @@ public class ItemRepository {
                 10, 
                 gp,
                 "Potongan kayu bakar, cocok untuk api unggun atau memasak sederhana.",
-                "/items/misc/firewood"); 
+                "/res/item/misc/firewood"); 
     }
     public static void initEquipment(GamePanel gp) {
         Hoe = new Equipment("Hoe",
@@ -197,6 +204,11 @@ public class ItemRepository {
                 0, 0, gp,
                 "Pancingan untuk menangkap ikan di berbagai perairan.",
                 "/res/item/equipment/fishingrod"); 
+        
+        ProposalRing = new Equipment("Proposal Ring",
+                1000, 500, gp,
+                "Cincin lamaran untuk KAWIN.",
+                "/res/item/equipment/proposalring");
     }
 
     public static void initFood(GamePanel gp) {
@@ -299,7 +311,6 @@ public class ItemRepository {
         initCrops(gp);
         initFood(gp);
         initEquipment(gp);
-        initTools(gp);
         initSeeds(gp);
         initFish(gp);
     }

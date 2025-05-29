@@ -805,7 +805,7 @@ public void drawTitleScreen() {
     Font quantityFont = arial_40.deriveFont(18F);
 
     // --- TENTUKAN UKURAN BARU UNTUK GAMBAR ITEM ---
-    int itemPadding = 8; // Padding di setiap sisi item di dalam slot (misalnya 4 pixel)
+    int itemPadding = 4; // Padding di setiap sisi item di dalam slot (misalnya 4 pixel)
                          // Anda bisa juga menggunakan persentase, misal: gp.tileSize / 10
     int itemDrawSize = gp.tileSize - (itemPadding * 2); // Ukuran gambar item saat digambar
 
