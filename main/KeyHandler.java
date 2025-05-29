@@ -106,10 +106,19 @@ public class KeyHandler implements KeyListener {
             npcInteractionState(code);
         }
 
-        // tilling
+        // tilling and planting
         if (code == KeyEvent.VK_SPACE) {
-            gp.player.tileLand(); // enter untuk bajak tanah
+            if (gp.gameState == gp.dialogueState) {
+                gp.gameState = gp.playState; // keluar dari dialog
+            } else if (gp.gameState == gp.playState) {
+                // Coba tanam, kalau gagal (belum dibajak / tidak ada seed), coba bajak
+                boolean planted = gp.player.plantSeed();
+                if (!planted) {
+                    gp.player.tileLand();
+                }
+            }
         }
+
 
         // next day
         if (code == KeyEvent.VK_N) {
