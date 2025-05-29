@@ -1,13 +1,18 @@
 package item;
-
+import main.GamePanel;
 public class ProposalRing extends Item {
-    public ProposalRing() {
-        super("Proposal Ring", 1000, 500, "Sebuah cincin indah untuk melamar."); // Harga beli/jual bisa disesuaikan
-        // setImage("/res/items/proposal_ring.png"); // Ganti dengan path gambar yang benar jika ada
+    public ProposalRing(GamePanel gp) {
+        super("Proposal Ring", 1000, 500, gp); 
+        setImage("/res/item/equipment/proposalring"); 
     }
 
     @Override
     public String getCategory() {
-        return "Misc"; // Atau "Equipment" atau kategori lain yang sesuai
+        return "Misc"; 
+    }
+    @Override
+    public void use() {
+        // Implementasi penggunaan cincin, misalnya untuk melamar
+        System.out.println("Anda menggunakan " + getName() + " untuk melamar.");
     }
 }

@@ -16,6 +16,7 @@ import object.SuperObject;
 import tile.TileManager;
 import environment.GameState;
 import item.ItemStack;
+import item.ItemRepository;
 import environment.EnvironmentManager;
 
 
@@ -59,7 +60,7 @@ public class GamePanel extends JPanel implements Runnable{
     // Timer untuk update waktu game
     private long lastTimeUpdate = System.currentTimeMillis();
     private final int timeUpdateInterval = 1000; // tiap 1 detik (1000 ms)
-
+    public ItemRepository ItemRepository; // untuk mengelola item
     //Untuk save & load
     SaveLoad saveLoad = new SaveLoad(this);
 
@@ -79,19 +80,8 @@ public class GamePanel extends JPanel implements Runnable{
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     public final int inventoryState = 6;
     public final int npcInteractionState = 7;
-
-
-
-    //int playerX = 100;
-    //int playerY = 100;
-    //int playerSpeed = 4;
-
-    // untuk time
     public GameState gameStateSystem = new GameState();
     public EnvironmentManager envManager = new EnvironmentManager(this);
-
-
-
 
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -99,6 +89,8 @@ public class GamePanel extends JPanel implements Runnable{
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
         this.setFocusable(true);
+        ItemRepository.initializeAllItems(this); 
+        player.setInitialInventoryItems();
     }
 
     public void setUpGame() {
@@ -198,8 +190,6 @@ public class GamePanel extends JPanel implements Runnable{
     // Di dalam file GamePanel.java Anda
 
     public void update() {
-
-
         if (gameState == playState && !pendingSleep) {
             boolean autoSleepConditionMet = false;
             String autoSleepMessage = "";
