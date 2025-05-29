@@ -77,11 +77,11 @@ public class GamePanel extends JPanel implements Runnable{
     public final int dialogueState = 3;
     public final int sleepState = 4; // untuk tidur di malam hari
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
-    public final int inventoryState = 6; 
+    public final int inventoryState = 6;
     public final int npcInteractionState = 7;
-    
 
-  
+
+
     //int playerX = 100;
     //int playerY = 100;
     //int playerSpeed = 4;
@@ -111,7 +111,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void initializeNPCs() {
 
         int mapNum = 0;
-        
+
         // NPC 1 (yang sudah ada)
         npc[mapNum][0] = new NPC_1_MayorTadi(this);
         npc[mapNum][0].worldX = tileSize * 21; // Contoh posisi X
@@ -131,11 +131,11 @@ public class GamePanel extends JPanel implements Runnable{
         npc[mapNum][3] = new NPC_4_Dasco(this);
         npc[mapNum][3].worldX = tileSize * 17;
         npc[mapNum][3].worldY = tileSize * 21;
-        
+
         npc[mapNum][4] = new NPC_5_Emily(this);
         npc[mapNum][4].worldX = tileSize * 13;
         npc[mapNum][4].worldY = tileSize * 21;
-        
+
         npc[mapNum][5] = new NPC_6_Abigail(this);
         npc[mapNum][5].worldX = tileSize * 23;
         npc[mapNum][5].worldY = tileSize * 25;
@@ -158,7 +158,7 @@ public class GamePanel extends JPanel implements Runnable{
         long currentTime;
         long timer = 0;
         int drawCount = 0;
-        
+
         while(gameThread != null){
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime)/ drawInterval;
@@ -173,7 +173,7 @@ public class GamePanel extends JPanel implements Runnable{
                 repaint();//gambar ulang bagian yang tadinya ditempati oleh karakter
                 delta--;
             }
-         
+
             if(timer >= 1000000000 ){
                 System.out.println("FPS: " + FPS);
                 drawCount = 0;
@@ -191,14 +191,14 @@ public class GamePanel extends JPanel implements Runnable{
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
-            
+
         }
     }
 
     // Di dalam file GamePanel.java Anda
 
     public void update() {
-        
+
 
         if (gameState == playState && !pendingSleep) {
             boolean autoSleepConditionMet = false;
@@ -226,7 +226,7 @@ public class GamePanel extends JPanel implements Runnable{
             if (keyH.enterPressed) {
                 gameState = playState;
                 keyH.enterPressed = false;
-                playMusic(0); 
+                playMusic(0);
                 System.out.println(">>> TITLESCREEN: Enter ditekan, pindah ke playState (" + playState + ")");
             }
         } else if (gameState == playState) {
@@ -249,7 +249,7 @@ public class GamePanel extends JPanel implements Runnable{
                     System.out.println(">>> DIALOGUE_STATE: Kondisi 'if (pendingSleep)' adalah TRUE. Memanggil executeSleepSequence().");
                     executeSleepSequence();
                 } else {
-                    
+
                     if (player.currentInteractingNPC != null ) {
                         System.out.println(">>> DIALOGUE_STATE: Dialog biasa dari NPC, kembali ke npcInteractionState (" + npcInteractionState + ")");
                         gameState = npcInteractionState;
@@ -261,34 +261,34 @@ public class GamePanel extends JPanel implements Runnable{
             }
         } else if (gameState == sleepState) {
             // Bisa untuk animasi tidur
-            
+
         } else if (gameState == npcInteractionState) {
             Entity currentNpc = player.currentInteractingNPC;
-            
+
 
             if (keyH.enterPressed) {
-                
+
                 if (currentNpc != null) {
                     int selectedOption = ui.commandNum;
-                    
+
 
                     if (selectedOption == 0) { // Gifting
-                        
+
                         if (player.inventory.isEmpty()) {
-                            
+
                             ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
                             gameState = dialogueState;
                         } else {
-                            ItemStack itemToGiftStack = player.inventory.get(0); 
-                            
+                            ItemStack itemToGiftStack = player.inventory.get(0);
+
                             if (itemToGiftStack == null || itemToGiftStack.getItem() == null) {
                                 ui.currentDialogue = "Item yang dipilih tidak valid.";
                                 gameState = dialogueState;
                             } else {
                                 String itemName = itemToGiftStack.getItem().getName();
-                                
+
                                 if (player.consumeEnergy(5)) { // [cite: 163]
-                                    
+
                                     int heartPointsChange = currentNpc.processGift(itemName);
                                     currentNpc.updateHeartPoints(heartPointsChange);
                                     player.removeItem(itemName, 1);
@@ -301,14 +301,14 @@ public class GamePanel extends JPanel implements Runnable{
                                     ui.currentDialogue = currentNpc.name + reaction + "\n(Hati: " + currentNpc.heartPoints + "/" + currentNpc.maxHeartPoints + ")";
                                     gameState = dialogueState;
                                 } else {
-                                    
+
                                     ui.currentDialogue = "Energi tidak cukup untuk memberi hadiah."; // [cite: 58]
                                     gameState = dialogueState;
                                 }
                             }
                         }
                     } else if (selectedOption == 1) { // Propose/Marry
-                        
+
                         boolean hasProposalRing = false;
                         for (ItemStack stack : player.inventory) {
                             if (stack != null && stack.getItem() != null && stack.getItem().getName() != null &&
@@ -317,13 +317,13 @@ public class GamePanel extends JPanel implements Runnable{
                                 break;
                             }
                         }
-                        
+
                         if (!hasProposalRing) {
                             ui.currentDialogue = "Kamu membutuhkan Cincin Lamaran untuk ini!";
                             gameState = dialogueState;
                         } else {
                             if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-                                
+
                                 if (player.consumeEnergy(80)) { // [cite: 163]
                                     currentNpc.isMarriedTo = true;
                                     player.partner = currentNpc.name;
@@ -336,7 +336,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 }
                                 gameState = dialogueState;
                             } else if (!currentNpc.isProposedTo) {
-                                
+
                                 if (currentNpc.heartPoints >= 150) { // [cite: 163]
                                     if (player.consumeEnergy(10)) { // [cite: 163]
                                         currentNpc.isProposedTo = true;
@@ -359,7 +359,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 }
                                 gameState = dialogueState;
                             } else if (currentNpc.isMarriedTo) {
-                                
+
                                 ui.currentDialogue = "Kita sudah menikah, sayangku " + player.name + "!";
                                 gameState = dialogueState;
                             } else {
@@ -367,7 +367,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             }
                         }
-                    } else if (selectedOption == 2) { 
+                    } else if (selectedOption == 2) {
                         System.out.println("NPC INTERACTION: Opsi 'Batal' dipilih. Mengubah gameState ke playState.");
                         gameState = playState;
                         player.currentInteractingNPC = null;
@@ -375,7 +375,7 @@ public class GamePanel extends JPanel implements Runnable{
                         System.out.println("NPC INTERACTION: selectedOption tidak dikenal: " + selectedOption + ". Tidak ada aksi.");
                     }
                 }
-                keyH.enterPressed = false; 
+                keyH.enterPressed = false;
             }
         }
 
@@ -390,7 +390,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void executeSleepSequence() {
         System.out.println("GAME PANEL: executeSleepSequence() dipanggil.");
-        
+
         int currentEnergy = player.energy;
         int maxEnergy = player.maxEnergy;
         int restoredEnergy;
@@ -447,7 +447,7 @@ public class GamePanel extends JPanel implements Runnable{
                 npc[currentMap][i].draw(g2);
             }
         }
-        
+
         player.draw(g2); // player
 
         // ui

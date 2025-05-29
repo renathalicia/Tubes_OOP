@@ -111,6 +111,11 @@ public class KeyHandler implements KeyListener {
             gp.player.tileLand(); // enter untuk bajak tanah
         }
 
+        // next day
+        if (code == KeyEvent.VK_N) {
+            gp.gameStateSystem.getTimeManager().advanceToNextMorning();
+        }
+
     }
     
 
