@@ -35,6 +35,9 @@ public class Entity {
     public boolean isMarriedTo = false;
     public String name = "NPC"; // Nama default, bisa di-override di subclass NPC
 
+    public String[] chatDialogues = new String[5]; // Ukuran array bisa disesuaikan, misal 5 baris per chat
+    public int currentChatLineIndex = 0;
+
     public List<String> lovedItems = new ArrayList<>();
     public List<String> likedItems = new ArrayList<>();
     public List<String> hatedItems = new ArrayList<>(
@@ -43,6 +46,30 @@ public class Entity {
     // CHARACTER STATUS
     public int maxLife;
     public int life;
+
+    public void startChat() {
+        currentChatLineIndex = 0;
+    }
+
+    public String getNextChatLine() {
+        if (chatDialogues == null || currentChatLineIndex >= chatDialogues.length || chatDialogues[currentChatLineIndex] == null) {
+            return null; // Tidak ada lagi baris dialog atau array belum diinisialisasi
+        }
+        String line = chatDialogues[currentChatLineIndex];
+        currentChatLineIndex++;
+        return line;
+    }
+
+    public void setDialogue() {
+        // Contoh:
+        // dialogues[0] = "Halo, saya entitas generik.";
+    }
+
+    public void setChatDialogues() {
+        // Contoh:
+        // chatDialogues[0] = "Ini adalah percakapan pertama dari entitas generik.";
+        // chatDialogues[1] = "Ini adalah percakapan kedua.";
+    }
 
     public Entity(GamePanel gp){
         this.gp = gp;

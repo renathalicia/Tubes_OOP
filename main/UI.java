@@ -58,6 +58,22 @@ public class UI {
     public final int inventoryMaxCol = 5;
     public final int inventoryMaxRow = 4;
     public int commandNum = 0;
+    private String currentDialogueMode = "";
+
+    public void setDialogue(String dialogue, String mode) {
+        this.currentDialogue = dialogue;
+        this.currentDialogueMode = mode;
+        // Jika mode adalah CHAT atau NPC_GIFT_RESULT, GamePanel akan tahu cara menanganinya
+        // Jika mode adalah TV_CONFIRM, GamePanel tahu ini adalah Ya/Tidak untuk TV
+    }
+
+    public String getCurrentDialogueMode() {
+        return currentDialogueMode;
+    }
+
+    public void clearDialogueMode() {
+        this.currentDialogueMode = ""; // Atau set ke mode default "SYSTEM_MESSAGE"
+    }
 
     public UI(GamePanel gp) {
         this.gp = gp;
@@ -581,7 +597,7 @@ public class UI {
         int lineHeight = 35; // Jarak antar baris opsi
 
         // Opsi 1: Gift Item
-        String optionText = "Beri Hadiah";
+        String optionText = "Gift Item";
         g2.drawString(optionText, textX, textY);
         if (commandNum == 0) {
             g2.drawString(">", textX - 20, textY); // Indikator pilihan
@@ -590,22 +606,30 @@ public class UI {
         // Opsi 2: Propose atau Marry
         textY += lineHeight;
         if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-            optionText = "Menikah";
+            optionText = "Marry";
         } else if (!currentNpc.isProposedTo) {
-            optionText = "Lamar (" + currentNpc.heartPoints + "/150)";
+            optionText = "Propose (" + currentNpc.heartPoints + "/150)";
         } else { // Sudah menikah
-            optionText = "(Sudah Menikah)";
+            optionText = "(Married)";
         }
         g2.drawString(optionText, textX, textY);
         if (commandNum == 1) {
             g2.drawString(">", textX - 20, textY);
         }
 
-        // Opsi 3: Cancel
+        // Opsi 3: Chatting
         textY += lineHeight;
-        optionText = "Batal";
+        optionText = "Chat";
         g2.drawString(optionText, textX, textY);
         if (commandNum == 2) {
+            g2.drawString(">", textX - 20, textY);
+        }
+
+        // Opsi 3: Chatting
+        textY += lineHeight;
+        optionText = "Exit";
+        g2.drawString(optionText, textX, textY);
+        if (commandNum == 3) {
             g2.drawString(">", textX - 20, textY);
         }
     }

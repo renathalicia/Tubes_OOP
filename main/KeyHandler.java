@@ -131,16 +131,16 @@ public class KeyHandler implements KeyListener {
     public void npcInteractionState(int code) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
                 gp.ui.commandNum--;
-                // Menu interaksi NPC memiliki 3 opsi (0: Gift, 1: Propose/Marry, 2: Cancel)
+                // Menu interaksi NPC memiliki 3 opsi (0: Gift, 1: Propose/Marry, 2: Chat, 3: Cancel)
                 if (gp.ui.commandNum < 0) {
-                    gp.ui.commandNum = 2; // Kembali ke opsi terakhir (Cancel)
+                    gp.ui.commandNum = 3; // Kembali ke opsi terakhir (Cancel)
                 }
         
             }
             if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
                 gp.ui.commandNum++;
                 // Menu interaksi NPC memiliki 3 opsi
-                if (gp.ui.commandNum > 2) {
+                if (gp.ui.commandNum > 3) {
                     gp.ui.commandNum = 0; // Kembali ke opsi pertama (Gift)
                 }
             }

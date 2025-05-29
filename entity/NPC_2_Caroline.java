@@ -12,6 +12,8 @@ public class NPC_2_Caroline extends Entity {
         speed = 0; // NPC ini tidak bergerak
         getImage();
         setDialogue();
+        setChatDialogues();
+        setGiftPreferences();
     }
 
     public void getImage(){
@@ -30,6 +32,13 @@ public class NPC_2_Caroline extends Entity {
         dialogues[1] = "Selamat datang di desa kami.";
         dialogues[2] = "Ada yang bisa saya bantu?";
         dialogues[3] = "Jangan lupa untuk istirahat yang cukup!";
+    }
+
+    @Override
+    public void setChatDialogues() {
+        chatDialogues[0] = "Halo! Senang bertemu denganmu.";
+        chatDialogues[1] = "Saya sedang mengerjakan proyek kayu baru, cukup menarik.";
+        chatDialogues[2] = "Hati-hati di luar sana.";
     }
 
     public void setGiftPreferences() {

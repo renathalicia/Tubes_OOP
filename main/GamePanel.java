@@ -248,6 +248,20 @@ public class GamePanel extends JPanel implements Runnable{
                 if (pendingSleep) {
                     System.out.println(">>> DIALOGUE_STATE: Kondisi 'if (pendingSleep)' adalah TRUE. Memanggil executeSleepSequence().");
                     executeSleepSequence();
+                } else if (player.currentInteractingNPC != null && ui.getCurrentDialogueMode().equals("CHAT_NPC")) { // Gunakan mode dari UI jika ada
+                    String nextLine = player.currentInteractingNPC.getNextChatLine();
+                    if (nextLine != null) {
+                        ui.setDialogue(nextLine, "CHAT_NPC"); // Tetap dalam mode chat
+                    } else {
+                        // Chat selesai
+                        System.out.println("GAMEPANEL: Sesi chat dengan " + player.currentInteractingNPC.name + " selesai.");
+                        ui.clearDialogueMode();
+                        ui.currentDialogue = "";
+                        // Kembali ke menu interaksi NPC atau playState?
+                        // Untuk "enter enter saja", lebih baik kembali ke playState.
+                        gameState = playState;
+                        player.currentInteractingNPC = null; // Selesaikan interaksi dengan NPC ini
+                    }
                 } else {
 
                     if (player.currentInteractingNPC != null ) {
@@ -367,12 +381,32 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             }
                         }
-                    } else if (selectedOption == 2) {
-                        System.out.println("NPC INTERACTION: Opsi 'Batal' dipilih. Mengubah gameState ke playState.");
+                    } else if (selectedOption == 2) { // Asumsi opsi ke-2 adalah "Chat" (0: Gift, 1: Lamar, 2: Chat, 3: Batal)
+                        System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
+                        if (player.consumeEnergy(10)) { // Efek energi [cite: 163]
+                            gameStateSystem.advanceTimeByMinutes(10); // Efek waktu [cite: 163]
+                            currentNpc.updateHeartPoints(10); // Efek heart points [cite: 163]
+
+                            currentNpc.startChat(); // Reset indeks dialog chat NPC
+                            String firstChatLine = currentNpc.getNextChatLine();
+                            if (firstChatLine != null) {
+                                ui.setDialogue(firstChatLine, "CHAT_NPC"); // Set dialog pertama dan mode
+                                gameState = dialogueState;
+                            } else {
+                                ui.setDialogue(currentNpc.name + " tidak ingin banyak bicara saat ini.", "SYSTEM_MESSAGE");
+                                gameState = dialogueState; // Tetap ke dialogueState untuk menampilkan pesan ini
+                                // Mungkin langsung kembali ke playState setelah pesan ini
+                                // player.currentInteractingNPC = null;
+                            }
+                        } else {
+                            ui.setDialogue("Tidak cukup energi untuk mengobrol.", "SYSTEM_MESSAGE");
+                            gameState = dialogueState;
+                        }
+                    }
+                    // --- AKHIR OPSI CHAT ---
+                    else if (selectedOption == 3) { // Asumsi opsi ke-3 adalah "Batal"
                         gameState = playState;
                         player.currentInteractingNPC = null;
-                    } else {
-                        System.out.println("NPC INTERACTION: selectedOption tidak dikenal: " + selectedOption + ". Tidak ada aksi.");
                     }
                 }
                 keyH.enterPressed = false;
