@@ -522,8 +522,8 @@ public class Player extends Entity {
     }
 
     public void setInitialInventoryItems() {
-        if(ItemRepository.Parsnip != null ) {
-            inventory.add(new ItemStack(ItemRepository.Parsnip, 15));
+        if(ItemRepository.Parsnip_Seeds != null ) {
+            inventory.add(new ItemStack(ItemRepository.Parsnip_Seeds, 15));
         } 
         if (ItemRepository.Hoe != null && ItemRepository.Watering_Can != null && ItemRepository.Pickaxe != null && ItemRepository.Fishing_Rod != null) {
             inventory.add(new ItemStack(ItemRepository.Hoe, 1));
