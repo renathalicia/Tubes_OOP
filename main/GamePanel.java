@@ -34,6 +34,9 @@ public class GamePanel extends JPanel implements Runnable{
     private boolean pendingSleep = false;
     private String sleepTriggerMessage = "";
 
+    public boolean isSelectingItemForGift = false; // Flag untuk mode pilih item hadiah
+    public Entity npcForGifting = null;  
+
     // world settings
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
@@ -80,6 +83,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int inventoryState = 6;
     public final int npcInteractionState = 7;
 
+    public boolean tvInteractionPendingConfirmation = false;
 
 
     //int playerX = 100;
@@ -198,12 +202,18 @@ public class GamePanel extends JPanel implements Runnable{
     // Di dalam file GamePanel.java Anda
 
     public void update() {
+        // Simpan status keyH.enterPressed di awal update untuk konsistensi dalam satu frame ini
+        boolean enterIsCurrentlyPressed = keyH.enterPressed;
 
+        // Jika enterIsCurrentlyPressed, kita akan mengonsumsinya di akhir blok state yang relevan
+        // atau di akhir pemeriksaan input jika tidak ada state yang menangani.
 
-        if (gameState == playState && !pendingSleep) {
+        // System.out.println("--- FRAME START --- GameState: " + gameState + ", pendingSleep: " + pendingSleep + ", tvInteractionPendingConfirmation: " + tvInteractionPendingConfirmation + ", enterIsCurrentlyPressed: " + enterIsCurrentlyPressed);
+
+        // BAGIAN 1: Deteksi Kondisi Tidur Otomatis
+        if (gameState == playState && !pendingSleep && !tvInteractionPendingConfirmation) {
             boolean autoSleepConditionMet = false;
             String autoSleepMessage = "";
-
             if (player.energy <= -20) {
                 autoSleepMessage = "Kamu pingsan karena kelelahan!";
                 autoSleepConditionMet = true;
@@ -211,66 +221,151 @@ public class GamePanel extends JPanel implements Runnable{
                 autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur...";
                 autoSleepConditionMet = true;
             }
-
             if (autoSleepConditionMet) {
-                System.out.println(">>> AUTO-SLEEP DETECTED! Pesan: " + autoSleepMessage);
+                System.out.println("GAMEPANEL: Kondisi tidur otomatis. Pesan: " + autoSleepMessage);
                 pendingSleep = true;
                 ui.currentDialogue = autoSleepMessage;
                 gameState = dialogueState;
-                keyH.enterPressed = false;
-                System.out.println(">>> AUTO-SLEEP: pendingSleep di-set TRUE, gameState di-set ke dialogueState (" + dialogueState + ")");
+                // keyH.enterPressed TIDAK direset di sini, biarkan state dialogue yang menangani jika perlu
             }
         }
 
+        // BAGIAN 2: Logika Update Berdasarkan Game State Saat Ini
         if (gameState == titleState) {
-            if (keyH.enterPressed) {
-                gameState = playState;
-                keyH.enterPressed = false;
-                playMusic(0);
-                System.out.println(">>> TITLESCREEN: Enter ditekan, pindah ke playState (" + playState + ")");
+            if (enterIsCurrentlyPressed) {
+                if (ui.commandNum == 0) { // New Game
+                    gameState = playState;
+                    playMusic(0);
+                } // ... (opsi title lain) ...
+                keyH.enterPressed = false; // Konsumsi Enter untuk title state
             }
         } else if (gameState == playState) {
-            player.update();
+            player.update(); // Update player (termasuk gerakan)
             for (int i = 0; i < npc[currentMap].length; i++) {
-                if (npc[currentMap][i] != null) {
-                    npc[currentMap][i].update();
-                }
+                if (npc[currentMap][i] != null) npc[currentMap][i].update();
             }
-        } else if (gameState == pauseState) {
-            // Tidak ada update logika game saat pause
-        } else if (gameState == inventoryState) {
-            // Logika update saat inventory terbuka
+
+            if (enterIsCurrentlyPressed) { // Gunakan variabel lokal yang menangkap status Enter di awal frame
+                System.out.println("GAMEPANEL (playState): Enter terdeteksi untuk interaksi.");
+                int npcIndex = cChecker.checkEntity(player, npc);
+                if (npcIndex != 999) {
+                    player.interactNPC(npcIndex); // Akan set gameState ke npcInteractionState
+                } else {
+                    int objIndex = cChecker.checkObject(player, true);
+                    if (objIndex != 999) {
+                        SuperObject interactedObject = obj[currentMap][objIndex];
+                        if (interactedObject != null && "Televisi".equals(interactedObject.name)) {
+                            tvInteractionPendingConfirmation = true;
+                            ui.currentDialogue = "Apakah kamu ingin menonton TV?";
+                            ui.commandNum = 0;
+                            gameState = dialogueState;
+                        } // ... (objek lain) ...
+                    }
+                }
+                keyH.enterPressed = false; // Konsumsi Enter setelah diproses di playState
+            }
         } else if (gameState == dialogueState) {
-            System.out.println("--- In dialogueState --- keyH.enterPressed: " + keyH.enterPressed + ", pendingSleep: " + pendingSleep);
             if (keyH.enterPressed) {
                 keyH.enterPressed = false;
-                System.out.println(">>> DIALOGUE_STATE: Enter DITEKAN. Nilai pendingSleep saat ini: " + pendingSleep);
-                if (pendingSleep) {
-                    System.out.println(">>> DIALOGUE_STATE: Kondisi 'if (pendingSleep)' adalah TRUE. Memanggil executeSleepSequence().");
-                    executeSleepSequence();
-                } else if (player.currentInteractingNPC != null && ui.getCurrentDialogueMode().equals("CHAT_NPC")) { // Gunakan mode dari UI jika ada
-                    String nextLine = player.currentInteractingNPC.getNextChatLine();
+                System.out.println("GAMEPANEL (dialogueState): Enter DITEKAN.");
+                System.out.println("                        Mode Dialog UI: '" + ui.getCurrentDialogueMode() + "'");
+                System.out.println("                        NPC yang berinteraksi: " + (player.currentInteractingNPC != null ? player.currentInteractingNPC.name : "Tidak Ada"));
+                System.out.println("                        Pending Sleep: " + pendingSleep);
+                System.out.println("                        TV Confirm: " + tvInteractionPendingConfirmation);
+
+
+                if (tvInteractionPendingConfirmation) {
+                    // ... (Logika konfirmasi TV Anda yang sudah benar) ...
+                    // Pastikan setelah memilih Ya/Tidak, tvInteractionPendingConfirmation direset ke false.
+                    // Jika Ya dan menampilkan cuaca, UI.currentDialogue diisi pesan cuaca,
+                    // dan ui.setDialogueMode("SYSTEM_MESSAGE"); // atau mode lain yang bukan CHAT_NPC
+                }
+                // --- PENANGANAN LANJUTAN CHAT ADA DI SINI ---
+                else if (player.currentInteractingNPC != null && "CHAT_NPC".equals(ui.getCurrentDialogueMode())) {
+                    System.out.println("GAMEPANEL (dialogueState): Melanjutkan mode CHAT_NPC dengan " + player.currentInteractingNPC.name);
+                    String nextLine = player.currentInteractingNPC.getNextChatLine(); // Memanggil metode dari Entity
+
                     if (nextLine != null) {
-                        ui.setDialogue(nextLine, "CHAT_NPC"); // Tetap dalam mode chat
+                        // Masih ada baris chat berikutnya
+                        ui.setDialogue(nextLine, "CHAT_NPC"); // Tetap dalam mode chat, tampilkan baris berikutnya
+                        System.out.println("GAMEPANEL (dialogueState): Menampilkan baris chat berikutnya: '" + nextLine + "'");
                     } else {
-                        // Chat selesai
-                        System.out.println("GAMEPANEL: Sesi chat dengan " + player.currentInteractingNPC.name + " selesai.");
+                        // Tidak ada baris chat lagi, sesi chat selesai
+                        System.out.println("GAMEPANEL (dialogueState): Tidak ada baris chat berikutnya dari " + player.currentInteractingNPC.name + ". Chat selesai.");
                         ui.clearDialogueMode();
-                        ui.currentDialogue = "";
-                        // Kembali ke menu interaksi NPC atau playState?
-                        // Untuk "enter enter saja", lebih baik kembali ke playState.
-                        gameState = playState;
+                        ui.currentDialogue = ""; // Kosongkan dialog
+                        gameState = playState;   // Kembali ke playState
                         player.currentInteractingNPC = null; // Selesaikan interaksi dengan NPC ini
+                        System.out.println("GAMEPANEL (dialogueState): Kembali ke playState. currentInteractingNPC direset.");
+                    }
+                }
+                // --- AKHIR PENANGANAN LANJUTAN CHAT ---
+                else if (pendingSleep) {
+                    executeSleepSequence();
+                } else {
+                    // Ini adalah dialog biasa lainnya (misal pesan cuaca TV selesai, pesan hasil gifting, dll.)
+                    System.out.println("GAMEPANEL (dialogueState): Menangani dialog biasa/sistem lainnya.");
+                    // Jika dialog ini adalah hasil dari aksi di npcInteractionState (misal gifting)
+                    if (player.currentInteractingNPC != null && ui.isDialogueFromNpcAction()){ // Anda perlu implementasi ui.isDialogueFromNpcAction()
+                        System.out.println("GAMEPANEL: Dialog hasil aksi NPC, kembali ke npcInteractionState.");
+                        gameState = npcInteractionState; // Kembali ke menu pilihan NPC
+                        ui.clearDialogueMode();
+                        ui.commandNum = 0; // Reset pilihan menu NPC
+                    } else {
+                        // Untuk dialog sistem umum atau akhir dari segalanya
+                        System.out.println("GAMEPANEL: Dialog umum selesai, kembali ke playState.");
+                        gameState = playState;
+                        ui.clearDialogueMode();
+                        if (player.currentInteractingNPC != null && !"CHAT_NPC".equals(ui.getCurrentDialogueMode())) {
+                            // Jika ini adalah dialog terakhir dari interaksi non-chat, mungkin reset NPC juga
+                            // player.currentInteractingNPC = null; // Hati-hati dengan ini
+                        }
+                    }
+                }
+            }
+        } else if (gameState == inventoryState) {
+            System.out.println("GAMEPANEL: Masuk inventoryState. Nilai enterIsCurrentlyPressed SAAT MASUK BLOK: " + enterIsCurrentlyPressed +
+                            ", isSelectingItemForGift: " + isSelectingItemForGift);
+
+            if (enterIsCurrentlyPressed) {
+                System.out.println("GAMEPANEL (inventoryState): BLOK if (enterIsCurrentlyPressed) TERPANGGIL!");
+                keyH.enterPressed = false; // Langsung konsumsi/reset di sini setelah terdeteksi
+
+                if (isSelectingItemForGift && npcForGifting != null) {
+                    System.out.println("GAMEPANEL (inventoryState): Mode GIFTING AKTIF. Memproses hadiah...");
+                    int selectedItemIndex = ui.getSelectedItemIndex();
+                    System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex);
+
+                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
+                        ItemStack itemToGift = player.inventory.get(selectedItemIndex);
+                        if (itemToGift != null && itemToGift.getItem() != null) {
+                            System.out.println("GAMEPANEL (inventoryState): Akan memberi hadiah '" + itemToGift.getItem().getName() + "' kepada " + npcForGifting.name);
+                            if (player.consumeEnergy(5)) {
+                                int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
+                                npcForGifting.updateHeartPoints(heartPointsChange);
+                                player.removeItem(itemToGift.getItem().getName(), 1);
+                                gameStateSystem.advanceTimeByMinutes(10);
+                                String reaction = "";
+                                if (heartPointsChange > 15) reaction = " sangat senang!";
+                                else if (heartPointsChange > 0) reaction = " terlihat senang.";
+                                else if (heartPointsChange == 0) reaction = " menerimanya.";
+                                else reaction = " terlihat tidak senang.";
+                                ui.currentDialogue = npcForGifting.name + reaction + "\n(Hati: " + npcForGifting.heartPoints + "/" + npcForGifting.maxHeartPoints + ")";
+                            } else {
+                                ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
+                            }
+                            gameState = dialogueState;
+                            System.out.println("GAMEPANEL (inventoryState): Pindah ke dialogueState ("+dialogueState+") untuk hasil gifting.");
+                            // isSelectingItemForGift dan npcForGifting akan direset saat dialog hasil gifting ditutup
+                            // atau saat keluar dari inventory (sudah ditangani KeyHandler).
+                        } else {
+                            System.err.println("GAMEPANEL (inventoryState): Item yang dipilih di slot " + selectedItemIndex + " adalah null atau itemnya null.");
+                        }
+                    } else {
+                        System.out.println("GAMEPANEL (inventoryState): Indeks item tidak valid (" + selectedItemIndex + ").");
                     }
                 } else {
-
-                    if (player.currentInteractingNPC != null ) {
-                        System.out.println(">>> DIALOGUE_STATE: Dialog biasa dari NPC, kembali ke npcInteractionState (" + npcInteractionState + ")");
-                        gameState = npcInteractionState;
-                    } else {
-                        System.out.println(">>> DIALOGUE_STATE: Dialog biasa sistem, kembali ke playState (" + playState + ")");
-                        gameState = playState;
-                    }
+                    System.out.println("GAMEPANEL (inventoryState): Enter ditekan, TAPI BUKAN mode gifting ATAU npcForGifting null.");
                 }
             }
         } else if (gameState == sleepState) {
@@ -286,40 +381,19 @@ public class GamePanel extends JPanel implements Runnable{
                     int selectedOption = ui.commandNum;
 
 
-                    if (selectedOption == 0) { // Gifting
-
+                    if (selectedOption == 0) { // Asumsi 0 adalah "Beri Hadiah"
+                        System.out.println("NPC Interaction: Memilih 'Beri Hadiah'.");
                         if (player.inventory.isEmpty()) {
-
                             ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
-                            gameState = dialogueState;
+                            gameState = dialogueState; // Tampilkan pesan
+                            // ui.setDialogueSourceNpcAction(true); // Jika Anda pakai sistem mode dialog
                         } else {
-                            ItemStack itemToGiftStack = player.inventory.get(0);
-
-                            if (itemToGiftStack == null || itemToGiftStack.getItem() == null) {
-                                ui.currentDialogue = "Item yang dipilih tidak valid.";
-                                gameState = dialogueState;
-                            } else {
-                                String itemName = itemToGiftStack.getItem().getName();
-
-                                if (player.consumeEnergy(5)) { // [cite: 163]
-
-                                    int heartPointsChange = currentNpc.processGift(itemName);
-                                    currentNpc.updateHeartPoints(heartPointsChange);
-                                    player.removeItem(itemName, 1);
-                                    gameStateSystem.tickTime(10); // [cite: 163]
-                                    String reaction = "";
-                                    if (heartPointsChange > 15) reaction = " sangat senang!"; // Loved: +25 [cite: 163]
-                                    else if (heartPointsChange > 0) reaction = " terlihat senang."; // Liked: +20 [cite: 163]
-                                    else if (heartPointsChange == 0) reaction = " menerimanya."; // Neutral: 0 [cite: 163]
-                                    else reaction = " terlihat tidak senang."; // Hated: -25 [cite: 163]
-                                    ui.currentDialogue = currentNpc.name + reaction + "\n(Hati: " + currentNpc.heartPoints + "/" + currentNpc.maxHeartPoints + ")";
-                                    gameState = dialogueState;
-                                } else {
-
-                                    ui.currentDialogue = "Energi tidak cukup untuk memberi hadiah."; // [cite: 58]
-                                    gameState = dialogueState;
-                                }
-                            }
+                            isSelectingItemForGift = true;
+                            npcForGifting = currentNpc; // Simpan NPC target
+                            gameState = inventoryState;   // Pindah ke layar inventory
+                            ui.slotCol = 0; // Reset kursor inventory
+                            ui.slotRow = 0;
+                            System.out.println("NPC Interaction: Pindah ke inventoryState untuk memilih hadiah. Target: " + npcForGifting.name);
                         }
                     } else if (selectedOption == 1) { // Propose/Marry
 
@@ -411,6 +485,68 @@ public class GamePanel extends JPanel implements Runnable{
                 }
                 keyH.enterPressed = false;
             }
+        } else if (gameState == inventoryState) {
+            // Debug print paling awal saat masuk state ini
+            System.out.println("GAMEPANEL: Masuk inventoryState. Nilai keyH.enterPressed SAAT MASUK BLOK: " + keyH.enterPressed +
+                            ", isSelectingItemForGift: " + isSelectingItemForGift +
+                            ", npcForGifting: " + (npcForGifting != null ? npcForGifting.name : "null"));
+
+            if (keyH.enterPressed) {
+                keyH.enterPressed = false; // Selalu konsumsi Enter di awal pemrosesan
+                System.out.println("GAMEPANEL (inventoryState): Enter DITEKAN.");
+
+                // --- DEKLARASIKAN DAN DAPATKAN selectedItemIndex DI SINI ---
+                int selectedItemIndex = ui.getSelectedItemIndex(); // Mendapatkan indeks dari UI
+
+                if (isSelectingItemForGift && npcForGifting != null) {
+                    System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF untuk NPC: " + npcForGifting.name);
+                    // selectedItemIndex sudah didapatkan di atas
+                    System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex +
+                                    ", Ukuran inventory: " + player.inventory.size());
+
+                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) { // Ini baris error 408 Anda
+                        ItemStack itemToGift = player.inventory.get(selectedItemIndex); // Ini baris error 409 Anda
+                        if (itemToGift != null && itemToGift.getItem() != null) {
+                            System.out.println("GAMEPANEL (inventoryState): Akan memberi hadiah '" + itemToGift.getItem().getName() + "' kepada " + npcForGifting.name);
+
+                            if (player.consumeEnergy(5)) {
+                                System.out.println("GAMEPANEL (inventoryState): Energi cukup. Player energy: " + player.energy);
+                                int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
+                                npcForGifting.updateHeartPoints(heartPointsChange);
+                                player.removeItem(itemToGift.getItem().getName(), 1);
+                                gameStateSystem.advanceTimeByMinutes(10);
+
+                                String reaction = "";
+                                if (heartPointsChange > 15) reaction = " sangat senang!";
+                                else if (heartPointsChange > 0) reaction = " terlihat senang.";
+                                else if (heartPointsChange == 0) reaction = " menerimanya.";
+                                else reaction = " terlihat tidak senang.";
+                                ui.currentDialogue = npcForGifting.name + reaction + "\n(Hati: " + npcForGifting.heartPoints + "/" + npcForGifting.maxHeartPoints + ")";
+                                System.out.println("GAMEPANEL (inventoryState): Hasil Gifting -> " + ui.currentDialogue);
+                            } else {
+                                ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
+                                System.out.println("GAMEPANEL (inventoryState): Gifting gagal, energi tidak cukup.");
+                            }
+                            gameState = dialogueState;
+                            System.out.println("GAMEPANEL (inventoryState): Pindah ke dialogueState ("+dialogueState+") untuk menampilkan hasil gifting.");
+                            // isSelectingItemForGift dan npcForGifting akan direset saat dialog hasil gifting ditutup
+                            // atau saat keluar dari inventory melalui Esc/I.
+                        } else {
+                            // Ini adalah baris error 436 Anda jika selectedItemIndex digunakan di sini tanpa pengecekan itemToGift
+                            System.err.println("GAMEPANEL (inventoryState): Item yang dipilih di slot " + selectedItemIndex + " adalah null atau itemnya null.");
+                            // Tidak lakukan apa-apa, biarkan pemain memilih lagi atau keluar
+                        }
+                    } else {
+                        System.out.println("GAMEPANEL (inventoryState): Tidak ada item dipilih di slot atau indeks tidak valid (" + selectedItemIndex + ").");
+                        // Tidak lakukan apa-apa, biarkan pemain memilih lagi atau keluar
+                    }
+                } else {
+                    // Pemain menekan Enter di inventory untuk tujuan lain (misal, menggunakan item)
+                    System.out.println("GAMEPANEL (inventoryState): Enter ditekan untuk penggunaan item biasa. selectedItemIndex: " + selectedItemIndex + " (belum diimplementasikan).");
+                    // Tambahkan logika penggunaan item di sini jika ada, menggunakan selectedItemIndex yang sudah dideklarasi di atas.
+                }
+            }
+            // Logika keluar dari inventory (Esc atau 'I') sudah ditangani di KeyHandler
         }
 
         if (gameState == playState) {

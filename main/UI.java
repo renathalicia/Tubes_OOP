@@ -75,6 +75,27 @@ public class UI {
         this.currentDialogueMode = ""; // Atau set ke mode default "SYSTEM_MESSAGE"
     }
 
+    public boolean isDialogueFromNpcAction() {
+        // Anda bisa lebih spesifik dengan mode-mode yang Anda set dari GamePanel
+        // setelah aksi NPC. Contoh:
+        return "NPC_GIFT_RESULT".equals(currentDialogueMode) ||
+               "NPC_PROPOSE_RESULT".equals(currentDialogueMode) ||
+               "CHAT_NPC".equals(currentDialogueMode); // Jika chat juga dianggap aksi NPC yang perlu kembali ke menu
+                                                       // Namun, untuk chat, kita sudah tangani untuk kembali ke playState.
+                                                       // Jadi, fokus pada hasil aksi seperti Gifting atau Proposing.
+        // Untuk contoh Gifting dan Proposing yang saya berikan di GamePanel (npcInteractionState):
+        // Saya belum secara eksplisit menyuruh Anda set mode "NPC_GIFT_RESULT".
+        // Anda perlu menambahkannya saat memproses gifting/proposing di GamePanel.
+        // Contoh di GamePanel (npcInteractionState, setelah gifting):
+        //   ui.currentDialogue = "Hasil gifting...";
+        //   ui.setDialogueMode("NPC_GIFT_RESULT"); // <--- PENTING DI GAMEPANEL
+        //   gameState = dialogueState;
+    }
+
+    public int getSelectedItemIndex() {
+        return slotRow * inventoryMaxCol + slotCol;
+    }
+
     public UI(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -641,6 +662,14 @@ public class UI {
     }
 
     public void drawInventory() {
+
+    String title;
+    if (gp.isSelectingItemForGift && gp.npcForGifting != null) {
+        title = "Berikan hadiah untuk: " + gp.npcForGifting.name;
+    } else {
+        title = "Inventory";
+    }
+
     // --- KONFIGURASI PANEL INVENTARIS --- (biarkan seperti sebelumnya)
     int panelInternalPadding = gp.tileSize / 3;
     int slotGridStrokeThickness = 4;

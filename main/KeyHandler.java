@@ -97,8 +97,33 @@ public class KeyHandler implements KeyListener {
             }
         }
 
-        else if(gp.gameState == gp.inventoryState){
-            handleInventoryKeys(code); // Handle inventory keys
+        else if (gp.gameState == gp.inventoryState) {
+            // handleInventoryKeys(code); // Panggil metode Anda jika sudah ada
+            // ATAU langsung di sini:
+            if (code == KeyEvent.VK_I || code == KeyEvent.VK_ESCAPE) { // Tombol untuk menutup inventory
+                if (gp.isSelectingItemForGift) {
+                    // Jika sedang memilih hadiah, kembali ke menu interaksi NPC
+                    gp.isSelectingItemForGift = false;
+                    gp.npcForGifting = null;
+                    gp.gameState = gp.npcInteractionState; // Kembali ke menu NPC
+                    System.out.println("KEYHANDLER: Batal memilih hadiah, kembali ke menu NPC.");
+                } else {
+                    // Jika inventory biasa, kembali ke playState
+                    gp.gameState = gp.playState;
+                }
+                // gp.playSE(5); // Suara jika ada
+            } else if (code == KeyEvent.VK_ENTER) {
+                System.out.println("DEBUG KEYHANDLER: InventoryState - Enter DITEKAN, enterPressed akan di-set true.");
+                enterPressed = true; // GamePanel akan memproses pemilihan item
+            } else if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+                if (gp.ui.slotRow > 0) { gp.ui.slotRow--; /* gp.playSE(5); */ }
+            } else if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+                if (gp.ui.slotRow < gp.ui.inventoryMaxRow - 1) { gp.ui.slotRow++; /* gp.playSE(5); */ }
+            } else if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+                if (gp.ui.slotCol > 0) { gp.ui.slotCol--; /* gp.playSE(5); */ }
+            } else if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+                if (gp.ui.slotCol < gp.ui.inventoryMaxCol - 1) { gp.ui.slotCol++; /* gp.playSE(5); */ }
+            }
         }
 
         // NPC INTERACTION STATE

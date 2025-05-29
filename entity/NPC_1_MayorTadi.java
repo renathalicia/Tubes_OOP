@@ -33,6 +33,7 @@ public class NPC_1_MayorTadi extends Entity {
 
     @Override
     public void setChatDialogues() {
+        chatDialogues = new String[3];
         chatDialogues[0] = "Ah, kamu lagi. Ada perlu apa?";
         chatDialogues[1] = "Kota ini butuh banyak perbaikan, tapi dana selalu jadi masalah.";
         chatDialogues[2] = "Jangan lupa bayar pajak ya, haha!";

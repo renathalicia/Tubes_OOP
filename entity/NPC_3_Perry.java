@@ -28,6 +28,7 @@ public class NPC_3_Perry extends Entity {
     }
 
     public void setDialogue(){
+        chatDialogues = new String[4];
         dialogues[0] = "Hmm? Siapa di sana?";
         dialogues[1] = "Oh, seorang pengembara.";
         dialogues[2] = "Desa ini menyimpan banyak rahasia.";
