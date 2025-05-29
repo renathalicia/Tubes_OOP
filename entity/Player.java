@@ -186,14 +186,8 @@ public class Player extends Entity {
         }
 
     if (keyH.enterPressed) {
-        boolean acted = plantSeed() || tileLand();
-
-        if (!acted) {
-            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-            interactNPC(npcIndex);
-        }
-
-        keyH.enterPressed = false;
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+        interactNPC(npcIndex);
     }
 
         else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
@@ -359,9 +353,7 @@ public class Player extends Entity {
 
         if (!consumeEnergy(5)) return true;
 
-        gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // jadi tilec
-        gp.ui.currentDialogue = "Tanah berhasil dibajak.";
-        gp.gameState = gp.dialogueState;
+        gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // jadi tile 55
         return true;
     }
 
