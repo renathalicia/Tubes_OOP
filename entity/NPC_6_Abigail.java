@@ -1,7 +1,6 @@
 package entity;
 import java.util.Arrays;
 
-import entity.Entity;
 import main.GamePanel;
 
 public class NPC_6_Abigail extends Entity {
