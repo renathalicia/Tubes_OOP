@@ -82,6 +82,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     public final int inventoryState = 6;
     public final int npcInteractionState = 7;
+    public final int helpState = 8; // untuk help
 
     public boolean tvInteractionPendingConfirmation = false;
 

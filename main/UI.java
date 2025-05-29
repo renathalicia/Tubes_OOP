@@ -3,17 +3,23 @@ package main;
 import entity.Entity;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 // import object.OBJ_Heart;
 // import object.SuperObject;
 import item.ItemStack;
 import item.Item;
+
+import javax.imageio.ImageIO;
 import java.awt.font.TextLayout;
 
 public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
+    BufferedImage backgroundImage;
+    Font stardewFont;
     // Font maruMonica, purisaB;
 
     // Modifikasi inventory wak
@@ -115,6 +121,31 @@ public class UI {
         // heart_full = heart.image;
         // heart_half = heart.image2;
         // heart_blank = heart.image3;
+        // Load background image once
+        try {
+            InputStream is = getClass().getResourceAsStream("/title/background.jpg");
+            if (is == null) {
+                System.out.println("❌ background.jpg not found!");
+            } else {
+                backgroundImage = ImageIO.read(is);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Load Stardew Valley font once
+        try {
+            InputStream fontStream = getClass().getResourceAsStream("/title/StardewValley.ttf");
+            if (fontStream == null) {
+                System.out.println("❌ Font file not found!");
+                stardewFont = new Font("Arial", Font.BOLD, 48); // fallback
+            } else {
+                stardewFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.BOLD, 48f);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            stardewFont = new Font("Arial", Font.BOLD, 48); // fallback
+        }
     }
 
     public void showMessage(String text){
@@ -131,6 +162,8 @@ public class UI {
         // title state
         if (gp.gameState == gp.titleState) {
             drawTitleScreen();
+        } else if (gp.gameState == gp.helpState) {
+            drawHelpScreen();
         }
 
         // UI untuk Play State
@@ -252,55 +285,127 @@ public class UI {
         g2.setFont(arial_40);
     }
 
-    public void drawTitleScreen() {
+//    public void drawTitleScreen() {
+//
+//        g2.setColor(new Color(0, 0, 0));
+//        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+//
+//        // TITLE NAME
+//        g2.setFont(g2.getFont().deriveFont(Font.BOLD,96F));
+//        String text = "Spakbor Hills";
+//        int x = getXforCenteredText(text);
+//        int y = gp.tileSize*3;
+//
+//        // SHADOW
+//        g2.setColor(Color.gray);
+//        g2.drawString(text, x+5, y+5);
+//
+//        g2.setColor(Color.white);
+//        g2.drawString(text, x, y);
+//
+//        // CHARACTER IMAGE
+//        x = gp.screenWidth/2 - (gp.tileSize*2)/2;
+//        y += gp.tileSize*3;
+//        g2.drawImage(gp.player.down1, x, y, gp.tileSize*2, gp.tileSize*2, null);
+//
+//        // MENU
+//        g2.setFont(g2.getFont().deriveFont(Font.BOLD,48F));
+//
+//        text = "NEW GAME";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize*6;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 0) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//
+//        text = "LOAD GAME";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 1) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//
+//        text = "QUIT";
+//        x = getXforCenteredText(text);
+//        y += gp.tileSize;
+//        g2.drawString(text, x, y);
+//        if (commandNum == 2) {
+//            g2.drawString(">", x-gp.tileSize, y);
+//        }
+//    }
+public void drawTitleScreen() {
+    try {
+        // load font
+        InputStream is = getClass().getResourceAsStream("/res/title/StardewValley.ttf");
+        Font stardewFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.BOLD, 48f);
+        g2.setFont(stardewFont);
+    } catch (Exception e) {
+        e.printStackTrace();
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f)); // fallback
+    }
 
-        g2.setColor(new Color(0, 0, 0));
+    // masukin bg
+    try {
+        BufferedImage background = ImageIO.read(getClass().getResourceAsStream("/res/title/background.jpg"));
+        g2.drawImage(background, 0, 0, gp.screenWidth, gp.screenHeight, null);
+    } catch (IOException e) {
+        e.printStackTrace();
+        // jadi gelap
+        g2.setColor(Color.black);
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+    }
+
+    // TITLE NAME
+    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 100f));
+    String text = "Spakbor Hills";
+    int x = getXforCenteredText(text);
+    int y = gp.tileSize * 7;
+
+    // shadow
+    g2.setColor(Color.gray);
+    g2.drawString(text, x + 5, y + 5);
+    g2.setColor(Color.white);
+    g2.drawString(text, x, y);
+
+    // menu
+    String[] options = { "NEW GAME", "LOAD GAME", "HELP", "QUIT" };
+    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f));
+    y += gp.tileSize * 1;
+
+    for (int i = 0; i < options.length; i++) {
+        text = options[i];
+        x = getXforCenteredText(text);
+        y += gp.tileSize;
+        g2.drawString(text, x, y);
+        if (commandNum == i) {
+            g2.drawString(">", x - gp.tileSize, y);
+        }
+    }
+}
+
+    public void drawHelpScreen() {
+        g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
-        // TITLE NAME
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD,96F));
-        String text = "Spakbor Hills";
-        int x = getXforCenteredText(text);
-        int y = gp.tileSize*3;
+        g2.setColor(Color.WHITE);
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 36f));
 
-        // SHADOW
-        g2.setColor(Color.gray);
-        g2.drawString(text, x+5, y+5);
+        int x = gp.tileSize;
+        int y = gp.tileSize;
 
-        g2.setColor(Color.white);
-        g2.drawString(text, x, y);
+        g2.drawString("HELP & HOW TO PLAY", x, y);
 
-        // CHARACTER IMAGE
-        x = gp.screenWidth/2 - (gp.tileSize*2)/2;
-        y += gp.tileSize*3;
-        g2.drawImage(gp.player.down1, x, y, gp.tileSize*2, gp.tileSize*2, null);
-
-        // MENU
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD,48F));
-
-        text = "NEW GAME";
-        x = getXforCenteredText(text);
-        y += gp.tileSize*6;
-        g2.drawString(text, x, y);
-        if (commandNum == 0) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
-
-        text = "LOAD GAME";
-        x = getXforCenteredText(text);
+        g2.setFont(stardewFont.deriveFont(24f));
+        y += gp.tileSize * 2;
+        g2.drawString("- Use W/S to move in menu", x, y);
         y += gp.tileSize;
-        g2.drawString(text, x, y);
-        if (commandNum == 1) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
-
-        text = "QUIT";
-        x = getXforCenteredText(text);
+        g2.drawString("- Use arrow keys to move player", x, y);
         y += gp.tileSize;
-        g2.drawString(text, x, y);
-        if (commandNum == 2) {
-            g2.drawString(">", x-gp.tileSize, y);
-        }
+        g2.drawString("- Press ENTER to interact", x, y);
+        y += gp.tileSize;
+        g2.drawString("- Press ESC to return", x, y);
     }
 
     // menampilkan time

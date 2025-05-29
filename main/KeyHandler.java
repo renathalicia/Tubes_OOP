@@ -35,12 +35,12 @@ public class KeyHandler implements KeyListener {
             if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){
                 gp.ui.commandNum--;
                 if (gp.ui.commandNum < 0) {
-                    gp.ui.commandNum = 2;
+                    gp.ui.commandNum = 3;
                 }
             }
             if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){
                 gp.ui.commandNum++;
-                if (gp.ui.commandNum > 2) {
+                if (gp.ui.commandNum > 3) {
                     gp.ui.commandNum = 0;
                 }
             }
@@ -52,8 +52,19 @@ public class KeyHandler implements KeyListener {
                     // add later
                 }
                 if(gp.ui.commandNum == 2) {
+                    gp.gameState = gp.helpState;
+                }
+
+                if(gp.ui.commandNum == 3) {
                     System.exit(0);
                 }
+            }
+        }
+
+        // help state
+        else if (gp.gameState == gp.helpState) {
+            if (code == KeyEvent.VK_ESCAPE) {
+                gp.gameState = gp.titleState;
             }
         }
 
@@ -63,7 +74,7 @@ public class KeyHandler implements KeyListener {
             if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; } 
             if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){ leftPressed = true; }
             if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){ rightPressed = true; }
-            if(code == KeyEvent.VK_P){ gp.gameState = gp.pauseState; }
+            if(code == KeyEvent.VK_ESCAPE){ gp.gameState = gp.pauseState; }
             if(code == KeyEvent.VK_ENTER){ enterPressed = true; }
             if(code == KeyEvent.VK_SHIFT){shiftPressed = true; }
 
@@ -82,9 +93,10 @@ public class KeyHandler implements KeyListener {
                 }
             }
         }
+
         //PAUSE STATE
         else if(gp.gameState == gp.pauseState){
-            if(code == KeyEvent.VK_P){
+            if(code == KeyEvent.VK_ESCAPE){
                 gp.gameState = gp.playState;
             }
         }
@@ -92,20 +104,16 @@ public class KeyHandler implements KeyListener {
         //DIALOGUE STATE
         else if (gp.gameState == gp.dialogueState) {
             if (code == KeyEvent.VK_ENTER) {
-                enterPressed = true; // PENTING: Set flag ini agar GamePanel bisa memprosesnya
-                // HAPUS BARIS INI: gp.gameState = gp.playState;
+                enterPressed = true;
             }
         }
 
         else if (gp.gameState == gp.inventoryState) {
-            // handleInventoryKeys(code); // Panggil metode Anda jika sudah ada
-            // ATAU langsung di sini:
-            if (code == KeyEvent.VK_I || code == KeyEvent.VK_ESCAPE) { // Tombol untuk menutup inventory
+            if (code == KeyEvent.VK_I || code == KeyEvent.VK_ESCAPE) { // nutup inventory
                 if (gp.isSelectingItemForGift) {
-                    // Jika sedang memilih hadiah, kembali ke menu interaksi NPC
                     gp.isSelectingItemForGift = false;
                     gp.npcForGifting = null;
-                    gp.gameState = gp.npcInteractionState; // Kembali ke menu NPC
+                    gp.gameState = gp.npcInteractionState; // balik ke menu npc
                     System.out.println("KEYHANDLER: Batal memilih hadiah, kembali ke menu NPC.");
                 } else {
                     // Jika inventory biasa, kembali ke playState
