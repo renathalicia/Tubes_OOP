@@ -6,14 +6,19 @@ import java.awt.event.KeyListener;
 import java.util.List;
 
 import item.Item;
+import entity.Player;
+import command.ActionCommand;
+import command.PlantCommand;
+import command.TillingCommand;
+import command.WaterCommand;
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, fPressed;
     public boolean shiftPressed;
     public boolean escapePressed = false; 
     boolean showDebugText = false;
-    public int lastPresseedDirectionKey = 0; 
+    public int lastPresseedDirectionKey = 0;
 
     public KeyHandler(GamePanel gp){
         this.gp = gp;
@@ -32,7 +37,7 @@ public class KeyHandler implements KeyListener {
            code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN ||
            code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT ||
            code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
-            lastPresseedDirectionKey = code; 
+            lastPresseedDirectionKey = code;
         }
         // TITLE STATE
         if (gp.gameState == gp.titleState) {
@@ -75,13 +80,13 @@ public class KeyHandler implements KeyListener {
         // PLAY STATE
         else if(gp.gameState == gp.playState){
             if(code == KeyEvent.VK_W || code == KeyEvent.VK_UP){ upPressed = true; }
-            if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; } 
+            if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; }
             if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){ leftPressed = true; }
             if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){ rightPressed = true; }
             if(code == KeyEvent.VK_ESCAPE){ gp.gameState = gp.pauseState; }
             if(code == KeyEvent.VK_ENTER){ enterPressed = true; }
             if(code == KeyEvent.VK_SHIFT){shiftPressed = true; }
-
+            if (code == KeyEvent.VK_F) {fPressed = true; }
             if(code == KeyEvent.VK_I){
                 gp.gameState = gp.inventoryState; 
                 gp.playSE(5);
@@ -169,14 +174,56 @@ public class KeyHandler implements KeyListener {
             }
         }
 
-        // Tilling and Planting
+        // FISHING STATE
+        else if (gp.gameState == gp.fishingState) {
+            if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true; // GamePanel akan memproses tebakan
+                System.out.println("KEYHANDLER (fishingState): Enter ditekan.");
+            } else if (code == KeyEvent.VK_BACK_SPACE) { // Untuk menghapus karakter terakhir
+                if (gp.currentFishingGuess != null && !gp.currentFishingGuess.isEmpty()) {
+                    gp.currentFishingGuess = gp.currentFishingGuess.substring(0, gp.currentFishingGuess.length() - 1);
+                    System.out.println("KEYHANDLER (fishingState): Backspace. Tebakan sekarang: " + gp.currentFishingGuess);
+                }
+            } else if (code >= KeyEvent.VK_0 && code <= KeyEvent.VK_9) { // Hanya terima input angka 0-9
+                // Batasi panjang input angka, misalnya maksimal 3 digit jika angka terbesar adalah 500
+                int maxInputLength = 3;
+                if (gp.fishingMaxRange >= 1000) maxInputLength = 4; // Sesuaikan jika ada rentang lebih besar
+
+                if (gp.currentFishingGuess.length() < maxInputLength) {
+                    gp.currentFishingGuess += (char) code; // Tambahkan digit ke string tebakan
+                    System.out.println("KEYHANDLER (fishingState): Angka '" + (char)code + "' ditekan. Tebakan sekarang: " + gp.currentFishingGuess);
+                }
+            } else if (code == KeyEvent.VK_ESCAPE) { // Opsi untuk membatalkan memancing
+                System.out.println("KEYHANDLER (fishingState): Escape ditekan, membatalkan memancing.");
+                // GamePanel akan menangani logika pembatalan jika diperlukan,
+                // atau kita bisa langsung panggil endFishingMinigame dari sini.
+                // Untuk konsistensi, biarkan GamePanel yang memproses jika ada flag khusus untuk Escape.
+                // Tapi untuk sederhana, kita bisa langsung akhiri:
+                gp.fishingFeedbackMessage = "Kamu berhenti memancing.";
+                gp.endFishingMinigame(false, gp.fishingFeedbackMessage); // Langsung akhiri jika Escape ditekan
+            }
+        }
+
+        // tilling and planting
         if (code == KeyEvent.VK_SPACE) {
             if (gp.gameState == gp.dialogueState) {
-                gp.gameState = gp.playState; 
+                gp.gameState = gp.playState;
             } else if (gp.gameState == gp.playState) {
-                boolean planted = gp.player.plantSeed();
-                if (!planted) {
-                    gp.player.tileLand();
+
+                // Ambil posisi tile yang sedang diinjak
+                int centerX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
+                int centerY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
+                int col = centerX / gp.tileSize;
+                int row = centerY / gp.tileSize;
+
+                int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+                if (tileIndex >= 43 && tileIndex <= 51) {
+                    new TillingCommand(gp.player).execute(); // Belum dibajak
+                } else if (tileIndex == 55 && gp.tileM.cropMap[col][row] == null) {
+                    new PlantCommand(gp.player).execute();   // Sudah dibajak dan belum ditanam
+                } else if (gp.tileM.cropMap[col][row] != null) {
+                    new WaterCommand(gp.player).execute();   // Sudah ada tanaman
                 }
             }
         }
@@ -227,11 +274,11 @@ public class KeyHandler implements KeyListener {
             }
         }
         if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){
-            if(gp.ui.slotRow < gp.ui.inventoryMaxRow - 1){ 
+            if(gp.ui.slotRow < gp.ui.inventoryMaxRow - 1){
                 gp.ui.slotRow++;
                 gp.playSE(5);
             }
-        }   
+        }
         if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){
             if(gp.ui.slotCol > 0){
                 gp.ui.slotCol--;
@@ -239,11 +286,11 @@ public class KeyHandler implements KeyListener {
             }
         }
         if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){
-            if(gp.ui.slotCol < gp.ui.inventoryMaxCol - 1){ 
+            if(gp.ui.slotCol < gp.ui.inventoryMaxCol - 1){
                 gp.ui.slotCol++;
                 gp.playSE(5);
-            } 
-        } 
+            }
+        }
         if(code == KeyEvent.VK_ENTER){
             // // Logika untuk memilih item
             // int selectedItem = gp.ui.getSelectedItem();
@@ -251,7 +298,7 @@ public class KeyHandler implements KeyListener {
             //     gp.player.useItem(selectedItem);
             //     gp.playSE(5); // Suara untuk menggunakan item
             // }
-            enterPressed = true; 
+            enterPressed = true;
         }
     }
 
@@ -272,6 +319,9 @@ public class KeyHandler implements KeyListener {
         }
         if(code == KeyEvent.VK_SHIFT){
             shiftPressed = false;
+        }
+        if (code == KeyEvent.VK_F) {
+            fPressed = false;
         }
     }
 }
