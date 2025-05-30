@@ -166,6 +166,11 @@ public class UI {
             drawHelpScreen();
         }
 
+        // fishing state
+        if (gp.gameState == gp.fishingState) {
+            drawFishingScreen();
+        }
+
         // UI untuk Play State
         if (gp.gameState == gp.playState) {
             // Tampilkan pesan singkat
@@ -219,6 +224,52 @@ public class UI {
         //UI untuk Transisi pindah MAP
         else if (gp.gameState == gp.transitionState){
             drawTransition();
+        }
+    }
+
+    public void drawFishingScreen() {
+        // Gambar latar belakang atau window untuk minigame memancing
+        // Anda bisa menggunakan metode drawSubWindow Anda jika ada, atau gambar kotak sederhana.
+        int windowX = gp.tileSize * 3;
+        int windowY = gp.tileSize * 4;
+        int windowWidth = gp.screenWidth - (gp.tileSize * 6);
+        int windowHeight = gp.tileSize * 5;
+        drawSubWindow(windowX, windowY, windowWidth, windowHeight); // Panggil metode drawSubWindow Anda
+
+        g2.setColor(stardewDialogText); // Atau warna teks yang Anda inginkan
+        g2.setFont(arial_40.deriveFont(24F)); // Sesuaikan font
+
+        int textX = windowX + gp.tileSize / 2;
+        int textY = windowY + gp.tileSize;
+        int lineHeight = 35; // Jarak antar baris
+
+        // 1. Tampilkan pesan feedback (misal, "Tebak angka...", "Terlalu tinggi!", dll.)
+        // Pesan ini diatur di GamePanel.fishingFeedbackMessage
+        if (gp.fishingFeedbackMessage != null && !gp.fishingFeedbackMessage.isEmpty()) {
+            // Anda bisa menggunakan logika word-wrapping jika pesannya panjang
+            // Untuk sederhana, kita gambar langsung:
+            String[] feedbackLines = gp.fishingFeedbackMessage.split("\n");
+            for (String line : feedbackLines) {
+                g2.drawString(line, textX, textY);
+                textY += lineHeight;
+            }
+        } else {
+            // Jika tidak ada feedback, mungkin tampilkan info ikan (opsional)
+            if (gp.fishBeingFished != null) {
+                 g2.drawString("Memancing " + gp.fishBeingFished.getFishRarity().toLowerCase() + " fish...", textX, textY);
+                 textY += lineHeight;
+            }
+        }
+        
+        textY += lineHeight * 0.5; // Spasi tambahan
+
+        // 2. Tampilkan input tebakan pemain saat ini (jika minigame masih berjalan)
+        if (gp.fishBeingFished != null) { // Hanya tampilkan jika minigame aktif
+            g2.drawString("Tebakanmu: " + gp.currentFishingGuess + "_", textX, textY); // Tambahkan '_' sebagai kursor sederhana
+            textY += lineHeight;
+
+            // 3. Tampilkan sisa percobaan
+            g2.drawString("Sisa Percobaan: " + gp.fishingAttemptsLeft, textX, textY);
         }
     }
 
