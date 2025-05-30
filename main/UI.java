@@ -203,8 +203,15 @@ public class UI {
         }
 
         // FISHING STATE
-        if (gp.gameState == gp.fishingState) {
+        else if (gp.gameState == gp.fishingState) {
             drawFishingScreen();
+        }
+
+        // SELLING STATE
+        else if (gp.gameState == gp.shippingBinState) {
+            drawPlayerEnergy(); // Opsional, tampilkan info dasar
+            drawTime();         // Opsional
+            drawShippingBinScreen(); // Metode baru untuk UI Shipping Bin
         }
 
         // PLAY STATE
@@ -264,6 +271,120 @@ public class UI {
         else if (gp.gameState == gp.transitionState){
             drawTransition();
         }
+    }
+
+    public void drawShippingBinScreen() {
+        // Tampilan ini akan sangat mirip dengan drawInventory(),
+        // kita akan menampilkan inventory pemain dengan judul yang berbeda.
+
+        // --- JUDUL/PROMPT ---
+        String title = "Pilih item untuk dijual (Enter). ESC untuk selesai.";
+
+        // --- Konfigurasi Panel Inventory (bisa disamakan dengan drawInventory()) ---
+        int panelInternalPadding = gp.tileSize / 3;
+        int slotGridStrokeThickness = 4;
+        int panelBorderThickness = 5;
+        int slotGridWidth = gp.tileSize * inventoryMaxCol;
+        int slotGridHeight = gp.tileSize * inventoryMaxRow;
+        int frameWidth = slotGridWidth + (panelInternalPadding * 2);
+        // Tinggikan sedikit panel untuk memberi ruang pada judul/prompt
+        int titleAreaHeight = gp.tileSize; // Perkiraan tinggi area judul
+        int frameHeight = slotGridHeight + (panelInternalPadding * 2) + titleAreaHeight;
+        int frameX = (gp.screenWidth - frameWidth) / 2;
+        int frameY = (gp.screenHeight - frameHeight) / 2; // Lebih ke tengah layar
+        if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
+
+        // Gambar panel utama (gunakan metode drawSubWindow jika ada atau gambar manual)
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+        // Atau gambar manual jika drawSubWindow tidak sesuai:
+        // g2.setColor(invPanelBg);
+        // g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+        // g2.setColor(invPanelBorder);
+        // g2.setStroke(new BasicStroke(panelBorderThickness));
+        // g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+
+        // Gambar Judul/Prompt
+        g2.setColor(stardewDialogText); // Warna teks yang konsisten
+        Font titleFont = arial_40.deriveFont(Font.PLAIN, 20F); // Font untuk judul/prompt
+        g2.setFont(titleFont);
+        FontMetrics fmTitle = g2.getFontMetrics();
+        int titleX = frameX + (frameWidth - fmTitle.stringWidth(title)) / 2; // Judul di tengah panel
+        int titleY = frameY + panelInternalPadding + fmTitle.getAscent();
+        g2.drawString(title, titleX, titleY);
+
+        // --- Slot-Slot Inventory Pemain (adaptasi dari drawInventory()) ---
+        final int slotStartX = frameX + panelInternalPadding;
+        // Mulai slot Y di bawah area judul
+        final int slotStartY = frameY + panelInternalPadding + titleAreaHeight;
+        int currentSlotX = slotStartX;
+        int currentSlotY = slotStartY;
+        int itemIndex = 0;
+
+        Font quantityFont = arial_40.deriveFont(18F); // Font untuk kuantitas
+        int itemPadding = 4; // Padding di dalam slot
+        int itemDrawSize = gp.tileSize - (itemPadding * 2); // Ukuran gambar item
+
+        for (int row = 0; row < inventoryMaxRow; row++) {
+            for (int col = 0; col < inventoryMaxCol; col++) {
+                // Gambar latar slot
+                g2.setColor(invSlotBg);
+                g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+                // Gambar border slot
+                g2.setColor(invPanelGrid); // Atau invPanelBorder jika ingin lebih tebal
+                g2.setStroke(new BasicStroke(slotGridStrokeThickness));
+                g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+
+                // Gambar item jika ada
+                if (itemIndex < gp.player.inventory.size()) {
+                    ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
+                    if (currentItemStack != null) { // Tambahkan null check untuk ItemStack
+                        Item currentItem = currentItemStack.getItem();
+                        if (currentItem != null && currentItem.image != null) { // Null check untuk Item dan image-nya
+                            int itemX = currentSlotX + itemPadding;
+                            int itemY = currentSlotY + itemPadding;
+                            g2.drawImage(currentItem.image, itemX, itemY, itemDrawSize, itemDrawSize, null);
+
+                            // Gambar kuantitas jika > 1
+                            if (currentItemStack.getQuantity() > 1) {
+                                g2.setFont(quantityFont);
+                                String quantityText = String.valueOf(currentItemStack.getQuantity());
+                                FontMetrics fmQty = g2.getFontMetrics();
+                                int qtyTextWidth = fmQty.stringWidth(quantityText);
+                                int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - (itemPadding > 2 ? itemPadding : 4);
+                                int qtyY = currentSlotY + gp.tileSize - (itemPadding > 2 ? itemPadding : 4);
+                                
+                                g2.setColor(Color.black); // Bayangan
+                                g2.drawString(quantityText, qtyX + 1, qtyY + 1);
+                                g2.setColor(stardewText); // Warna teks kuantitas
+                                g2.drawString(quantityText, qtyX, qtyY);
+                            }
+                        }
+                    }
+                }
+                currentSlotX += gp.tileSize;
+                itemIndex++;
+            }
+            currentSlotX = slotStartX;
+            currentSlotY += gp.tileSize;
+        }
+        g2.setStroke(new BasicStroke(1)); // Reset stroke
+
+        // --- KURSOR PEMILIHAN SLOT --- (Sama seperti di drawInventory)
+        int cursorX = slotStartX + (gp.tileSize * slotCol); // slotCol dari UI
+        int cursorY = slotStartY + (gp.tileSize * slotRow); // slotRow dari UI
+        g2.setColor(stardewHighlightBorder);
+        g2.setStroke(new BasicStroke(3));
+        // int cursorOffset = (slotGridStrokeThickness > 1 ? slotGridStrokeThickness -1 : 1) + 1;
+        // g2.drawRect(cursorX - cursorOffset, cursorY - cursorOffset,
+        //             gp.tileSize + (cursorOffset*2) -1 , gp.tileSize + (cursorOffset*2) -1);
+        // Penggambaran kursor yang lebih sederhana:
+        g2.drawRect(cursorX, cursorY, gp.tileSize, gp.tileSize);
+        g2.setStroke(new BasicStroke(1));
+
+        // Tidak perlu panel nama item di layar shipping bin ini, kecuali Anda mau.
+        // Fokusnya adalah memilih item untuk dijual.
+
+        g2.setFont(arial_40); // Kembalikan font default
     }
 
     public void drawFishingScreen() {

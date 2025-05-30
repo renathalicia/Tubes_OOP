@@ -36,6 +36,11 @@ public class GamePanel extends JPanel implements Runnable{
     public Entity npcForGifting = null;  
     private java.util.Scanner sharedScanner;
 
+    // shipping bin
+    public ArrayList<ItemStack> itemsToShip = new ArrayList<>();
+    public boolean hasShippedToday = false;
+    public boolean isTimePaused = false;
+
     // world settings
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
@@ -87,7 +92,8 @@ public class GamePanel extends JPanel implements Runnable{
     
     public final int shoppingState = 9; 
     public final int helpState = 8; // untuk help
-    public final int fishingState = 10; // Pastikan nomor state ini unik dan belum dipakai
+    public final int fishingState = 10;
+    public final int shippingBinState = 11;
 
     // fishing
     public Fish fishBeingFished = null;
@@ -116,6 +122,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void setUpGame() {
+        ItemRepository.initializeAllItems(this);
         aSetter.setObject();
         initializeNPCs();
         playMusic(0);
@@ -248,15 +255,30 @@ public class GamePanel extends JPanel implements Runnable{
         // Jika waktu benar-benar dihentikan, Anda perlu mekanisme untuk melanjutkannya.
     }
 
+    public void finalizeAndExitShippingBin() {
+        if (gameState != shippingBinState) return;
+        System.out.println("GAMEPANEL: Finalisasi Shipping Bin. Jumlah item di bin: " + itemsToShip.size());
+        isTimePaused = false;
+        gameStateSystem.advanceTimeByMinutes(15);
+        hasShippedToday = true;
+        if (!itemsToShip.isEmpty()) {
+            ui.setDialogue("Semua item telah ditempatkan di Shipping Bin.", "SYSTEM_MESSAGE");
+        } else {
+            ui.setDialogue("Kamu tidak memasukkan item apapun ke Shipping Bin.", "SYSTEM_MESSAGE");
+        }
+        gameState = dialogueState;
+        System.out.println("GAMEPANEL: Keluar dari shippingBinState. Waktu maju 15 menit. hasShippedToday=true.");
+    }
+
     public void initializeNPCs() {
         int mapNum = 0;
 
         npc[mapNum][0] = new NPC_1_MayorTadi(this);
-        npc[mapNum][0].worldX = tileSize * 21; // Contoh posisi X
-        npc[mapNum][0].worldY = tileSize * 21; // Contoh posisi Y
+        npc[mapNum][0].worldX = tileSize * 21;
+        npc[mapNum][0].worldY = tileSize * 21; 
 
         npc[mapNum][1] = new NPC_2_Caroline(this);
-        npc[mapNum][1].worldX = tileSize * 25; // Atur posisi yang berbeda
+        npc[mapNum][1].worldX = tileSize * 25; 
         npc[mapNum][1].worldY = tileSize * 21;
 
         npc[mapNum][2] = new NPC_3_Perry(this);
@@ -275,9 +297,6 @@ public class GamePanel extends JPanel implements Runnable{
         npc[mapNum][5].worldX = tileSize * 23;
         npc[mapNum][5].worldY = tileSize * 25;
 
-        // Pastikan posisi worldX dan worldY ini berada dalam batas peta Anda
-        // (maxWorldCol * tileSize dan maxWorldRow * tileSize)
-        // dan tidak bertabrakan dengan tile yang solid secara default.
     }
 
     public void startGameThread(){
@@ -298,10 +317,8 @@ public class GamePanel extends JPanel implements Runnable{
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime)/ drawInterval;
             timer += (currentTime - lastTime);
-           // System.out.println("current time" + currentTime);
+
             lastTime = currentTime;
-            //timer = 0;
-            //drawCount = 0;
 
             if(delta >= 1){
                 update(); //update posisi karakter
@@ -323,18 +340,18 @@ public class GamePanel extends JPanel implements Runnable{
                 }
                 Thread.sleep((long) remainingTime);
                 nextDrawTime += drawInterval;
-            }catch (InterruptedException e){
+            } catch (InterruptedException e){
                 e.printStackTrace();
             }
-
         }
     }
 
-    // Di dalam file GamePanel.java Anda
-
     public void update() {
+        boolean enterPressedThisFrame = keyH.enterPressed;
         boolean enterIsCurrentlyPressed = keyH.enterPressed;
+
         if (gameState == playState && !pendingSleep && !tvInteractionPendingConfirmation) {
+            
             boolean autoSleepConditionMet = false;
             String autoSleepMessage = "";
             if (player.energy <= -20) {
@@ -361,7 +378,7 @@ public class GamePanel extends JPanel implements Runnable{
                 keyH.enterPressed = false; 
             }
         } else if (gameState == playState) {
-            player.update(); 
+            player.update();
             for (int i = 0; i < npc[currentMap].length; i++) {
                 if (npc[currentMap][i] != null) npc[currentMap][i].update();
             }
@@ -402,6 +419,68 @@ public class GamePanel extends JPanel implements Runnable{
                         // ui.setDialogueMode("SYSTEM_MESSAGE");
                         gameState = dialogueState;
                         System.out.println("GAMEPANEL: Gagal memancing, tidak menghadap air.");
+                    }
+                }
+            }
+
+            else if (keyH.enterPressed) {
+                keyH.enterPressed = false; // Konsumsi Enter di awal untuk interaksi playState
+                boolean enterWasPressedForThisInteraction = keyH.enterPressed;
+
+                if (enterWasPressedForThisInteraction) {
+                    System.out.println("GAMEPANEL (playState): Enter terdeteksi untuk interaksi.");
+                    System.out.println("Player Pos: X=" + player.worldX / tileSize + ", Y=" + player.worldY / tileSize + ", Dir: " + player.direction);
+
+                    boolean interactionHandled = false;
+
+                    // 1. Prioritaskan Interaksi NPC
+                    int npcIndex = cChecker.checkEntity(player, npc);
+                    if (npcIndex != 999) {
+                        System.out.println("GAMEPANEL: Interaksi dengan NPC[" + npcIndex + "] terdeteksi.");
+                        player.interactNPC(npcIndex); // Ini akan set gameState = npcInteractionState
+                        interactionHandled = true;
+                    } else {
+                        // 2. Jika tidak ada NPC, baru cek Interaksi Objek
+                        System.out.println("GAMEPANEL: Tidak ada NPC terdeteksi. Mengecek objek...");
+                        int objIndex = cChecker.checkObject(player, true);
+                        System.out.println("GAMEPANEL: cChecker.checkObject mengembalikan objIndex: " + objIndex);
+
+                        if (objIndex != 999) {
+                            SuperObject interactedObject = obj[currentMap][objIndex];
+                            if (interactedObject != null) {
+                                System.out.println("GAMEPANEL: Berinteraksi dengan objek bernama: '" + interactedObject.name + "'");
+
+                                if ("Televisi".equals(interactedObject.name)) {
+                                    System.out.println("GAMEPANEL: Objek adalah 'Televisi'. Memulai konfirmasi.");
+                                    tvInteractionPendingConfirmation = true;
+                                    ui.setDialogue("Apakah kamu ingin menonton TV?", "TV_CONFIRM");
+                                    ui.commandNum = 0;
+                                    gameState = dialogueState;
+                                    interactionHandled = true;
+                                } else if ("Shipping Bin".equals(interactedObject.name)) { // <<<---- INI LOGIKA SHIPPING BIN
+                                    System.out.println("GAMEPANEL: Objek adalah 'Shipping Bin'.");
+                                    if (hasShippedToday) {
+                                        ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE");
+                                        gameState = dialogueState;
+                                        System.out.println("GAMEPANEL: Sudah menjual hari ini.");
+                                    } else {
+                                        isTimePaused = true; // Hentikan waktu game
+                                        gameState = shippingBinState; // Pindah ke state Shipping Bin
+                                        ui.slotCol = 0; // Reset kursor inventory untuk layar bin
+                                        ui.slotRow = 0;
+                                        System.out.println("GAMEPANEL: Masuk shippingBinState. Waktu dihentikan.");
+                                    }
+                                    interactionHandled = true;
+                                } else {
+                                    System.out.println("GAMEPANEL: Objek BUKAN 'Televisi' ataupun 'Shipping Bin'. Nama objek: '" + interactedObject.name + "'");
+                                    // Logika untuk interaksi objek lain jika ada
+                                }
+                            } else {
+                                System.err.println("GAMEPANEL: ERROR - interactedObject adalah null meskipun objIndex (" + objIndex + ") bukan 999.");
+                            }
+                        } else {
+                            System.out.println("GAMEPANEL: Tidak ada objek yang terdeteksi untuk interaksi pada posisi player saat ini.");
+                        }
                     }
                 }
             }
@@ -456,6 +535,28 @@ public class GamePanel extends JPanel implements Runnable{
                 }
                 else if (pendingSleep) {
                     executeSleepSequence();
+                } else if (gameState == shippingBinState) {
+                    System.out.println("GAMEPANEL: Masuk shippingBinState. Nilai enterPressedThisFrame SAAT MASUK BLOK: " + enterPressedThisFrame);
+
+                    if (enterPressedThisFrame) { // Gunakan status Enter yang sudah ditangkap
+                        System.out.println("GAMEPANEL (shippingBinState): BLOK if (enterPressedThisFrame) TERPANGGIL!");
+
+                        if (itemsToShip.size() >= 16) {
+                            ui.showMessage("Shipping Bin sudah penuh (maks 16 slot)!");
+                        } else {
+                            int selectedItemIndex = ui.getSelectedItemIndex();
+                            if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
+                                ItemStack stackToSell = player.inventory.get(selectedItemIndex);
+                                if (stackToSell != null && stackToSell.getItem() != null) {
+                                    itemsToShip.add(new ItemStack(stackToSell.getItem(), stackToSell.getQuantity()));
+                                    System.out.println("GAMEPANEL (shippingBinState): Item '" + stackToSell.getItem().getName() +
+                                                    "' x" + stackToSell.getQuantity() + " ditambahkan ke bin.");
+                                    player.inventory.remove(selectedItemIndex);
+                                    // Logika reset kursor UI jika perlu
+                                }
+                            }
+                        }
+                    }
                 } else {
                     System.out.println("GAMEPANEL (dialogueState): Menangani dialog biasa/sistem lainnya.");
                     if (player.currentInteractingNPC != null && ui.isDialogueFromNpcAction()){ 
@@ -801,6 +902,27 @@ public class GamePanel extends JPanel implements Runnable{
                 player.currentInteractingNPC = null;
                 ui.commandNum = 0; 
             }
+        } else if (gameState == shippingBinState) {
+            System.out.println("GAMEPANEL: Di dalam shippingBinState. keyH.enterPressed=" + keyH.enterPressed);
+
+            if (keyH.enterPressed) { // Pemain menekan Enter untuk memilih item yang akan dijual
+                keyH.enterPressed = false; // Konsumsi Enter
+
+                if (itemsToShip.size() >= 16) {
+                    ui.showMessage("Shipping Bin sudah penuh (maks 16 slot)!");
+                } else {
+                    int selectedItemIndex = ui.getSelectedItemIndex();
+                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
+                        ItemStack stackToSell = player.inventory.get(selectedItemIndex);
+                        if (stackToSell != null && stackToSell.getItem() != null) {
+                            itemsToShip.add(new ItemStack(stackToSell.getItem(), stackToSell.getQuantity()));
+                            System.out.println("GAMEPANEL (shippingBinState): Item '" + stackToSell.getItem().getName() +
+                                               "' x" + stackToSell.getQuantity() + " ditambahkan ke bin.");
+                            player.inventory.remove(selectedItemIndex);
+                        }
+                    }
+                }
+            }
         } else if (gameState == shoppingState) {
             if (keyH.enterPressed) {
             keyH.enterPressed = false; // Konsumsi input Enter
@@ -808,7 +930,6 @@ public class GamePanel extends JPanel implements Runnable{
             int currentSelectionInShop = ui.getShopSelectedItemIndex(); 
             int numberOfItemsForSale = emilyStore.getItemsForSale().size();
 
-            // Logika untuk debug:
             System.out.println("SHOPPING STATE - Enter Pressed. currentSelectionInShop: " + currentSelectionInShop +
                             ", numberOfItemsForSale: " + numberOfItemsForSale +
                             ", ui.CMD_SHOP_EXIT: " + ui.CMD_SHOP_EXIT);
@@ -940,12 +1061,7 @@ public class GamePanel extends JPanel implements Runnable{
                     currentFishingGuess = ""; // Reset input tebakan setelah diproses, siap untuk tebakan berikutnya atau akhir game
                 }
             }
-            // Jika pemain menekan tombol Escape (atau tombol batal lain) saat memancing
-            // if (keyH.escPressed) { // Anda perlu flag escPressed di KeyHandler
-            //     keyH.escPressed = false;
-            //     fishingFeedbackMessage = "Kamu berhenti memancing.";
-            //     endFishingMinigame(false, fishingFeedbackMessage);
-            // }
+
         }
 
         if (gameState == playState) {
@@ -965,33 +1081,48 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void executeSleepSequence() {
-        System.out.println("GAME PANEL: executeSleepSequence() dipanggil.");
-
+        System.out.println("GAMEPANEL: executeSleepSequence() dipanggil.");
+        // ... (logika pemulihan energi Anda) ...
         int currentEnergy = player.energy;
         int maxEnergy = player.maxEnergy;
         int restoredEnergy;
-
-        if (currentEnergy < (maxEnergy * 0.10f)) { 
-            restoredEnergy = maxEnergy / 2; 
-        } else {
-            restoredEnergy = maxEnergy; 
-        }
+        if (currentEnergy < (maxEnergy * 0.10f)) { restoredEnergy = maxEnergy / 2; }
+        else { restoredEnergy = maxEnergy; }
         player.energy = restoredEnergy;
         if (player.energy > maxEnergy) player.energy = maxEnergy;
-        System.out.println("GAME PANEL (executeSleepSequence): Energi dipulihkan menjadi: " + player.energy);
 
-        gameStateSystem.advanceToNextMorning();
-        System.out.println("GAME PANEL (executeSleepSequence): Waktu dimajukan. Info Waktu Baru: " +
-                        "Hari ke-" + gameStateSystem.getTimeManager().getDay() +
-                        ", Pukul " + gameStateSystem.getTimeManager().getFormattedTime());
 
-        ui.currentDialogue = "Selamat pagi! Hari baru telah dimulai.";
+        // --- PROSES PENJUALAN DARI SHIPPING BIN --- 
+        int goldEarnedToday = 0;
+        if (!itemsToShip.isEmpty()) {
+            System.out.println("GAMEPANEL: Memproses penjualan " + itemsToShip.size() + " jenis item dari bin...");
+            for (ItemStack shippedStack : itemsToShip) {
+                if (shippedStack != null && shippedStack.getItem() != null) {
+                    int itemSellValue = shippedStack.getItem().getSellPrice() * shippedStack.getQuantity();
+                    goldEarnedToday += itemSellValue;
+                    System.out.println("  - Menjual " + shippedStack.getItem().getName() + " x" + shippedStack.getQuantity() + " seharga " + itemSellValue + "G");
+                }
+            }
+            
+            player.changeGold(goldEarnedToday);
+            itemsToShip.clear(); // Kosongkan bin untuk hari berikutnya
+        } else {
+            System.out.println("GAMEPANEL: Tidak ada item yang dijual semalam.");
+        }
+        // --- AKHIR PROSES PENJUALAN ---
 
+        hasShippedToday = false; // Reset untuk hari baru 
+
+        gameStateSystem.advanceToNextMorning(); // Majukan ke pagi berikutnya
+        
+        String morningMessage = "Selamat pagi! Hari baru telah dimulai.";
+        if (goldEarnedToday > 0) {
+            morningMessage += "\nKamu mendapatkan " + goldEarnedToday + "G dari penjualan semalam!";
+        }
+        ui.setDialogue(morningMessage, "SYSTEM_MESSAGE");
         pendingSleep = false;
-        System.out.println("GAME PANEL (executeSleepSequence): pendingSleep direset ke false.");
-
-        gameState = playState;
-        System.out.println("GAME PANEL (executeSleepSequence): gameState diubah ke playState.");
+        gameState = dialogueState; // Tampilkan pesan pagi dulu
+        System.out.println("GAMEPANEL (executeSleepSequence): Selesai. pendingSleep=false. gameState=" + gameState);
     }
 
     public void paintComponent(Graphics g){

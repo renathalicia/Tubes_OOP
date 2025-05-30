@@ -83,6 +83,7 @@ public class KeyHandler implements KeyListener {
             if(code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN){ downPressed = true; }
             if(code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT){ leftPressed = true; }
             if(code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT){ rightPressed = true; }
+            if(code == KeyEvent.VK_P) { gp.gameState = gp.pauseState; }
             if(code == KeyEvent.VK_ESCAPE){ gp.gameState = gp.pauseState; }
             if(code == KeyEvent.VK_ENTER){ enterPressed = true; }
             if(code == KeyEvent.VK_SHIFT){shiftPressed = true; }
@@ -174,6 +175,37 @@ public class KeyHandler implements KeyListener {
             }
         }
 
+        // SELLING STATE
+        else if (gp.gameState == gp.shippingBinState) {
+            if (code == KeyEvent.VK_ESCAPE) {
+                System.out.println("KEYHANDLER (shippingBinState): ESCAPE ditekan. Memanggil finalizeAndExitShippingBin().");
+                gp.finalizeAndExitShippingBin(); // Metode baru di GamePanel untuk menyelesaikan
+            } else if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true; // GamePanel akan memproses pemilihan item untuk dijual
+                System.out.println("KEYHANDLER (shippingBinState): ENTER ditekan (pilih item).");
+            } else if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+                if (gp.ui.slotRow > 0) {
+                    gp.ui.slotRow--;
+                    // gp.playSE(SUARA_NAVIGASI);
+                }
+            } else if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+                if (gp.ui.slotRow < gp.ui.inventoryMaxRow - 1) { // Asumsi inventoryMaxRow ada di UI
+                    gp.ui.slotRow++;
+                    // gp.playSE(SUARA_NAVIGASI);
+                }
+            } else if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+                if (gp.ui.slotCol > 0) {
+                    gp.ui.slotCol--;
+                    // gp.playSE(SUARA_NAVIGASI);
+                }
+            } else if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+                if (gp.ui.slotCol < gp.ui.inventoryMaxCol - 1) { // Asumsi inventoryMaxCol ada di UI
+                    gp.ui.slotCol++;
+                    // gp.playSE(SUARA_NAVIGASI);
+                }
+            }
+        }
+
         // FISHING STATE
         else if (gp.gameState == gp.fishingState) {
             if (code == KeyEvent.VK_ENTER) {
@@ -229,7 +261,7 @@ public class KeyHandler implements KeyListener {
         }
         
         if (code == KeyEvent.VK_N) {
-            gp.gameStateSystem.getTimeManager().advanceToNextMorning();
+            gp.executeSleepSequence();
         }
     }
 
