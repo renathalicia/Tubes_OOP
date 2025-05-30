@@ -905,24 +905,65 @@ public class GamePanel extends JPanel implements Runnable{
         } else if (gameState == shippingBinState) {
             System.out.println("GAMEPANEL: Di dalam shippingBinState. keyH.enterPressed=" + keyH.enterPressed);
 
-            if (keyH.enterPressed) { // Pemain menekan Enter untuk memilih item yang akan dijual
-                keyH.enterPressed = false; // Konsumsi Enter
+            if (keyH.enterPressed) {
+    keyH.enterPressed = false;
+    int selectedIndexInView = ui.getSelectedItemIndexInSellableView(); // Dapatkan indeks dari daftar yang difilter
 
-                if (itemsToShip.size() >= 16) {
-                    ui.showMessage("Shipping Bin sudah penuh (maks 16 slot)!");
-                } else {
-                    int selectedItemIndex = ui.getSelectedItemIndex();
-                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
-                        ItemStack stackToSell = player.inventory.get(selectedItemIndex);
-                        if (stackToSell != null && stackToSell.getItem() != null) {
-                            itemsToShip.add(new ItemStack(stackToSell.getItem(), stackToSell.getQuantity()));
-                            System.out.println("GAMEPANEL (shippingBinState): Item '" + stackToSell.getItem().getName() +
-                                               "' x" + stackToSell.getQuantity() + " ditambahkan ke bin.");
-                            player.inventory.remove(selectedItemIndex);
-                        }
+    if (selectedIndexInView != -1) { // Pastikan ada item valid yang dipilih
+        // Dapatkan indeks asli item tersebut di player.inventory
+        int originalInventoryIndex = ui.sellableItemsOriginalIndices.get(selectedIndexInView);
+        ItemStack stackInPlayerInventory = player.inventory.get(originalInventoryIndex);
+
+        // --- Logika menjual satu item (dari respons sebelumnya) ---
+        if (stackInPlayerInventory != null && stackInPlayerInventory.getItem() != null && stackInPlayerInventory.getQuantity() > 0) {
+            Item itemToSell = stackInPlayerInventory.getItem();
+
+            // Pastikan lagi (meskipun sudah difilter) bahwa item punya harga jual
+            if (itemToSell.getSellPrice() <= 0) {
+                ui.showMessage("Item ini tidak bisa dijual.");
+                // Tidak perlu return atau continue di sini karena seharusnya tidak terpilih
+            } else {
+                boolean itemProcessedForBin = false;
+                boolean mergedWithExistingInBin = false;
+                // ... (logika merge atau add ke itemsToShip seperti respons sebelumnya) ...
+                for (ItemStack stackInBin : itemsToShip) {
+                    if (stackInBin.getItem().getName().equals(itemToSell.getName())) {
+                        stackInBin.addQuantity(1);
+                        mergedWithExistingInBin = true;
+                        itemProcessedForBin = true;
+                        System.out.println("GAMEPANEL (shippingBinState): Menambah jumlah '" + itemToSell.getName() + "' di bin.");
+                        break;
                     }
                 }
+                if (!mergedWithExistingInBin) {
+                    if (itemsToShip.size() < 16) { // Max 16 unique item types
+                        itemsToShip.add(new ItemStack(itemToSell, 1));
+                        itemProcessedForBin = true;
+                        System.out.println("GAMEPANEL (shippingBinState): Menambah item baru '" + itemToSell.getName() + "' (x1) ke bin.");
+                    } else {
+                        ui.showMessage("Shipping Bin penuh untuk JENIS item baru!");
+                    }
+                }
+                // --- Akhir logika merge atau add ---
+
+                if (itemProcessedForBin) {
+                    stackInPlayerInventory.removeQuantity(1);
+                    System.out.println("GAMEPANEL (shippingBinState): Mengurangi 1 '" + itemToSell.getName() + "' dari inventory. Sisa: " + stackInPlayerInventory.getQuantity());
+                    if (stackInPlayerInventory.getQuantity() <= 0) {
+                        player.inventory.remove(originalInventoryIndex);
+                        System.out.println("GAMEPANEL (shippingBinState): Stack '" + itemToSell.getName() + "' habis dan dihapus.");
+                    }
+                    // !!! PENTING: Setelah inventaris pemain berubah, filter ulang daftar di UI !!!
+                    ui.filterSellableItemsForShipping(player);
+                    // Kursor mungkin perlu disesuaikan lagi di sini jika item yang dipilih hilang
+                    // Metode filterSellableItemsForShipping sudah mencoba menyesuaikan kursor.
+                }
             }
+        }
+        // --- Akhir logika menjual satu item ---
+    }
+}
+            // Logika navigasi (W/A/S/D/Escape) di shippingBinState tetap sama
         } else if (gameState == shoppingState) {
             if (keyH.enterPressed) {
             keyH.enterPressed = false; // Konsumsi input Enter

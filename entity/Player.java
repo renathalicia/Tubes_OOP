@@ -170,6 +170,7 @@ public class Player extends Entity {
                 } else {
                     gp.isTimePaused = true; // Akses isTimePaused dari GamePanel
                     gp.gameState = gp.shippingBinState; // Akses gameState dan shippingBinState dari GamePanel
+                    gp.ui.filterSellableItemsForShipping(gp.player);
                     gp.ui.slotCol = 0; // Akses ui dari GamePanel
                     gp.ui.slotRow = 0;
                     System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
