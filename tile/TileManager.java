@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import object.CropObject;
 
 import javax.imageio.ImageIO;
 import main.GamePanel;
@@ -14,11 +15,13 @@ public class TileManager {
     GamePanel gp;
     public Tile[] tile;
     public int mapTileNum[][][];
+    public CropObject[][] cropMap;
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
         tile = new Tile[60];
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
+        cropMap = new CropObject[gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
         loadMap(0, "/res/maps/worldV3.txt");
@@ -85,7 +88,7 @@ public class TileManager {
         setup(54, "stone", true);
         setup(55, "tilled", false);
         setup(56, "planted", false);
-
+        setup(57, "planted", false);
     }
 
     public void setup(int index, String imageName, boolean collision) {
