@@ -37,6 +37,117 @@ public class Player extends Entity {
 
     public Entity currentInteractingNPC = null; // Menyimpan NPC yang sedang diajak interaksi
 
+    public boolean isFacingWaterTile() {
+        int pWorldX = this.worldX; // Gunakan this untuk merujuk field Player
+        int pWorldY = this.worldY;
+        String pDirection = this.direction;
+        int tileSize = gp.tileSize; // Ambil tileSize dari GamePanel
+
+        int tileX1 = pWorldX; // Koordinat X untuk tile pertama di depan
+        int tileY1 = pWorldY; // Koordinat Y untuk tile pertama di depan
+        int tileX2 = pWorldX; // Koordinat X untuk tile kedua di depan
+        int tileY2 = pWorldY; // Koordinat Y untuk tile kedua di depan
+
+        // Tentukan koordinat untuk dua tile di depan pemain berdasarkan arah
+        // Kita akan menggunakan titik tengah pemain sebagai referensi awal,
+        // lalu bergerak maju berdasarkan solidArea atau tileSize.
+        // Untuk kesederhanaan, kita akan cek tile berdasarkan pergerakan 1 dan 2 tileSize.
+
+        switch(pDirection) {
+            case "up":
+                // Tile 1 di depan (dari tengah player)
+                tileY1 = pWorldY - tileSize; // Y dari tile di atas player
+                tileX1 = pWorldX;            // X tetap sama dengan player (cek tile lurus di atas)
+                // Tile 2 di depan
+                tileY2 = pWorldY - (tileSize * 2);
+                tileX2 = pWorldX;
+                break;
+            case "down":
+                tileY1 = pWorldY + tileSize;
+                tileX1 = pWorldX;
+                tileY2 = pWorldY + (tileSize * 2);
+                tileX2 = pWorldX;
+                break;
+            case "left":
+                tileX1 = pWorldX - tileSize;
+                tileY1 = pWorldY;
+                tileX2 = pWorldX - (tileSize * 2);
+                tileY2 = pWorldY;
+                break;
+            case "right":
+                tileX1 = pWorldX + tileSize;
+                tileY1 = pWorldY;
+                tileX2 = pWorldX + (tileSize * 2);
+                tileY2 = pWorldY;
+                break;
+        }
+
+        // Fungsi helper untuk mengecek satu tile
+        // Anda bisa letakkan ini di Player.java atau sebagai private static method jika hanya dipakai di sini
+        // atau di kelas Utility jika dipakai di banyak tempat.
+        // Untuk sekarang, kita buat sebagai inner lambda atau panggil langsung.
+
+        // Cek tile pertama di depan
+        if (checkSpecificTileIsWater(tileX1, tileY1)) {
+            System.out.println("PLAYER: Menghadap air di tile 1 di depan.");
+            return true;
+        }
+
+        // Cek tile kedua di depan
+        if (checkSpecificTileIsWater(tileX2, tileY2)) {
+            System.out.println("PLAYER: Menghadap air di tile 2 di depan.");
+            return true;
+        }
+        
+        System.out.println("PLAYER: Tidak menghadap air dalam jangkauan 2 tile di depan.");
+        return false;
+    }
+
+    /**
+     * Helper method untuk mengecek apakah tile pada koordinat dunia tertentu adalah air (kode 12)
+     * dan bisa dipancing (tidak solid).
+     * @param worldX Koordinat X dunia dari tile
+     * @param worldY Koordinat Y dunia dari tile
+     * @return true jika tile adalah air yang valid, false jika tidak.
+     */
+    private boolean checkSpecificTileIsWater(int worldX, int worldY) {
+        if (gp == null || gp.tileM == null) return false; // Pengaman
+
+        int tileCol = worldX / gp.tileSize;
+        int tileRow = worldY / gp.tileSize;
+
+        // Pengecekan batas peta
+        if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
+            // System.out.println("checkSpecificTileIsWater: Koordinat (" + tileCol + "," + tileRow + ") di luar batas peta.");
+            return false; // Di luar batas peta
+        }
+
+        // Pengecekan batas array mapTileNum
+        if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
+            tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
+            tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
+            System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
+            return false;
+        }
+        
+        int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
+
+        // Pengecekan batas array tile properties
+        if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
+            System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
+            return false;
+        }
+
+        // Cek apakah tile tersebut adalah air (kode 12)
+        // dan tile tersebut tidak memiliki properti collision (agar tidak bisa memancing di atas tembok air)
+        // atau jika tile air itu sendiri punya flag 'isWater' atau 'canFish'.
+        // Untuk sekarang, kita asumsikan tile 12 = air dan jika !collision, bisa dipancing.
+        if (tileNum == 12 && !gp.tileM.tile[tileNum].collision) {
+            return true;
+        }
+        return false;
+    }
+    
     public boolean removeItem(String itemName, int quantityToRemove) {
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack currentItemStack = inventory.get(i);

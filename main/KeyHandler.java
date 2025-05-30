@@ -11,7 +11,7 @@ import command.WaterCommand;
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed, fPressed;
     public boolean shiftPressed;
     boolean showDebugText = false;
     public int lastPresseedDirectionKey = 0;
@@ -82,7 +82,7 @@ public class KeyHandler implements KeyListener {
             if(code == KeyEvent.VK_ESCAPE){ gp.gameState = gp.pauseState; }
             if(code == KeyEvent.VK_ENTER){ enterPressed = true; }
             if(code == KeyEvent.VK_SHIFT){shiftPressed = true; }
-
+            if (code == KeyEvent.VK_F) {fPressed = true; }
             if(code == KeyEvent.VK_I){
                 gp.gameState = gp.inventoryState; // Pindah ke inventory state
                 gp.playSE(5);
@@ -142,6 +142,36 @@ public class KeyHandler implements KeyListener {
         // NPC INTERACTION STATE
         else if (gp.gameState == gp.npcInteractionState) {
             npcInteractionState(code);
+        }
+
+        // FISHING STATE
+        else if (gp.gameState == gp.fishingState) {
+            if (code == KeyEvent.VK_ENTER) {
+                enterPressed = true; // GamePanel akan memproses tebakan
+                System.out.println("KEYHANDLER (fishingState): Enter ditekan.");
+            } else if (code == KeyEvent.VK_BACK_SPACE) { // Untuk menghapus karakter terakhir
+                if (gp.currentFishingGuess != null && !gp.currentFishingGuess.isEmpty()) {
+                    gp.currentFishingGuess = gp.currentFishingGuess.substring(0, gp.currentFishingGuess.length() - 1);
+                    System.out.println("KEYHANDLER (fishingState): Backspace. Tebakan sekarang: " + gp.currentFishingGuess);
+                }
+            } else if (code >= KeyEvent.VK_0 && code <= KeyEvent.VK_9) { // Hanya terima input angka 0-9
+                // Batasi panjang input angka, misalnya maksimal 3 digit jika angka terbesar adalah 500
+                int maxInputLength = 3;
+                if (gp.fishingMaxRange >= 1000) maxInputLength = 4; // Sesuaikan jika ada rentang lebih besar
+
+                if (gp.currentFishingGuess.length() < maxInputLength) {
+                    gp.currentFishingGuess += (char) code; // Tambahkan digit ke string tebakan
+                    System.out.println("KEYHANDLER (fishingState): Angka '" + (char)code + "' ditekan. Tebakan sekarang: " + gp.currentFishingGuess);
+                }
+            } else if (code == KeyEvent.VK_ESCAPE) { // Opsi untuk membatalkan memancing
+                System.out.println("KEYHANDLER (fishingState): Escape ditekan, membatalkan memancing.");
+                // GamePanel akan menangani logika pembatalan jika diperlukan,
+                // atau kita bisa langsung panggil endFishingMinigame dari sini.
+                // Untuk konsistensi, biarkan GamePanel yang memproses jika ada flag khusus untuk Escape.
+                // Tapi untuk sederhana, kita bisa langsung akhiri:
+                gp.fishingFeedbackMessage = "Kamu berhenti memancing.";
+                gp.endFishingMinigame(false, gp.fishingFeedbackMessage); // Langsung akhiri jika Escape ditekan
+            }
         }
 
         // tilling and planting
@@ -261,6 +291,9 @@ public class KeyHandler implements KeyListener {
         }
         if(code == KeyEvent.VK_SHIFT){
             shiftPressed = false;
+        }
+        if (code == KeyEvent.VK_F) {
+            fPressed = false;
         }
     }
 }

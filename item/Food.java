@@ -38,20 +38,20 @@ public class Food extends Item {
 
     @Override
     public void use() {
-        if (gp.player != null) {
-            gp.player.gainEnergy(this.energiYangDiberikan); // Menggunakan metode gainEnergy dari Player.java
-            gp.ui.showMessage("Anda memakan " + getName() + " dan memulihkan " + this.energiYangDiberikan + " energi.");
-            System.out.println(gp.player.name + " memakan " + getName() + ". Energi +" + this.energiYangDiberikan);
+        if (this.gp != null && this.gp.player != null) {
+            this.gp.player.gainEnergy(getEnergyValue());
+            
+            // Ini akan menggunakan drawDialogueScreen() untuk menampilkan pesan
+            this.gp.ui.currentDialogue = "Anda memakan " + getName() + ".\nEnergi pulih +" + getEnergyValue() + "!";
+            // Atur mode dialog jika Anda punya, agar GamePanel tahu cara menutupnya
+            // this.gp.ui.setDialogueMode("SYSTEM_MESSAGE"); // atau "ITEM_USE_RESULT"
+            this.gp.gameState = gp.dialogueState; // Pindah ke dialogueState untuk menampilkan pesan
 
-            // Menggunakan metode removeItem dari Player.java untuk mengurangi item dari inventory
-            boolean itemRemoved = gp.player.removeItem(this.getName(), 1);
-            if (!itemRemoved) {
-                System.out.println("Peringatan: Gagal mengurangi " + getName() + " dari inventory setelah digunakan.");
-                // Anda mungkin ingin menangani kasus ini lebih lanjut jika diperlukan
+            if (this.gp.player.removeItem(this.getName(), 1)) {
+                this.gp.gameStateSystem.advanceTimeByMinutes(5); // Biaya waktu makan
+            } else {
+                // Handle jika item gagal dihapus (seharusnya tidak terjadi jika logika benar)
             }
-        } else {
-            System.out.println("Objek Player tidak ditemukan di GamePanel. Makanan tidak bisa digunakan.");
-            gp.ui.showMessage("Error: Tidak bisa menggunakan " + getName() + ".");
         }
     }
 }
