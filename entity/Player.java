@@ -7,15 +7,17 @@ import main.AssetSetter;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
-
 import javax.imageio.ImageIO;
 
+import environment.GameState;
 import environment.Weather;
-
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import object.CropObject;
+import object.SuperObject;
 
 public class Player extends Entity {
 
@@ -33,10 +35,168 @@ public class Player extends Entity {
     public String partner;
     public int gold;
     public ArrayList<ItemStack> inventory = new ArrayList<>();
-    public final int inventorySize = 10; // Ukuran inventaris, bisa diubah sesuai kebutuhan
+    public final int inventorySize = 10; 
 
-    public Entity currentInteractingNPC = null; // Menyimpan NPC yang sedang diajak interaksi
+    public Entity currentInteractingNPC = null; 
 
+    public boolean isFacingWaterTile() {
+        int pWorldX = this.worldX; // Gunakan this untuk merujuk field Player
+        int pWorldY = this.worldY;
+        String pDirection = this.direction;
+        int tileSize = gp.tileSize; // Ambil tileSize dari GamePanel
+
+        int tileX1 = pWorldX; // Koordinat X untuk tile pertama di depan
+        int tileY1 = pWorldY; // Koordinat Y untuk tile pertama di depan
+        int tileX2 = pWorldX; // Koordinat X untuk tile kedua di depan
+        int tileY2 = pWorldY; // Koordinat Y untuk tile kedua di depan
+
+        // Tentukan koordinat untuk dua tile di depan pemain berdasarkan arah
+        // Kita akan menggunakan titik tengah pemain sebagai referensi awal,
+        // lalu bergerak maju berdasarkan solidArea atau tileSize.
+        // Untuk kesederhanaan, kita akan cek tile berdasarkan pergerakan 1 dan 2 tileSize.
+
+        switch(pDirection) {
+            case "up":
+                // Tile 1 di depan (dari tengah player)
+                tileY1 = pWorldY - tileSize; // Y dari tile di atas player
+                tileX1 = pWorldX;            // X tetap sama dengan player (cek tile lurus di atas)
+                // Tile 2 di depan
+                tileY2 = pWorldY - (tileSize * 2);
+                tileX2 = pWorldX;
+                break;
+            case "down":
+                tileY1 = pWorldY + tileSize;
+                tileX1 = pWorldX;
+                tileY2 = pWorldY + (tileSize * 2);
+                tileX2 = pWorldX;
+                break;
+            case "left":
+                tileX1 = pWorldX - tileSize;
+                tileY1 = pWorldY;
+                tileX2 = pWorldX - (tileSize * 2);
+                tileY2 = pWorldY;
+                break;
+            case "right":
+                tileX1 = pWorldX + tileSize;
+                tileY1 = pWorldY;
+                tileX2 = pWorldX + (tileSize * 2);
+                tileY2 = pWorldY;
+                break;
+        }
+
+        // Fungsi helper untuk mengecek satu tile
+        // Anda bisa letakkan ini di Player.java atau sebagai private static method jika hanya dipakai di sini
+        // atau di kelas Utility jika dipakai di banyak tempat.
+        // Untuk sekarang, kita buat sebagai inner lambda atau panggil langsung.
+
+        // Cek tile pertama di depan
+        if (checkSpecificTileIsWater(tileX1, tileY1)) {
+            System.out.println("PLAYER: Menghadap air di tile 1 di depan.");
+            return true;
+        }
+
+        // Cek tile kedua di depan
+        if (checkSpecificTileIsWater(tileX2, tileY2)) {
+            System.out.println("PLAYER: Menghadap air di tile 2 di depan.");
+            return true;
+        }
+        
+        System.out.println("PLAYER: Tidak menghadap air dalam jangkauan 2 tile di depan.");
+        return false;
+    }
+
+    /**
+     * Helper method untuk mengecek apakah tile pada koordinat dunia tertentu adalah air (kode 12)
+     * dan bisa dipancing (tidak solid).
+     * @param worldX Koordinat X dunia dari tile
+     * @param worldY Koordinat Y dunia dari tile
+     * @return true jika tile adalah air yang valid, false jika tidak.
+     */
+    private boolean checkSpecificTileIsWater(int worldX, int worldY) {
+        if (gp == null || gp.tileM == null) return false; // Pengaman
+
+        int tileCol = worldX / gp.tileSize;
+        int tileRow = worldY / gp.tileSize;
+
+        // Pengecekan batas peta
+        if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
+            // System.out.println("checkSpecificTileIsWater: Koordinat (" + tileCol + "," + tileRow + ") di luar batas peta.");
+            return false; // Di luar batas peta
+        }
+
+        // Pengecekan batas array mapTileNum
+        if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
+            tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
+            tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
+            System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
+            return false;
+        }
+        
+        int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
+
+        // Pengecekan batas array tile properties
+        if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
+            System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
+            return false;
+        }
+
+        // Cek apakah tile tersebut adalah air (kode 12)
+        // dan tile tersebut tidak memiliki properti collision (agar tidak bisa memancing di atas tembok air)
+        // atau jika tile air itu sendiri punya flag 'isWater' atau 'canFish'.
+        // Untuk sekarang, kita asumsikan tile 12 = air dan jika !collision, bisa dipancing.
+        if (tileNum == 12 && !gp.tileM.tile[tileNum].collision) {
+            return true;
+        }
+        return false;
+    }
+
+    public void interactWithObject(int objIndex) {
+        if (objIndex == 999) { // Jika tidak ada objek yang terdeteksi
+            return;
+        }
+
+        // Dapatkan objek yang berinteraksi dari array objek di GamePanel
+        SuperObject interactedObject = gp.obj[gp.currentMap][objIndex];
+
+        if (interactedObject != null) {
+            String objectName = interactedObject.name;
+            System.out.println("PLAYER: Berinteraksi dengan objek: " + objectName + " melalui Player.java");
+
+            // Logika untuk SHIPPING BIN
+            if ("Shipping Bin".equals(objectName)) {
+                if (gp.hasShippedToday) { // Akses hasShippedToday dari GamePanel
+                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE"); // Akses ui dari GamePanel
+                    gp.gameState = gp.dialogueState; // Akses gameState dan dialogueState dari GamePanel
+                } else {
+                    gp.isTimePaused = true; // Akses isTimePaused dari GamePanel
+                    gp.gameState = gp.shippingBinState; // Akses gameState dan shippingBinState dari GamePanel
+                    gp.ui.filterSellableItemsForShipping(gp.player);
+                    gp.ui.slotCol = 0; // Akses ui dari GamePanel
+                    gp.ui.slotRow = 0;
+                    System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
+                }
+                // gp.interactionHandled = true; // Variabel ini lokal untuk GamePanel, mungkin tidak diperlukan di sini
+                                            // atau perlu cara lain untuk menandakan interaksi sudah ditangani jika diperlukan.
+            }
+            // Logika untuk TELEVISI (menggunakan metode watchTV() yang sudah ada jika sesuai)
+            else if ("Television".equals(objectName)) {
+                // Anda bisa memanggil metode watchTV() yang sudah ada di Player.java
+                // atau memindahkan logika konfirmasi TV ke sini jika perlu.
+                // Untuk sekarang, asumsikan watchTV() sudah menangani interaksi TV:
+                watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
+            }
+            // Tambahkan else if untuk objek lain di sini
+            // else if ("Bed".equals(objectName)) {
+            // gp.gameState = gp.sleepState;
+            // }
+            else {
+                System.out.println("PLAYER: Objek '" + objectName + "' belum memiliki interaksi khusus di Player.java.");
+            }
+        } else {
+            System.err.println("PLAYER: Interacted object is null for index: " + objIndex);
+        }
+    }
+    
     public boolean removeItem(String itemName, int quantityToRemove) {
         for (int i = 0; i < inventory.size(); i++) {
             ItemStack currentItemStack = inventory.get(i);
@@ -50,12 +210,12 @@ public class Player extends Entity {
                     return true;
                 } else {
                     System.out.println("Not enough " + itemName + " ("+ currentItemStack.getQuantity() +") to remove " + quantityToRemove + ".");
-                    return false; // Tidak cukup kuantitas
+                    return false; 
                 }
             }
         }
         System.out.println(itemName + " not found in inventory to remove.");
-        return false; // Item tidak ditemukan
+        return false; 
     }
 
     public void addTestGiftableItems() {
@@ -94,7 +254,7 @@ public class Player extends Entity {
         name = "Bujanginam";
         gender = "Male";
         energy = maxEnergy;
-        gold = 0;
+        gold = 3000;
         farmName = "Tanah Batak";
         partner = "None";
 
@@ -104,20 +264,18 @@ public class Player extends Entity {
     }
 
     public void setInitialInventoryItems() {
-        //Item (Equipment) yang default dimiliki oleh Player
-        Hoe hoe = new Hoe();
-        inventory.add(new ItemStack(hoe, 1));
-
-        Pickaxe pickAxe = new Pickaxe();
-        inventory.add(new ItemStack(pickAxe, 1));
-
-        WateringCan wateringCan = new WateringCan();
-        inventory.add(new ItemStack(wateringCan, 1));
-
-        FishingRod fishingRod = new FishingRod();
-        inventory.add(new ItemStack(fishingRod, 1));
-
-        inventory.add(new ItemStack(new ProposalRing(), 1));
+        if(ItemRepository.Parsnip_Seeds != null ) {
+            inventory.add(new ItemStack(ItemRepository.Parsnip_Seeds, 15));
+        } 
+        if (ItemRepository.Hoe != null && ItemRepository.Watering_Can != null && ItemRepository.Pickaxe != null && ItemRepository.Fishing_Rod != null) {
+            inventory.add(new ItemStack(ItemRepository.Hoe, 1));
+            inventory.add(new ItemStack(ItemRepository.Watering_Can, 1));
+            inventory.add(new ItemStack(ItemRepository.Pickaxe, 1));
+            inventory.add(new ItemStack(ItemRepository.Fishing_Rod, 1));
+        } 
+        else {
+            System.out.println("Item tidak ditemukan di ItemRepository.");
+        }
     }
 
     public BufferedImage setUpItemImage(String imagePath) {
@@ -134,7 +292,7 @@ public class Player extends Entity {
             System.out.println("Gagal memuat gambar item: " + imagePath + ".png");
             e.printStackTrace();
         }
-            return image;
+        return image;
     }
 
     public void getPlayerImage() {
@@ -188,8 +346,65 @@ public class Player extends Entity {
         }
 
     if (keyH.enterPressed) {
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-        interactNPC(npcIndex);
+        // Konsumsi tombol Enter agar tidak diproses berulang kali dalam satu frame oleh sistem lain
+        // Namun, interactNPC dan interactWithObject mungkin perlu tahu bahwa Enter baru saja ditekan.
+        // Untuk amannya, biarkan interactNPC dan interactWithObject yang mereset keyH.enterPressed jika perlu.
+        // Atau, reset di sini setelah semua pengecekan interaksi.
+
+        System.out.println("PLAYER.UPDATE: Enter ditekan.");
+
+        // 1. Prioritaskan Interaksi NPC
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc); // Cek NPC
+        if (npcIndex != 999) {
+            System.out.println("PLAYER.UPDATE: NPC terdeteksi (index: " + npcIndex + "), panggil interactNPC.");
+            interactNPC(npcIndex); // Metode interactNPC Anda akan menangani ini
+                                   // pastikan interactNPC mereset keyH.enterPressed jika sudah diproses.
+        } else {
+            // 2. Jika tidak ada NPC, cek Interaksi Objek
+            System.out.println("PLAYER.UPDATE: Tidak ada NPC terdeteksi, cek objek.");
+            int objIndex = gp.cChecker.checkObject(this, true); // Cek objek di depan pemain
+            if (objIndex != 999) {
+                System.out.println("PLAYER.UPDATE: Objek terdeteksi (index: " + objIndex + "), panggil interactWithObject.");
+                interactWithObject(objIndex); // Panggil metode baru Anda
+            } else {
+                System.out.println("PLAYER.UPDATE: Tidak ada NPC atau Objek yang bisa diajak berinteraksi.");
+            }
+        }
+        keyH.enterPressed = false; // Reset enterPressed di sini setelah semua potensi interaksi dicek.
+    }
+    // Logika Gerakan (HANYA JIKA TIDAK ADA ENTER YANG BARU DIPROSES UNTUK INTERAKSI)
+    // dan ada tombol arah yang ditekan
+    else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+        collisionOn = false;
+        gp.cChecker.checkTile(this);
+
+        // Untuk tabrakan objek saat bergerak, kita tidak ingin memicu interaksi, hanya tabrakan fisik.
+        // Metode checkObject bisa dimodifikasi atau dipanggil dengan flag berbeda jika hanya untuk tabrakan.
+        // Untuk sekarang, kita asumsikan checkObject tidak memicu interaksi di sini.
+        gp.cChecker.checkObject(this, false); // `false` berarti bukan untuk interaksi, hanya cek tabrakan
+
+        // Cek tabrakan NPC saat bergerak
+        gp.cChecker.checkEntity(this, gp.npc); // Sama, hanya untuk tabrakan
+
+        gp.eHandler.checkEvent();
+
+        if (!collisionOn) {
+            switch (direction) {
+                case "up": worldY -= speed; break;
+                case "down": worldY += speed; break;
+                case "left": worldX -= speed; break;
+                case "right": worldX += speed; break;
+            }
+            isMoving = true;
+        }
+
+        if (isMoving) { // Tidak perlu cek gp.gameState == gp.playState di sini karena sudah di playState
+            spriteCounter++;
+            if (spriteCounter > 10) {
+                spriteNum = (spriteNum == 1) ? 2 : 1;
+                spriteCounter = 0;
+            }
+        }
     }
 
         else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
@@ -231,20 +446,6 @@ public class Player extends Entity {
 
             }
         }
-
-        if(energy <= 0){
-            if(energy > -20){
-                gp.gameState = gp.dialogueState;
-                gp.ui.currentDialogue = "Anda kelelahan! Energi: " + energy;
-            } else {
-                gp.gameState = gp.sleepState;
-                worldX = gp.tileSize * 12; // Reset posisi ke tempat tidur
-                worldY = gp.tileSize * 13; // Reset posisi ke tempat tidur
-
-                energy = maxEnergy; // Reset energi saat tidur
-                gp.player.direction = "down"; // Mengatur arah ke bawah saat tidur
-            }
-        }
     }
 
     public void pickUpObject(int i) {
@@ -254,8 +455,7 @@ public class Player extends Entity {
         if (objectName.equals("Television")) {
             watchTV();
         }
-        // else if untuk object lain seperti bed, stove, dsb
-        }
+    }
     }
 
     public void interactNPC(int i) {
@@ -295,7 +495,7 @@ public class Player extends Entity {
     public void changeGold(int amount) {
         gold += amount;
         if (gold < 0) {
-            gold = 0; // Pastikan gold tidak negatif
+            gold = 0; 
         }
     }
 
@@ -343,95 +543,210 @@ public class Player extends Entity {
 
     // action tilling
     public boolean tileLand() {
-    int centerX = worldX + solidArea.x + (solidArea.width / 2);
-    int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
 
-    int col = centerX / gp.tileSize;
-    int row = centerY / gp.tileSize;
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
 
-    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-    if (tileIndex >= 43 && tileIndex <= 51) {
-        if (!hasItem("Hoe")) {
-            gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
+        if (tileIndex >= 43 && tileIndex <= 51) {
+            if (!hasItem("Hoe")) {
+                gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
+                gp.gameState = gp.dialogueState;
+                return true;
+            }
+
+            if (!consumeEnergy(5)) return true;
+
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; 
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Menambahkan item ke inventaris pemain.
+     * Akan mencoba menumpuk item jika stackable dan ada stack yang sama dengan ruang kosong.
+     * Jika tidak, atau jika stack penuh, akan membuat stack baru jika ada slot kosong.
+     *
+     * @param itemToAdd Item yang akan ditambahkan.
+     * @param quantity Jumlah item yang akan ditambahkan.
+     * @return true jika setidaknya sebagian item berhasil ditambahkan, false jika tidak ada yang bisa ditambahkan.
+     */
+    public boolean addItemToInventory(Item itemToAdd, int quantity) {
+        if (itemToAdd == null || quantity <= 0) {
+            System.out.println("addItemToInventory: Item null atau quantity tidak valid.");
+            return false;
+        }
+
+        int originalQuantity = quantity; 
+        int remainingQuantity = quantity;
+        if (itemToAdd.stackable) {
+            for (ItemStack stack : inventory) {
+                if (stack.getItem() != null && stack.getItem().getName().equals(itemToAdd.getName())) {
+                    if (stack.getQuantity() < itemToAdd.maxStackAmount) {
+                        int spaceInStack = itemToAdd.maxStackAmount - stack.getQuantity();
+                        int amountToAddToThisStack = Math.min(remainingQuantity, spaceInStack);
+                        stack.addQuantity(amountToAddToThisStack);
+                        remainingQuantity -= amountToAddToThisStack;
+                        System.out.println("Menambahkan " + amountToAddToThisStack + " ke tumpukan " + itemToAdd.getName() + ". Sisa: " + remainingQuantity);
+
+                        if (remainingQuantity <= 0) {
+                            gp.ui.showMessage("Menambahkan " + originalQuantity + " " + itemToAdd.getName() + ".");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        while (remainingQuantity > 0) {
+            if (inventory.size() < inventorySize) {
+                int amountForNewStack;
+                if (itemToAdd.stackable) {
+                    amountForNewStack = Math.min(remainingQuantity, itemToAdd.maxStackAmount);
+                } else {
+                    amountForNewStack = 1;
+                }
+
+                inventory.add(new ItemStack(itemToAdd, amountForNewStack));
+                remainingQuantity -= amountForNewStack;
+                System.out.println("Membuat tumpukan baru untuk " + itemToAdd.getName() + " sejumlah " + amountForNewStack + ". Sisa: " + remainingQuantity);
+
+                if (remainingQuantity <= 0) {
+                    gp.ui.showMessage("Menambahkan " + originalQuantity + " " + itemToAdd.getName() + ".");
+                    return true;
+                }
+            } else {
+                // Tidak ada slot kosong lagi di inventaris, tetapi masih ada sisa item
+                gp.ui.showMessage("Inventaris penuh! Tidak semua " + itemToAdd.getName() + " bisa ditambahkan.");
+                System.out.println("Inventaris penuh. Sisa " + remainingQuantity + " " + itemToAdd.getName() + " tidak dapat ditambahkan.");
+                return originalQuantity > remainingQuantity;
+            }
+        }
+        return true;
+    }
+
+    public boolean hasItem(String itemName) {
+        for (ItemStack stack : inventory) {
+            if (stack.getItem() != null && stack.getItem().getName().equalsIgnoreCase(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // action planting
+    public boolean plantSeed() {
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
+
+        int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+        // Pastikan tile dibajak
+        if (tileIndex == 55 && gp.tileM.cropMap[col][row] == null) {
+            ItemStack seed = getSeedFromInventory();
+            if (seed == null) {
+                gp.ui.currentDialogue = "Kamu tidak punya seed!";
+                gp.gameState = gp.dialogueState;
+                return true;
+            }
+
+            if (!consumeEnergy(5)) return true;
+
+            removeItem(seed.getItem().getName(), 1);
+            gp.tileM.cropMap[col][row] = new CropObject(
+                    seed.getItem().getName(),
+                    gp.gameStateSystem.getTimeManager().getDay()
+            );
+
+            gp.ui.currentDialogue = "Berhasil menanam " + seed.getItem().getName();
+            gp.gameState = gp.dialogueState;
+            return true;
+        }
+        return false;
+    }
+    public ItemStack getSeedFromInventory() {
+        for (ItemStack stack : inventory) {
+            if (stack.getItem() != null && stack.getItem() instanceof Seed) {
+                return stack;
+            }
+        }
+        return null;
+    }
+    // watering
+    public boolean waterTile() {
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
+
+        Weather weather = gp.gameStateSystem.getTimeManager().getWeather();
+        int currentDay = gp.gameStateSystem.getTimeManager().getDay();
+
+        if (weather == Weather.RAINY) {
+            gp.ui.currentDialogue = "Hari ini hujan, tidak perlu menyiram!";
             gp.gameState = gp.dialogueState;
             return true;
         }
 
-        if (!consumeEnergy(5)) return true;
-
-        gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // jadi tile 55
-        return true;
-    }
-
-    return false;
-}
-
-public boolean hasItem(String itemName) {
-    for (ItemStack stack : inventory) {
-        if (stack.getItem() != null && stack.getItem().getName().equalsIgnoreCase(itemName)) {
-            return true;
+        // Cek apakah ada tanaman (dari cropMap, bukan tile index)
+        CropObject crop = gp.tileM.cropMap[col][row];
+        if (crop == null) {
+            gp.ui.currentDialogue = "Tidak ada tanaman di sini!";
+            gp.gameState = gp.dialogueState;
+            return false;
         }
-    }
-    return false;
-}
 
-// action planting
-public boolean plantSeed() {
-    int centerX = worldX + solidArea.x + (solidArea.width / 2);
-    int centerY = worldY + solidArea.y + (solidArea.height / 2);
-    int col = centerX / gp.tileSize;
-    int row = centerY / gp.tileSize;
-
-    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
-
-    if (tileIndex == 55) { // 55 = tilled soil
-        ItemStack seed = getSeedFromInventory();
-        if (seed == null) {
-            gp.ui.currentDialogue = "Kamu tidak punya seed!";
+        // Cek apakah boleh disiram
+        if (!crop.canBeWateredToday(currentDay)) {
+            gp.ui.currentDialogue = "Tanaman ini sudah disiram. Coba lagi nanti.";
             gp.gameState = gp.dialogueState;
             return true;
         }
 
+        // Cek alat dan energi
+        if (!hasItem("Watering Can")) {
+            gp.ui.currentDialogue = "Kamu butuh Watering Can!";
+            gp.gameState = gp.dialogueState;
+            return true;
+        }
+
+        // Cek energi cukup
         if (!consumeEnergy(5)) return true;
 
-        // Tanam: ubah tile menjadi planted (index 56)
-        gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
-        removeItem(seed.getItem().getName(), 1); // Kurangi seed dari inventory
-        gp.ui.currentDialogue = "Berhasil menanam " + seed.getItem().getName();
+        crop.setLastWateredDay(currentDay);
+        gp.gameStateSystem.advanceTimeByMinutes(5);
+
+        gp.ui.currentDialogue = "Tanaman berhasil disiram.";
         gp.gameState = gp.dialogueState;
         return true;
     }
 
-    return false;
-}
-public ItemStack getSeedFromInventory() {
-    for (ItemStack stack : inventory) {
-        if (stack.getItem() != null && stack.getItem() instanceof Seed) {
-            return stack;
+
+    // watching
+    public boolean watchTV() {
+        Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
+        // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
+        if (gp.currentMap != 0) {
+            gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
+            gp.gameState = gp.dialogueState;
+            return true;
         }
-    }
-    return null;
-}
 
-// watching
-public boolean watchTV() {
-    Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
-    // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
-    if (gp.currentMap != 0) { 
-        gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
+        // Cek energi cukup
+        if (!consumeEnergy(5)) return true;
+
+        // Tambah waktu menggunakan GameState (biar konsisten)
+        gp.gameStateSystem.advanceTimeByMinutes(15);
+
+        gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
         gp.gameState = gp.dialogueState;
         return true;
     }
-
-    // Cek energi cukup
-    if (!consumeEnergy(5)) return true;
-
-    // Tambah waktu menggunakan GameState (biar konsisten)
-    gp.gameStateSystem.advanceTimeByMinutes(15);
-
-    gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
-    gp.gameState = gp.dialogueState;
-    return true;
-}
 }

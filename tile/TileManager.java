@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import object.CropObject;
 
 import javax.imageio.ImageIO;
 import main.GamePanel;
@@ -13,11 +14,13 @@ public class TileManager {
     GamePanel gp;
     public Tile[] tile;
     public int mapTileNum[][][];
+    public CropObject[][] cropMap;
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
         tile = new Tile[271];
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
+        cropMap = new CropObject[gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
         loadMap(0, "/res/maps/FarmMap.txt");

@@ -1,52 +1,69 @@
+// Di dalam file AssetSetter.java
 package main;
 
 import object.*;
 
 public class AssetSetter {
     GamePanel gp;
-    public AssetSetter(GamePanel gp){
+
+    public AssetSetter(GamePanel gp) {
         this.gp = gp;
     }
 
-    public void setObject(){
-        gp.obj[1][0] = new OBJ_Television(gp);
-        gp.obj[1][0].worldX = 23 * gp.tileSize;
-        gp.obj[1][0].worldY = 28 * gp.tileSize;
+    public void setObject() {
+        System.out.println("ASSETSETTER: Memulai setObject()...");
+        int mapNum = 0; // Semua objek akan ditempatkan di map 0 untuk saat ini
+        int i = 0;      // Indeks untuk array objek gp.obj[mapNum]
 
-        gp.obj[0][0] = new OBJ_House(gp);
-        gp.obj[0][0].worldX = 29 * gp.tileSize;
-        gp.obj[0][0].worldY = 22 * gp.tileSize;
+        // 1. Menempatkan OBJEK SHIPPING BIN
+        try {
+            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
+                gp.obj[mapNum][i] = new OBJ_ShippingBin(gp);
+                if (gp.obj[mapNum][i] != null) {
+                    // Tentukan koordinat X dan Y (DALAM SATUAN TILE) untuk Shipping Bin
+                    // Spesifikasi: Shipping bin terletak di sebelah kanan rumah pemain. 
+                    int binTileX = 23; // GANTI DENGAN KOORDINAT X YANG SESUAI (CONTOH)
+                    int binTileY = 40; // GANTI DENGAN KOORDINAT Y YANG SESUAI (CONTOH)
+                    gp.obj[mapNum][i].worldX = binTileX * gp.tileSize;
+                    gp.obj[mapNum][i].worldY = binTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                                       " pada tile (" + binTileX + "," + binTileY + ")");
+                } else {
+                    System.err.println("AssetSetter: Gagal membuat instance OBJ_ShippingBin.");
+                }
+                i++; // Naikkan indeks untuk objek berikutnya
+            } else {
+                System.err.println("AssetSetter: Indeks map atau objek di luar batas untuk Shipping Bin (i=" + i + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("ASSETSETTER: ERROR saat menempatkan Shipping Bin!");
+            e.printStackTrace();
+        }
 
-        gp.obj[0][1] = new OBJ_ShippingBin(gp);
-        gp.obj[0][1].worldX = 36 * gp.tileSize;
-        gp.obj[0][1].worldY = 22 * gp.tileSize;
+        // 2. Menempatkan OBJEK TELEVISI
+        try {
+            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
+                gp.obj[mapNum][i] = new OBJ_Television(gp); // Pastikan nama kelas ini benar
+                if (gp.obj[mapNum][i] != null) {
+                    // Tentukan koordinat X dan Y (DALAM SATUAN TILE) untuk TV
+                    int tvTileX = 23; // GANTI DENGAN KOORDINAT X TV YANG DIINGINKAN (CONTOH)
+                    int tvTileY = 27; // GANTI DENGAN KOORDINAT Y TV YANG DIINGINKAN (CONTOH)
+                    gp.obj[mapNum][i].worldX = tvTileX * gp.tileSize;
+                    gp.obj[mapNum][i].worldY = tvTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                                       " pada tile (" + tvTileX + "," + tvTileY + ")");
+                } else {
+                    System.err.println("AssetSetter: Gagal membuat instance OBJ_Television.");
+                }
+                i++; // Naikkan indeks untuk objek berikutnya
+            } else {
+                System.err.println("AssetSetter: Indeks map atau objek di luar batas untuk Televisi (i=" + i + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("ASSETSETTER: ERROR saat menempatkan Televisi!");
+            e.printStackTrace();
+        }
 
-//         gp.obj[1] = new OBJ_Key(gp);
-//         gp.obj[1].worldX = 23*gp.tileSize;
-//         gp.obj[1].worldY = 40*gp.tileSize;
-//
-//         gp.obj[2] = new OBJ_Key(gp);
-//         gp.obj[2].worldX = 37*gp.tileSize;
-//         gp.obj[2].worldY = 7*gp.tileSize;
-//
-//         gp.obj[3] = new OBJ_Door(gp);
-//         gp.obj[3].worldX = 10*gp.tileSize;
-//         gp.obj[3].worldY = 11*gp.tileSize;
-//
-//         gp.obj[4] = new OBJ_Door(gp);
-//         gp.obj[4].worldX = 8*gp.tileSize;
-//         gp.obj[4].worldY = 28*gp.tileSize;
-//
-//         gp.obj[5] = new OBJ_Door(gp);
-//         gp.obj[5].worldX = 12*gp.tileSize;
-//         gp.obj[5].worldY = 22*gp.tileSize;
-//
-//         gp.obj[6] = new OBJ_Chest(gp);
-//         gp.obj[6].worldX = 10*gp.tileSize;
-//         gp.obj[6].worldY = 7*gp.tileSize;
-//
-//         gp.obj[7] = new OBJ_Boots(gp);
-//         gp.obj[7].worldX =37*gp.tileSize;
-//         gp.obj[7].worldY = 42*gp.tileSize;
+        System.out.println("ASSETSETTER: Selesai setObject(). Total slot objek yang coba diisi di map " + mapNum + ": " + i);
     }
 }
