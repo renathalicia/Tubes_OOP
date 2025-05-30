@@ -36,6 +36,10 @@ public abstract class Item {
     //method abstak untuk mengenali item termasuk ke kategori apa saja, wajib diimplementasikan di setiap inheritance dari kelas Item.java
     public abstract String getCategory();
 
+    public int getEnergyValue() {
+        return 0; // Default tidak memberi energi
+    }
+
     // public BufferedImage setUpImage(String imagePath) {
     //     UtilityTool uTool = new UtilityTool();
     //     BufferedImage scaledImage = null;  

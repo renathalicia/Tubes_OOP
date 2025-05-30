@@ -21,6 +21,7 @@ import tile.TileManager;
 import environment.GameState;
 import item.ItemStack;
 import item.Fish;
+import item.Item;
 import item.ItemRepository;
 import environment.EnvironmentManager;
 
@@ -503,6 +504,73 @@ public class GamePanel extends JPanel implements Runnable{
             System.out.println("GAMEPANEL: Masuk inventoryState. Nilai enterIsCurrentlyPressed SAAT MASUK BLOK: " + enterIsCurrentlyPressed +
                             ", isSelectingItemForGift: " + isSelectingItemForGift);
 
+            if (keyH.enterPressed) {
+                keyH.enterPressed = false; // Selalu konsumsi Enter di awal pemrosesan
+                System.out.println("GAMEPANEL (inventoryState): Enter DITEKAN.");
+
+                int selectedItemIndex = ui.getSelectedItemIndex(); // Dapatkan indeks item yang dipilih dari UI
+
+                if (isSelectingItemForGift && npcForGifting != null) { // Jika sedang memilih hadiah
+                    System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF.");
+                    // ... (logika gifting Anda yang sudah ada, pastikan berfungsi) ...
+                    // Setelah gifting, gameState akan ke dialogueState.
+                    // isSelectingItemForGift dan npcForGifting direset saat dialog gifting ditutup atau inventory dibatalkan.
+                } else {
+                    // Bukan mode gifting, berarti pemain ingin MENGGUNAKAN atau MEMAKAN item
+                    System.out.println("GAMEPANEL (inventoryState): Enter untuk penggunaan item biasa. Indeks: " + selectedItemIndex);
+
+                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
+                        ItemStack stack = player.inventory.get(selectedItemIndex);
+                        if (stack != null && stack.getItem() != null) {
+                            Item selectedItem = stack.getItem();
+                            System.out.println("GAMEPANEL (inventoryState): Item dipilih: " + selectedItem.getName());
+
+                            // Cek apakah item ini bisa dimakan (berdasarkan kategorinya atau metode getEnergyValue())
+                            // Kategori Edible: Fish, Crops, Food [cite: 171]
+                            // Efek energi: Fish +1[cite: 160], Crop +3[cite: 169], Food bervariasi [cite: 174]
+                            // Biaya waktu makan: -5 menit [cite: 213]
+                            if (selectedItem.getCategory().equals("Fish") ||
+                                selectedItem.getCategory().equals("Crop") || // Pastikan Crop punya getCategory()
+                                selectedItem.getCategory().equals("Food")) { // Pastikan Food punya getCategory()
+
+                                int energyGain = selectedItem.getEnergyValue(); // Panggil metode getEnergyValue()
+
+                                if (energyGain > 0) { // Hanya proses jika memang memberi energi
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' bisa dimakan. Energi: +" + energyGain);
+
+                                    // Langsung panggil metode use() dari item tersebut
+                                    // Metode use() di Fish, Crop, atau Food akan menangani:
+                                    // 1. player.gainEnergy(energyGain)
+                                    // 2. ui.showMessage(...)
+                                    // 3. player.removeItem(...)
+                                    // 4. gameStateSystem.advanceTimeByMinutes(5)
+                                    selectedItem.use(); // Memanggil metode use() dari objek Item
+
+                                    // Setelah makan, biasanya kembali ke playState atau inventory tetap terbuka
+                                    // Tergantung desain Anda. Untuk sekarang, kita asumsikan kembali ke playState.
+                                    // Jika item habis setelah dimakan dan stack kosong, item akan hilang dari inventory (ditangani di removeItem).
+                                    // Jika ingin inventory tetap terbuka, jangan ubah gameState di sini.
+                                    // Jika ingin inventory tertutup setelah makan:
+                                    // gameState = playState;
+                                    // ui.currentDialogue = ""; // Kosongkan dialog jika ada sisa
+
+                                } else {
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' adalah edible tapi tidak memberi energi (getEnergyValue() = 0). Tidak dimakan.");
+                                    ui.showMessage("Kamu tidak bisa memakan " + selectedItem.getName() + " saat ini.");
+                                    // Tetap di inventoryState
+                                }
+                            } else {
+                                // Jika item bukan kategori edible atau aksi lain yang bisa dilakukan dari inventory
+                                System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa dimakan atau digunakan dengan Enter dari sini.");
+                                ui.showMessage(selectedItem.getName() + " tidak bisa dimakan.");
+                                // Tetap di inventoryState
+                            }
+                        }
+                    } else {
+                        System.out.println("GAMEPANEL (inventoryState): Tidak ada item valid di slot terpilih.");
+                    }
+                }
+            }
             if (enterIsCurrentlyPressed) {
                 System.out.println("GAMEPANEL (inventoryState): BLOK if (enterIsCurrentlyPressed) TERPANGGIL!");
                 keyH.enterPressed = false; // Langsung konsumsi/reset di sini setelah terdeteksi

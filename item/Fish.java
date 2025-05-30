@@ -138,6 +138,11 @@ public class Fish extends Item {
     }
 
     @Override
+    public int getEnergyValue() {
+        return this.energyRestoredOnEat; // energyRestoredOnEat sudah ada (nilainya 1)
+    }
+
+    @Override
     public void use() {
         // Memakan ikan
         if (gp.player != null) {

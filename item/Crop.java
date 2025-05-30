@@ -28,6 +28,11 @@ public class Crop extends Item {
         this.image = setUpImage(imagePath); // Memanggil metode dari kelas Item untuk memuat gambar
     }
 
+    @Override
+    public int getEnergyValue() {
+        return 3; // Sesuai spesifikasi, semua crop +3 energi
+    }
+
     // Getter
     public int getJumlahPerPanen() {
         return jumlahPerPanen;
