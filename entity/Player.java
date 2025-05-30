@@ -40,26 +40,21 @@ public class Player extends Entity {
     public Entity currentInteractingNPC = null; 
 
     public boolean isFacingWaterTile() {
-        int pWorldX = this.worldX; // Gunakan this untuk merujuk field Player
+        int pWorldX = this.worldX; 
         int pWorldY = this.worldY;
         String pDirection = this.direction;
-        int tileSize = gp.tileSize; // Ambil tileSize dari GamePanel
+        int tileSize = gp.tileSize; 
 
-        int tileX1 = pWorldX; // Koordinat X untuk tile pertama di depan
-        int tileY1 = pWorldY; // Koordinat Y untuk tile pertama di depan
-        int tileX2 = pWorldX; // Koordinat X untuk tile kedua di depan
-        int tileY2 = pWorldY; // Koordinat Y untuk tile kedua di depan
-
-        // Tentukan koordinat untuk dua tile di depan pemain berdasarkan arah
-        // Kita akan menggunakan titik tengah pemain sebagai referensi awal,
-        // lalu bergerak maju berdasarkan solidArea atau tileSize.
-        // Untuk kesederhanaan, kita akan cek tile berdasarkan pergerakan 1 dan 2 tileSize.
+        int tileX1 = pWorldX; 
+        int tileY1 = pWorldY; 
+        int tileX2 = pWorldX; 
+        int tileY2 = pWorldY; 
 
         switch(pDirection) {
             case "up":
                 // Tile 1 di depan (dari tengah player)
-                tileY1 = pWorldY - tileSize; // Y dari tile di atas player
-                tileX1 = pWorldX;            // X tetap sama dengan player (cek tile lurus di atas)
+                tileY1 = pWorldY - tileSize; 
+                tileX1 = pWorldX;         
                 // Tile 2 di depan
                 tileY2 = pWorldY - (tileSize * 2);
                 tileX2 = pWorldX;
@@ -84,11 +79,6 @@ public class Player extends Entity {
                 break;
         }
 
-        // Fungsi helper untuk mengecek satu tile
-        // Anda bisa letakkan ini di Player.java atau sebagai private static method jika hanya dipakai di sini
-        // atau di kelas Utility jika dipakai di banyak tempat.
-        // Untuk sekarang, kita buat sebagai inner lambda atau panggil langsung.
-
         // Cek tile pertama di depan
         if (checkSpecificTileIsWater(tileX1, tileY1)) {
             System.out.println("PLAYER: Menghadap air di tile 1 di depan.");
@@ -106,25 +96,21 @@ public class Player extends Entity {
     }
 
     /**
-     * Helper method untuk mengecek apakah tile pada koordinat dunia tertentu adalah air (kode 12)
-     * dan bisa dipancing (tidak solid).
      * @param worldX Koordinat X dunia dari tile
      * @param worldY Koordinat Y dunia dari tile
-     * @return true jika tile adalah air yang valid, false jika tidak.
+     * @return 
      */
     private boolean checkSpecificTileIsWater(int worldX, int worldY) {
-        if (gp == null || gp.tileM == null) return false; // Pengaman
+        if (gp == null || gp.tileM == null) return false; 
 
         int tileCol = worldX / gp.tileSize;
         int tileRow = worldY / gp.tileSize;
 
         // Pengecekan batas peta
         if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
-            // System.out.println("checkSpecificTileIsWater: Koordinat (" + tileCol + "," + tileRow + ") di luar batas peta.");
-            return false; // Di luar batas peta
+            return false; 
         }
 
-        // Pengecekan batas array mapTileNum
         if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
             tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
             tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
@@ -134,16 +120,11 @@ public class Player extends Entity {
         
         int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
 
-        // Pengecekan batas array tile properties
         if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
             System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
             return false;
         }
 
-        // Cek apakah tile tersebut adalah air (kode 12)
-        // dan tile tersebut tidak memiliki properti collision (agar tidak bisa memancing di atas tembok air)
-        // atau jika tile air itu sendiri punya flag 'isWater' atau 'canFish'.
-        // Untuk sekarang, kita asumsikan tile 12 = air dan jika !collision, bisa dipancing.
         if (tileNum == 12 && !gp.tileM.tile[tileNum].collision) {
             return true;
         }
@@ -151,11 +132,10 @@ public class Player extends Entity {
     }
 
     public void interactWithObject(int objIndex) {
-        if (objIndex == 999) { // Jika tidak ada objek yang terdeteksi
+        if (objIndex == 999) { 
             return;
         }
 
-        // Dapatkan objek yang berinteraksi dari array objek di GamePanel
         SuperObject interactedObject = gp.obj[gp.currentMap][objIndex];
 
         if (interactedObject != null) {
@@ -164,31 +144,23 @@ public class Player extends Entity {
 
             // Logika untuk SHIPPING BIN
             if ("Shipping Bin".equals(objectName)) {
-                if (gp.hasShippedToday) { // Akses hasShippedToday dari GamePanel
-                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE"); // Akses ui dari GamePanel
-                    gp.gameState = gp.dialogueState; // Akses gameState dan dialogueState dari GamePanel
+                if (gp.hasShippedToday) { 
+                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE");
+                    gp.gameState = gp.dialogueState; 
                 } else {
-                    gp.isTimePaused = true; // Akses isTimePaused dari GamePanel
-                    gp.gameState = gp.shippingBinState; // Akses gameState dan shippingBinState dari GamePanel
+                    gp.isTimePaused = true; 
+                    gp.gameState = gp.shippingBinState; 
                     gp.ui.filterSellableItemsForShipping(gp.player);
-                    gp.ui.slotCol = 0; // Akses ui dari GamePanel
+                    gp.ui.slotCol = 0; 
                     gp.ui.slotRow = 0;
                     System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
                 }
-                // gp.interactionHandled = true; // Variabel ini lokal untuk GamePanel, mungkin tidak diperlukan di sini
-                                            // atau perlu cara lain untuk menandakan interaksi sudah ditangani jika diperlukan.
             }
-            // Logika untuk TELEVISI (menggunakan metode watchTV() yang sudah ada jika sesuai)
+
             else if ("Television".equals(objectName)) {
-                // Anda bisa memanggil metode watchTV() yang sudah ada di Player.java
-                // atau memindahkan logika konfirmasi TV ke sini jika perlu.
-                // Untuk sekarang, asumsikan watchTV() sudah menangani interaksi TV:
-                watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
+
+                watchTV(); 
             }
-            // Tambahkan else if untuk objek lain di sini
-            // else if ("Bed".equals(objectName)) {
-            // gp.gameState = gp.sleepState;
-            // }
             else {
                 System.out.println("PLAYER: Objek '" + objectName + "' belum memiliki interaksi khusus di Player.java.");
             }

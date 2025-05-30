@@ -1,4 +1,4 @@
-package item; // Pastikan ini sesuai dengan struktur package Anda
+package item; 
 
 import main.GamePanel;
 
@@ -47,15 +47,12 @@ public class Seed extends Item {
 
     @Override
     public String getCategory() {
-        return "Seeds"; // Implementasi metode abstrak dari Item
+        return "Seeds"; 
     }
 
     @Override
     public void use() {
-        // "Menggunakan" bibit biasanya berarti mencoba menanamnya.
-        // Logika penanaman aktual lebih cocok ditangani oleh aksi pemain (Player.plantSeed())
-        // yang akan memeriksa tile, musim, dll.
-        // Metode use() ini bisa memberikan pesan informatif.
+
         gp.ui.showMessage("Pilih tile yang sudah dibajak untuk menanam " + getName() + ".");
         System.out.println("Mencoba menggunakan bibit: " + getName() + ". Proses penanaman dilakukan melalui aksi pemain.");
     }

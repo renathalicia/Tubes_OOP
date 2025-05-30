@@ -8,7 +8,7 @@ public class NPC_4_Dasco extends Entity {
     public NPC_4_Dasco(GamePanel gp){
         super(gp);
         this.name = "Dasco";
-        direction = "down"; // Menghadap ke kanan secara default
+        direction = "down"; 
         speed = 0;
         getImage();
         setDialogue();
@@ -44,13 +44,13 @@ public class NPC_4_Dasco extends Entity {
 
     public void setGiftPreferences() {
         lovedItems.addAll(Arrays.asList(
-            "The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad" // [cite: 85]
+            "The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad" 
         ));
         likedItems.addAll(Arrays.asList(
-            "Fish Sandwich", "Fish Stew", "Baguette", "Fish n’ Chips" // [cite: 85]
+            "Fish Sandwich", "Fish Stew", "Baguette", "Fish n’ Chips" 
         ));
         hatedItems.addAll(Arrays.asList(
-            "Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon" // [cite: 85]
+            "Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon" 
         ));
     }
 

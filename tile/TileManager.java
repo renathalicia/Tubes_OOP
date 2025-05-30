@@ -29,7 +29,6 @@ public class TileManager {
     }
 
     public void getTileImage() {
-        //dummy biar pembuatan txt lebih enak
         setup(0, "earth", false);
         setup(1, "earth", false);
         setup(2, "earth", false);
@@ -40,7 +39,6 @@ public class TileManager {
         setup(7, "earth", false);
         setup(8, "earth", false);
         setup(9, "earth", false);
-        //PLACE HOLDER
         setup(10, "tree00", true);
         setup(11, "tree01", true);
         setup(12, "water00", false);
@@ -134,8 +132,6 @@ public class TileManager {
     public void draw(Graphics2D g2){
         int worldCol = 0;
         int worldRow= 0;
-        // int x=0;
-        // int y=0;
 
         while(worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow){
             int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
@@ -151,20 +147,12 @@ public class TileManager {
                 g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
                }
             worldCol++;
-           // x+=gp.tileSize;
 
             if(worldCol== gp.maxWorldCol){
                 worldCol = 0;
-               // x = 0;
                 worldRow++; 
-                //y+=gp.tileSize;
             }
         } 
-        // g2.drawImage(tile[1].image, 0, 0, gp.tileSize, gp.tileSize, null);
-        // g2.drawImage(tile[1].image, 48, 0, gp.tileSize, gp.tileSize, null);
-        // g2.drawImage(tile[1].image, 96, 0, gp.tileSize, gp.tileSize, null);
-        // g2.drawImage(tile[1].image, 144, 0, gp.tileSize, gp.tileSize, null);
-        // g2.drawImage(tile[1].image, 192, 0, gp.tileSize, gp.tileSize, null);
     }
 
 }

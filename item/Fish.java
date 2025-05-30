@@ -139,7 +139,7 @@ public class Fish extends Item {
 
     @Override
     public int getEnergyValue() {
-        return this.energyRestoredOnEat; // energyRestoredOnEat sudah ada (nilainya 1)
+        return this.energyRestoredOnEat; 
     }
 
     @Override

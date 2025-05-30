@@ -8,7 +8,7 @@ public class CropObject {
     public CropObject(String cropName, int plantedDay) {
         this.cropName = cropName;
         this.plantedDay = plantedDay;
-        this.lastWateredDay = -999; // diasumsikan langsung disiram saat tanam
+        this.lastWateredDay = -999; 
     }
 
     public String getCropName() {

@@ -32,7 +32,7 @@ public class GamePanel extends JPanel implements Runnable{
     private boolean musicIsPlaying = false;
     private boolean pendingSleep = false;
     private String sleepTriggerMessage = "";
-    public boolean isSelectingItemForGift = false; // Flag untuk mode pilih item hadiah
+    public boolean isSelectingItemForGift = false; 
     public Entity npcForGifting = null;  
     private java.util.Scanner sharedScanner;
 
@@ -45,8 +45,8 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
 
-    //Map Settings (untuk pindah Map)
-    public final int maxMap = 5; // jumlah map yang ada
+    // Map Settings (untuk pindah Map)
+    public final int maxMap = 5; 
     public int currentMap = 0;
 
     // FPS
@@ -66,7 +66,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     // Timer untuk update waktu game
     private long lastTimeUpdate = System.currentTimeMillis();
-    private final int timeUpdateInterval = 1000; // tiap 1 detik (1000 ms)
+    private final int timeUpdateInterval = 1000; 
 
 
     //Untuk save & load
@@ -74,24 +74,23 @@ public class GamePanel extends JPanel implements Runnable{
 
     // entity and object
     public Player player = new Player(this, keyH);
-    public SuperObject obj[][] = new SuperObject[maxMap][10]; // 10 untuk slot yang dapat digunakan untuk menaruh objek, boleh ditambah.
+    public SuperObject obj[][] = new SuperObject[maxMap][10]; 
     public Entity npc[][] = new Entity[maxMap][10];
     public Store emilyStore; 
-    // public ItemRepository ItemRepository;
 
     // GAME STATE
     public int gameState;
     public final int titleState = 0;
     public final int playState = 1;
-    public final int pauseState = 2; // ini gunanya untuk mengatur aksi lain di screen pada waktu yang bersamaan, misalnya swing a sword with enter key, dimana di saat yang bersamaan enter bisa untuk melakukan aksi lain
+    public final int pauseState = 2; 
     public final int dialogueState = 3;
-    public final int sleepState = 4; // untuk tidur di malam hari
+    public final int sleepState = 4; 
     public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
     public final int inventoryState = 6;
     public final int npcInteractionState = 7;
     
     public final int shoppingState = 9; 
-    public final int helpState = 8; // untuk help
+    public final int helpState = 8; 
     public final int fishingState = 10;
     public final int shippingBinState = 11;
 
@@ -101,7 +100,7 @@ public class GamePanel extends JPanel implements Runnable{
     public int fishingAttemptsLeft = 0;
     public int fishingMinRange = 0;
     public int fishingMaxRange = 0;
-    public String currentFishingGuess = ""; // Untuk menampung input angka dari pemain
+    public String currentFishingGuess = ""; 
     public String fishingFeedbackMessage = "";
 
     public boolean tvInteractionPendingConfirmation = false;
@@ -130,129 +129,83 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void startFishingMinigame() {
-        // Spesifikasi: Waktu dunia dihentikan, tambah 15 menit, baru berlanjut setelah selesai. [cite: 195]
-        // Untuk implementasi awal, kita cukup majukan waktu. Penghentian waktu bisa ditambahkan nanti.
+
         gameStateSystem.advanceTimeByMinutes(15);
         System.out.println("GAMEPANEL: Waktu dimajukan 15 menit untuk memancing.");
 
-        // A. Tentukan Lokasi Memancing (berdasarkan currentMap dan mungkin posisi player)
-        // Untuk sekarang, kita asumsikan map 0 adalah satu-satunya tempat memancing yang valid.
-        // Anda perlu Enum atau String untuk merepresentasikan lokasi.
-        String currentLocationString = "Default_Location"; // Placeholder
-        if (currentMap == 0) { // Asumsi map 0 punya area Pond, Forest River, atau Mountain Lake
-            // Logika lebih detail untuk menentukan apakah ini Pond, Forest River, atau Mountain Lake
-            // berdasarkan posisi player di map 0 atau jenis tile air yang dihadapi.
-            // Untuk sekarang, kita hardcode satu.
-            currentLocationString = "Pond"; // Contoh, atau "Mountain Lake" jika semua air di map 0 itu
+        String currentLocationString = "Default_Location"; 
+        if (currentMap == 0) { 
+            currentLocationString = "Pond"; 
         } else {
-            // Logika untuk peta lain (Ocean, dll.) jika currentMap bukan 0
-            // Untuk sekarang, kita hanya fokus map 0.
             System.out.println("GAMEPANEL: Saat ini hanya bisa memancing di map 0.");
             ui.currentDialogue = "Kamu hanya bisa memancing di area tertentu di peta utama.";
             gameState = dialogueState;
             return;
         }
 
-        // B. Dapatkan Daftar Ikan yang Bisa Ditangkap
         List<Fish> catchableFishToday = new ArrayList<>();
-        // Anda perlu mengakses ItemRepository atau FishDatabase Anda
-        // Untuk contoh, kita asumsikan ada ItemRepository.getAllFish() yang mengembalikan List<Fish>
-        // List<Fish> allFish = ItemRepository.getAllFishInstances(this); // Metode hipotetis
-        // if (allFish == null) {
-        //     System.err.println("GAMEPANEL: Daftar semua ikan belum diinisialisasi di ItemRepository!");
-        //     ui.currentDialogue = "Ada masalah dengan data ikan...";
-        //     gameState = dialogueState;
-        //     return;
-        // }
 
-        // Filter ikan berdasarkan musim, waktu, cuaca, dan lokasi saat ini
-        // Season currentSeasonEnum = Season.valueOf(gameStateSystem.getTimeManager().getSeason().toUpperCase()); // Konversi String ke Enum
-        // Weather currentWeatherEnum = Weather.valueOf(gameStateSystem.getTimeManager().getWeather().toUpperCase());
-        // FishingLocation currentFishingLocationEnum = FishingLocation.valueOf(currentLocationString.toUpperCase());
-        // int currentHour = gameStateSystem.getTimeManager().getHour();
-
-        // for (Fish fish : allFish) {
-        //     if (fish.isCatchable(currentSeasonEnum, currentHour, currentWeatherEnum, currentFishingLocationEnum)) {
-        //         catchableFishToday.add(fish);
-        //     }
-        // }
-
-        // --- UNTUK SEMENTARA, GUNAKAN IKAN DUMMY AGAR BISA DIUJI ---
-        // Ganti ini dengan logika filter ikan Anda yang sebenarnya nanti.
-        // Pastikan Anda sudah menginisialisasi ikan di ItemRepository.
         if (ItemRepository.Bullhead != null) catchableFishToday.add(ItemRepository.Bullhead);
         if (ItemRepository.Carp != null) catchableFishToday.add(ItemRepository.Carp);
         if (ItemRepository.Largemouth_Bass != null) catchableFishToday.add(ItemRepository.Largemouth_Bass);
-        // --- AKHIR BAGIAN DUMMY ---
-
 
         if (catchableFishToday.isEmpty()) {
-            ui.currentDialogue = "Sepertinya tidak ada ikan yang aktif saat ini...";
+            ui.currentDialogue = "Sepertinya tidak ada ikan yang aktif saat ini";
             gameState = dialogueState;
             System.out.println("GAMEPANEL: Tidak ada ikan yang bisa ditangkap saat ini.");
             return;
         }
 
-        // C. Pilih Satu Ikan Secara Acak
         java.util.Random random = new java.util.Random();
         fishBeingFished = catchableFishToday.get(random.nextInt(catchableFishToday.size()));
         System.out.println("GAMEPANEL: Ikan yang berpotensi ditangkap: " + fishBeingFished.name + " (" + fishBeingFished.getFishRarity() + ")");
 
 
-        // D. Tentukan Rentang Angka dan Jumlah Percobaan
-        String rarity = fishBeingFished.getFishRarity().toLowerCase(); // Ambil raritas dari Fish.java
+        String rarity = fishBeingFished.getFishRarity().toLowerCase(); 
         switch (rarity) {
             case "common":
                 fishingMinRange = 1; fishingMaxRange = 10;
-                fishingAttemptsLeft = 10; // Maks. 10 percobaan [cite: 195]
+                fishingAttemptsLeft = 10; 
                 break;
             case "regular":
                 fishingMinRange = 1; fishingMaxRange = 100;
-                fishingAttemptsLeft = 10; // Maks. 10 percobaan [cite: 195]
+                fishingAttemptsLeft = 10; 
                 break;
             case "legendary":
                 fishingMinRange = 1; fishingMaxRange = 500;
-                fishingAttemptsLeft = 7; // Maks. 7 percobaan [cite: 195]
+                fishingAttemptsLeft = 7;
                 break;
-            default: // Fallback jika raritas tidak dikenal
+            default: 
                 System.err.println("GAMEPANEL: Rarias ikan tidak dikenal - " + rarity + ". Menggunakan default Common.");
                 fishingMinRange = 1; fishingMaxRange = 10;
                 fishingAttemptsLeft = 10;
                 break;
         }
         fishingTargetNumber = random.nextInt(fishingMaxRange - fishingMinRange + 1) + fishingMinRange;
-        currentFishingGuess = ""; // Kosongkan input tebakan
+        currentFishingGuess = ""; 
         fishingFeedbackMessage = "Tebak angka antara " + fishingMinRange + " dan " + fishingMaxRange + "!";
 
         System.out.println("GAMEPANEL: Minigame Fishing. Target Angka: " + fishingTargetNumber + ", Percobaan: " + fishingAttemptsLeft);
 
-        // E. Pindah ke fishingState
         gameState = fishingState;
-        // ui.commandNum = 0; // Tidak ada commandNum untuk fishingState ini, tapi input angka
-        ui.setDialogue(fishingFeedbackMessage, "FISHING_MINIGAME"); // Set pesan awal dan mode
+
+        ui.setDialogue(fishingFeedbackMessage, "FISHING_MINIGAME"); 
         System.out.println("GAMEPANEL: Pindah ke fishingState (" + fishingState + ")");
     }
 
     public void endFishingMinigame(boolean caughtFish, String finalMessage) {
         System.out.println("GAMEPANEL: Minigame Fishing Selesai. Berhasil: " + caughtFish + ". Pesan: " + finalMessage);
 
-        ui.currentDialogue = finalMessage; // Tampilkan pesan hasil akhir
-        // ui.setDialogueMode("SYSTEM_MESSAGE"); // Set mode dialog jika Anda menggunakannya
-        gameState = dialogueState;         // Pindah ke dialogueState untuk menampilkan pesan
-
-        // Reset variabel terkait memancing
+        ui.currentDialogue = finalMessage;
+        gameState = dialogueState;         
         fishBeingFished = null;
         fishingTargetNumber = 0;
         fishingAttemptsLeft = 0;
         fishingMinRange = 0;
         fishingMaxRange = 0;
         currentFishingGuess = "";
-        fishingFeedbackMessage = ""; // Kosongkan juga ini untuk sesi berikutnya
+        fishingFeedbackMessage = ""; 
 
-        // Lanjutkan waktu dunia (jika sebelumnya Anda mengimplementasikan stopTime())
-        // gameStateSystem.resumeTime();
-        // Untuk sekarang, kita asumsikan advanceTimeByMinutes(15) di startFishingMinigame sudah mencakup 'biaya waktu'.
-        // Jika waktu benar-benar dihentikan, Anda perlu mekanisme untuk melanjutkannya.
     }
 
     public void finalizeAndExitShippingBin() {
@@ -321,8 +274,8 @@ public class GamePanel extends JPanel implements Runnable{
             lastTime = currentTime;
 
             if(delta >= 1){
-                update(); //update posisi karakter
-                repaint();//gambar ulang bagian yang tadinya ditempati oleh karakter
+                update();
+                repaint();
                 delta--;
             }
 
@@ -358,7 +311,7 @@ public class GamePanel extends JPanel implements Runnable{
                 autoSleepMessage = "Kamu pingsan karena kelelahan!";
                 autoSleepConditionMet = true;
             } else if (gameStateSystem.getTimeManager().getHour() == 2) {
-                autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur...";
+                autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur";
                 autoSleepConditionMet = true;
             }
             if (autoSleepConditionMet) {
@@ -383,11 +336,10 @@ public class GamePanel extends JPanel implements Runnable{
                 if (npc[currentMap][i] != null) npc[currentMap][i].update();
             }
 
-            if (keyH.fPressed) { // Atau bisa juga bagian dari logika Enter jika pemain menghadap air
-                keyH.fPressed = false; // Konsumsi input
+            if (keyH.fPressed) { 
+                keyH.fPressed = false; 
                 System.out.println("GAMEPANEL (playState): Tombol F ditekan untuk memancing.");
 
-                // 1. Cek apakah punya Fishing Rod
                 boolean hasFishingRod = false;
                 for (ItemStack stack : player.inventory) {
                     if (stack.getItem() != null && "Fishing Rod".equals(stack.getItem().getName())) {
@@ -398,25 +350,25 @@ public class GamePanel extends JPanel implements Runnable{
 
                 if (!hasFishingRod) {
                     ui.currentDialogue = "Kamu membutuhkan Pancingan (Fishing Rod)!";
-                    // ui.setDialogueMode("SYSTEM_MESSAGE"); // Jika Anda pakai sistem mode
+            
                     gameState = dialogueState;
                     System.out.println("GAMEPANEL: Gagal memancing, tidak ada Fishing Rod.");
                 } else {
-                    // 2. Cek apakah pemain menghadap tile air yang valid (kode 12) di map saat ini
-                    if (player.isFacingWaterTile()) { // Panggil metode dari Player.java
-                        // 3. Cek Energi
-                        if (player.consumeEnergy(5)) { // Biaya -5 energi per attempt [cite: 188]
-                            System.out.println("GAMEPANEL: Memulai aksi Fishing...");
-                            startFishingMinigame(); // Metode baru untuk memulai minigame
+         
+                    if (player.isFacingWaterTile()) { 
+          
+                        if (player.consumeEnergy(5)) {
+                            System.out.println("GAMEPANEL: Memulai aksi Fishing");
+                            startFishingMinigame(); 
                         } else {
                             ui.currentDialogue = "Tidak cukup energi untuk memancing.";
-                            // ui.setDialogueMode("SYSTEM_MESSAGE");
+                  
                             gameState = dialogueState;
                             System.out.println("GAMEPANEL: Gagal memancing, energi tidak cukup.");
                         }
                     } else {
                         ui.currentDialogue = "Kamu tidak bisa memancing di sini.";
-                        // ui.setDialogueMode("SYSTEM_MESSAGE");
+           
                         gameState = dialogueState;
                         System.out.println("GAMEPANEL: Gagal memancing, tidak menghadap air.");
                     }
@@ -424,7 +376,7 @@ public class GamePanel extends JPanel implements Runnable{
             }
 
             else if (keyH.enterPressed) {
-                keyH.enterPressed = false; // Konsumsi Enter di awal untuk interaksi playState
+                keyH.enterPressed = false; 
                 boolean enterWasPressedForThisInteraction = keyH.enterPressed;
 
                 if (enterWasPressedForThisInteraction) {
@@ -433,15 +385,15 @@ public class GamePanel extends JPanel implements Runnable{
 
                     boolean interactionHandled = false;
 
-                    // 1. Prioritaskan Interaksi NPC
+           
                     int npcIndex = cChecker.checkEntity(player, npc);
                     if (npcIndex != 999) {
                         System.out.println("GAMEPANEL: Interaksi dengan NPC[" + npcIndex + "] terdeteksi.");
-                        player.interactNPC(npcIndex); // Ini akan set gameState = npcInteractionState
+                        player.interactNPC(npcIndex); 
                         interactionHandled = true;
                     } else {
-                        // 2. Jika tidak ada NPC, baru cek Interaksi Objek
-                        System.out.println("GAMEPANEL: Tidak ada NPC terdeteksi. Mengecek objek...");
+                
+                        System.out.println("GAMEPANEL: Tidak ada NPC terdeteksi. Mengecek objek");
                         int objIndex = cChecker.checkObject(player, true);
                         System.out.println("GAMEPANEL: cChecker.checkObject mengembalikan objIndex: " + objIndex);
 
@@ -457,23 +409,23 @@ public class GamePanel extends JPanel implements Runnable{
                                     ui.commandNum = 0;
                                     gameState = dialogueState;
                                     interactionHandled = true;
-                                } else if ("Shipping Bin".equals(interactedObject.name)) { // <<<---- INI LOGIKA SHIPPING BIN
+                                } else if ("Shipping Bin".equals(interactedObject.name)) { 
                                     System.out.println("GAMEPANEL: Objek adalah 'Shipping Bin'.");
                                     if (hasShippedToday) {
                                         ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE");
                                         gameState = dialogueState;
                                         System.out.println("GAMEPANEL: Sudah menjual hari ini.");
                                     } else {
-                                        isTimePaused = true; // Hentikan waktu game
-                                        gameState = shippingBinState; // Pindah ke state Shipping Bin
-                                        ui.slotCol = 0; // Reset kursor inventory untuk layar bin
+                                        isTimePaused = true; 
+                                        gameState = shippingBinState; 
+                                        ui.slotCol = 0; 
                                         ui.slotRow = 0;
                                         System.out.println("GAMEPANEL: Masuk shippingBinState. Waktu dihentikan.");
                                     }
                                     interactionHandled = true;
                                 } else {
                                     System.out.println("GAMEPANEL: Objek BUKAN 'Televisi' ataupun 'Shipping Bin'. Nama objek: '" + interactedObject.name + "'");
-                                    // Logika untuk interaksi objek lain jika ada
+             
                                 }
                             } else {
                                 System.err.println("GAMEPANEL: ERROR - interactedObject adalah null meskipun objIndex (" + objIndex + ") bukan 999.");
@@ -485,7 +437,7 @@ public class GamePanel extends JPanel implements Runnable{
                 }
             }
 
-            if (enterIsCurrentlyPressed) { // Gunakan variabel lokal yang menangkap status Enter di awal frame
+            if (enterIsCurrentlyPressed) { 
                 System.out.println("GAMEPANEL (playState): Enter terdeteksi untuk interaksi.");
                 int npcIndex = cChecker.checkEntity(player, npc);
                 if (npcIndex != 999) {
@@ -538,7 +490,7 @@ public class GamePanel extends JPanel implements Runnable{
                 } else if (gameState == shippingBinState) {
                     System.out.println("GAMEPANEL: Masuk shippingBinState. Nilai enterPressedThisFrame SAAT MASUK BLOK: " + enterPressedThisFrame);
 
-                    if (enterPressedThisFrame) { // Gunakan status Enter yang sudah ditangkap
+                    if (enterPressedThisFrame) { 
                         System.out.println("GAMEPANEL (shippingBinState): BLOK if (enterPressedThisFrame) TERPANGGIL!");
 
                         if (itemsToShip.size() >= 16) {
@@ -552,7 +504,7 @@ public class GamePanel extends JPanel implements Runnable{
                                     System.out.println("GAMEPANEL (shippingBinState): Item '" + stackToSell.getItem().getName() +
                                                     "' x" + stackToSell.getQuantity() + " ditambahkan ke bin.");
                                     player.inventory.remove(selectedItemIndex);
-                                    // Logika reset kursor UI jika perlu
+                
                                 }
                             }
                         }
@@ -580,18 +532,16 @@ public class GamePanel extends JPanel implements Runnable{
                             ", isSelectingItemForGift: " + isSelectingItemForGift);
 
             if (keyH.enterPressed) {
-                keyH.enterPressed = false; // Selalu konsumsi Enter di awal pemrosesan
+                keyH.enterPressed = false;
                 System.out.println("GAMEPANEL (inventoryState): Enter DITEKAN.");
 
-                int selectedItemIndex = ui.getSelectedItemIndex(); // Dapatkan indeks item yang dipilih dari UI
+                int selectedItemIndex = ui.getSelectedItemIndex(); 
 
-                if (isSelectingItemForGift && npcForGifting != null) { // Jika sedang memilih hadiah
+                if (isSelectingItemForGift && npcForGifting != null) { 
                     System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF.");
-                    // ... (logika gifting Anda yang sudah ada, pastikan berfungsi) ...
-                    // Setelah gifting, gameState akan ke dialogueState.
-                    // isSelectingItemForGift dan npcForGifting direset saat dialog gifting ditutup atau inventory dibatalkan.
+
                 } else {
-                    // Bukan mode gifting, berarti pemain ingin MENGGUNAKAN atau MEMAKAN item
+             
                     System.out.println("GAMEPANEL (inventoryState): Enter untuk penggunaan item biasa. Indeks: " + selectedItemIndex);
 
                     if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
@@ -600,45 +550,29 @@ public class GamePanel extends JPanel implements Runnable{
                             Item selectedItem = stack.getItem();
                             System.out.println("GAMEPANEL (inventoryState): Item dipilih: " + selectedItem.getName());
 
-                            // Cek apakah item ini bisa dimakan (berdasarkan kategorinya atau metode getEnergyValue())
-                            // Kategori Edible: Fish, Crops, Food [cite: 171]
-                            // Efek energi: Fish +1[cite: 160], Crop +3[cite: 169], Food bervariasi [cite: 174]
-                            // Biaya waktu makan: -5 menit [cite: 213]
+        
                             if (selectedItem.getCategory().equals("Fish") ||
-                                selectedItem.getCategory().equals("Crop") || // Pastikan Crop punya getCategory()
-                                selectedItem.getCategory().equals("Food")) { // Pastikan Food punya getCategory()
+                                selectedItem.getCategory().equals("Crop") || 
+                                selectedItem.getCategory().equals("Food")) { 
 
-                                int energyGain = selectedItem.getEnergyValue(); // Panggil metode getEnergyValue()
+                                int energyGain = selectedItem.getEnergyValue(); 
 
-                                if (energyGain > 0) { // Hanya proses jika memang memberi energi
+                                if (energyGain > 0) { 
                                     System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' bisa dimakan. Energi: +" + energyGain);
 
-                                    // Langsung panggil metode use() dari item tersebut
-                                    // Metode use() di Fish, Crop, atau Food akan menangani:
-                                    // 1. player.gainEnergy(energyGain)
-                                    // 2. ui.showMessage(...)
-                                    // 3. player.removeItem(...)
-                                    // 4. gameStateSystem.advanceTimeByMinutes(5)
-                                    selectedItem.use(); // Memanggil metode use() dari objek Item
+                                    selectedItem.use(); 
 
-                                    // Setelah makan, biasanya kembali ke playState atau inventory tetap terbuka
-                                    // Tergantung desain Anda. Untuk sekarang, kita asumsikan kembali ke playState.
-                                    // Jika item habis setelah dimakan dan stack kosong, item akan hilang dari inventory (ditangani di removeItem).
-                                    // Jika ingin inventory tetap terbuka, jangan ubah gameState di sini.
-                                    // Jika ingin inventory tertutup setelah makan:
-                                    // gameState = playState;
-                                    // ui.currentDialogue = ""; // Kosongkan dialog jika ada sisa
 
                                 } else {
                                     System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' adalah edible tapi tidak memberi energi (getEnergyValue() = 0). Tidak dimakan.");
                                     ui.showMessage("Kamu tidak bisa memakan " + selectedItem.getName() + " saat ini.");
-                                    // Tetap di inventoryState
+                      
                                 }
                             } else {
-                                // Jika item bukan kategori edible atau aksi lain yang bisa dilakukan dari inventory
+                           
                                 System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa dimakan atau digunakan dengan Enter dari sini.");
                                 ui.showMessage(selectedItem.getName() + " tidak bisa dimakan.");
-                                // Tetap di inventoryState
+
                             }
                         }
                     } else {
@@ -651,7 +585,7 @@ public class GamePanel extends JPanel implements Runnable{
                 keyH.enterPressed = false; 
 
                 if (isSelectingItemForGift && npcForGifting != null) {
-                    System.out.println("GAMEPANEL (inventoryState): Mode GIFTING AKTIF. Memproses hadiah...");
+                    System.out.println("GAMEPANEL (inventoryState): Mode GIFTING AKTIF. Memproses hadiah");
                     int selectedItemIndex = ui.getSelectedItemIndex();
                     System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex);
 
@@ -686,7 +620,6 @@ public class GamePanel extends JPanel implements Runnable{
                 }
             }
         } else if (gameState == sleepState) {
-            // Bisa untuk animasi tidur
             
 
         } else if (gameState == npcInteractionState) { 
@@ -757,7 +690,7 @@ public class GamePanel extends JPanel implements Runnable{
                                             if (gameStateSystem != null) {
                                                 gameStateSystem.advanceTimeByMinutes(60); 
                                             }
-                                            ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
+                                            ui.currentDialogue = "Maaf, " + player.name + " Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
                                         } else {
                                             ui.currentDialogue = "Tidak cukup energi (dan hati juga belum cukup).";
                                         }
@@ -771,7 +704,7 @@ public class GamePanel extends JPanel implements Runnable{
                                     gameState = dialogueState;
                                 }
                             }
-                        } else if (selectedOption == 3) { // Asumsi opsi ke-2 adalah "Chat" (0: Gift, 1: Lamar, 2: Chat, 3: Batal)
+                        } else if (selectedOption == 3) { 
                             System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
                             if (player.consumeEnergy(10)) { 
                                 gameStateSystem.advanceTimeByMinutes(10); 
@@ -791,13 +724,12 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             }
                         }
-                        // --- AKHIR OPSI CHAT ---
-                        else if (selectedOption == 4) { // "Batal"
+                        else if (selectedOption == 4) { 
                             gameState = playState;
                             player.currentInteractingNPC = null;
                         }
                     } else {
-                        if (selectedOption == 0) { // "Beri Hadiah"
+                        if (selectedOption == 0) { 
                             System.out.println("NPC Interaction: Memilih 'Beri Hadiah'.");
                             if (player.inventory.isEmpty()) {
                                 ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
@@ -810,7 +742,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 ui.slotRow = 0;
                                 System.out.println("NPC Interaction: Pindah ke inventoryState untuk memilih hadiah. Target: " + npcForGifting.name);
                             }
-                        } else if (selectedOption == 1) { // Propose/Marry
+                        } else if (selectedOption == 1) { 
                             boolean hasProposalRing = false;
                             for (ItemStack stack : player.inventory) {
                                 if (stack != null && stack.getItem() != null && stack.getItem().getName() != null &&
@@ -854,7 +786,7 @@ public class GamePanel extends JPanel implements Runnable{
                                             if (gameStateSystem != null) {
                                                 gameStateSystem.advanceTimeByMinutes(60); 
                                             }
-                                            ui.currentDialogue = "Maaf, " + player.name + "... Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
+                                            ui.currentDialogue = "Maaf, " + player.name + " Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
                                         } else {
                                             ui.currentDialogue = "Tidak cukup energi (dan hati juga belum cukup).";
                                         }
@@ -868,7 +800,7 @@ public class GamePanel extends JPanel implements Runnable{
                                     gameState = dialogueState;
                                 }
                             }
-                        } else if (selectedOption == 2) { // Asumsi opsi ke-2 adalah "Chat" (0: Gift, 1: Lamar, 2: Chat, 3: Batal)
+                        } else if (selectedOption == 2) { 
                             System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
                             if (player.consumeEnergy(10)) { 
                                 gameStateSystem.advanceTimeByMinutes(10); 
@@ -888,8 +820,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             }
                         }
-                        // --- AKHIR OPSI CHAT ---
-                        else if (selectedOption == 3) { // "Batal"
+                        else if (selectedOption == 3) { 
                             gameState = playState;
                             player.currentInteractingNPC = null;
                         }
@@ -907,25 +838,23 @@ public class GamePanel extends JPanel implements Runnable{
 
             if (keyH.enterPressed) {
     keyH.enterPressed = false;
-    int selectedIndexInView = ui.getSelectedItemIndexInSellableView(); // Dapatkan indeks dari daftar yang difilter
+    int selectedIndexInView = ui.getSelectedItemIndexInSellableView(); 
 
-    if (selectedIndexInView != -1) { // Pastikan ada item valid yang dipilih
-        // Dapatkan indeks asli item tersebut di player.inventory
+    if (selectedIndexInView != -1) { 
         int originalInventoryIndex = ui.sellableItemsOriginalIndices.get(selectedIndexInView);
         ItemStack stackInPlayerInventory = player.inventory.get(originalInventoryIndex);
 
-        // --- Logika menjual satu item (dari respons sebelumnya) ---
         if (stackInPlayerInventory != null && stackInPlayerInventory.getItem() != null && stackInPlayerInventory.getQuantity() > 0) {
             Item itemToSell = stackInPlayerInventory.getItem();
 
-            // Pastikan lagi (meskipun sudah difilter) bahwa item punya harga jual
+       
             if (itemToSell.getSellPrice() <= 0) {
                 ui.showMessage("Item ini tidak bisa dijual.");
-                // Tidak perlu return atau continue di sini karena seharusnya tidak terpilih
+  
             } else {
                 boolean itemProcessedForBin = false;
                 boolean mergedWithExistingInBin = false;
-                // ... (logika merge atau add ke itemsToShip seperti respons sebelumnya) ...
+    
                 for (ItemStack stackInBin : itemsToShip) {
                     if (stackInBin.getItem().getName().equals(itemToSell.getName())) {
                         stackInBin.addQuantity(1);
@@ -936,7 +865,7 @@ public class GamePanel extends JPanel implements Runnable{
                     }
                 }
                 if (!mergedWithExistingInBin) {
-                    if (itemsToShip.size() < 16) { // Max 16 unique item types
+                    if (itemsToShip.size() < 16) { 
                         itemsToShip.add(new ItemStack(itemToSell, 1));
                         itemProcessedForBin = true;
                         System.out.println("GAMEPANEL (shippingBinState): Menambah item baru '" + itemToSell.getName() + "' (x1) ke bin.");
@@ -944,7 +873,7 @@ public class GamePanel extends JPanel implements Runnable{
                         ui.showMessage("Shipping Bin penuh untuk JENIS item baru!");
                     }
                 }
-                // --- Akhir logika merge atau add ---
+      
 
                 if (itemProcessedForBin) {
                     stackInPlayerInventory.removeQuantity(1);
@@ -953,20 +882,18 @@ public class GamePanel extends JPanel implements Runnable{
                         player.inventory.remove(originalInventoryIndex);
                         System.out.println("GAMEPANEL (shippingBinState): Stack '" + itemToSell.getName() + "' habis dan dihapus.");
                     }
-                    // !!! PENTING: Setelah inventaris pemain berubah, filter ulang daftar di UI !!!
+                 
                     ui.filterSellableItemsForShipping(player);
-                    // Kursor mungkin perlu disesuaikan lagi di sini jika item yang dipilih hilang
-                    // Metode filterSellableItemsForShipping sudah mencoba menyesuaikan kursor.
+               
                 }
             }
         }
-        // --- Akhir logika menjual satu item ---
     }
 }
-            // Logika navigasi (W/A/S/D/Escape) di shippingBinState tetap sama
+
         } else if (gameState == shoppingState) {
             if (keyH.enterPressed) {
-            keyH.enterPressed = false; // Konsumsi input Enter
+            keyH.enterPressed = false; 
 
             int currentSelectionInShop = ui.getShopSelectedItemIndex(); 
             int numberOfItemsForSale = emilyStore.getItemsForSale().size();
@@ -1009,7 +936,7 @@ public class GamePanel extends JPanel implements Runnable{
                 int selectedItemIndex = ui.getSelectedItemIndex(); 
                 if (isSelectingItemForGift && npcForGifting != null) {
                     System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF untuk NPC: " + npcForGifting.name);
-                    // selectedItemIndex sudah didapatkan di atas
+           
                     System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex +
                                     ", Ukuran inventory: " + player.inventory.size());
 
@@ -1048,18 +975,15 @@ public class GamePanel extends JPanel implements Runnable{
                     System.out.println("GAMEPANEL (inventoryState): Enter ditekan untuk penggunaan item biasa. selectedItemIndex: " + selectedItemIndex + " (belum diimplementasikan).");
                 }
             }
-            // Logika keluar dari inventory (Esc atau 'I') sudah ditangani di KeyHandler
+     
         } else if (gameState == fishingState) {
-            // Minigame memancing sedang berlangsung.
-            // Input angka dari pemain akan di-handle oleh KeyHandler dan disimpan di gp.currentFishingGuess.
-            // Saat pemain menekan Enter, kita proses tebakan mereka.
 
             if (keyH.enterPressed) {
-                keyH.enterPressed = false; // Selalu konsumsi Enter setelah diproses
+                keyH.enterPressed = false;
 
-                if (fishBeingFished == null) { // Pengaman jika state ini tercapai tanpa ikan yang valid
+                if (fishBeingFished == null) { 
                     System.err.println("GAMEPANEL (fishingState): Error - fishBeingFished adalah null!");
-                    endFishingMinigame(false, "Terjadi kesalahan saat memancing."); // Keluar dari minigame
+                    endFishingMinigame(false, "Terjadi kesalahan saat memancing."); 
                     return;
                 }
 
@@ -1077,17 +1001,16 @@ public class GamePanel extends JPanel implements Runnable{
                         if (guess == fishingTargetNumber) {
                             fishingFeedbackMessage = "BERHASIL! Kamu menangkap " + fishBeingFished.name + "!";
                             System.out.println("FISHING_MINIGAME: Berhasil menangkap " + fishBeingFished.name);
-                            // Tambahkan ikan ke inventory pemain
-                            player.inventory.add(new ItemStack(fishBeingFished, 1)); // Asumsi Fish adalah Item
-                            // gp.playSE(SUARA_BERHASIL_MANCING); // Mainkan suara jika ada
+                   
+                            player.inventory.add(new ItemStack(fishBeingFished, 1)); 
+                         
                             endFishingMinigame(true, fishingFeedbackMessage);
                         } else if (fishingAttemptsLeft <= 0) {
                             fishingFeedbackMessage = "GAGAL! Kesempatan habis. Angka sebenarnya: " + fishingTargetNumber + ".";
                             System.out.println("FISHING_MINIGAME: Gagal, kesempatan habis.");
-                            // gp.playSE(SUARA_GAGAL_MANCING); // Mainkan suara jika ada
+                 
                             endFishingMinigame(false, fishingFeedbackMessage);
                         } else {
-                            // Berikan petunjuk jika tebakan salah
                             if (guess < fishingTargetNumber) {
                                 fishingFeedbackMessage = "Terlalu RENDAH! Sisa percobaan: " + fishingAttemptsLeft;
                             } else {
@@ -1099,7 +1022,7 @@ public class GamePanel extends JPanel implements Runnable{
                         fishingFeedbackMessage = "Input angka tidak valid! Coba lagi.";
                         System.err.println("FISHING_MINIGAME: NumberFormatException untuk input: " + currentFishingGuess);
                     }
-                    currentFishingGuess = ""; // Reset input tebakan setelah diproses, siap untuk tebakan berikutnya atau akhir game
+                    currentFishingGuess = "";
                 }
             }
 
@@ -1123,7 +1046,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void executeSleepSequence() {
         System.out.println("GAMEPANEL: executeSleepSequence() dipanggil.");
-        // ... (logika pemulihan energi Anda) ...
+        //  (logika pemulihan energi) 
         int currentEnergy = player.energy;
         int maxEnergy = player.maxEnergy;
         int restoredEnergy;
@@ -1136,7 +1059,7 @@ public class GamePanel extends JPanel implements Runnable{
         // --- PROSES PENJUALAN DARI SHIPPING BIN --- 
         int goldEarnedToday = 0;
         if (!itemsToShip.isEmpty()) {
-            System.out.println("GAMEPANEL: Memproses penjualan " + itemsToShip.size() + " jenis item dari bin...");
+            System.out.println("GAMEPANEL: Memproses penjualan " + itemsToShip.size() + " jenis item dari bin");
             for (ItemStack shippedStack : itemsToShip) {
                 if (shippedStack != null && shippedStack.getItem() != null) {
                     int itemSellValue = shippedStack.getItem().getSellPrice() * shippedStack.getQuantity();
@@ -1146,15 +1069,14 @@ public class GamePanel extends JPanel implements Runnable{
             }
             
             player.changeGold(goldEarnedToday);
-            itemsToShip.clear(); // Kosongkan bin untuk hari berikutnya
+            itemsToShip.clear(); 
         } else {
             System.out.println("GAMEPANEL: Tidak ada item yang dijual semalam.");
         }
-        // --- AKHIR PROSES PENJUALAN ---
 
-        hasShippedToday = false; // Reset untuk hari baru 
+        hasShippedToday = false; 
 
-        gameStateSystem.advanceToNextMorning(); // Majukan ke pagi berikutnya
+        gameStateSystem.advanceToNextMorning(); 
         
         String morningMessage = "Selamat pagi! Hari baru telah dimulai.";
         if (goldEarnedToday > 0) {
@@ -1162,7 +1084,7 @@ public class GamePanel extends JPanel implements Runnable{
         }
         ui.setDialogue(morningMessage, "SYSTEM_MESSAGE");
         pendingSleep = false;
-        gameState = dialogueState; // Tampilkan pesan pagi dulu
+        gameState = dialogueState;
         System.out.println("GAMEPANEL (executeSleepSequence): Selesai. pendingSleep=false. gameState=" + gameState);
     }
 
@@ -1235,10 +1157,8 @@ public class GamePanel extends JPanel implements Runnable{
     public void playMusic(int i) {
         System.out.println("DEBUG: playMusic dipanggil dengan indeks: " + i + " dari gameState: " + gameState);
         if (currentlyPlayingMusicIndex == i && musicIsPlaying) {
-            // Jika musik yang diminta adalah musik yang sama dan sedang diputar, jangan lakukan apa-apa
             return;
         }
-        // Jika ada musik lain yang sedang berjalan atau musik yang sama tapi ingin di-restart, hentikan dulu
         if (musicIsPlaying) {
             music.stop();
         }
@@ -1247,13 +1167,13 @@ public class GamePanel extends JPanel implements Runnable{
         music.play();
         music.loop();
         currentlyPlayingMusicIndex = i;
-        musicIsPlaying = true; // Tandai bahwa musik sedang diputar
+        musicIsPlaying = true; 
     }
 
     public void stopMusic() {
         music.stop();
-        currentlyPlayingMusicIndex = -1; // Reset pelacak
-        musicIsPlaying = false; // Tandai bahwa musik berhenti
+        currentlyPlayingMusicIndex = -1;
+        musicIsPlaying = false; 
     }
 
     public void playSE(int i) {

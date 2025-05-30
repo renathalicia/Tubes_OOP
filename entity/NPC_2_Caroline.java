@@ -9,7 +9,7 @@ public class NPC_2_Caroline extends Entity {
         super(gp);
         this.name = "Caroline";
         direction = "down";
-        speed = 0; // NPC ini tidak bergerak
+        speed = 0; 
         getImage();
         setDialogue();
         setChatDialogues();
@@ -43,15 +43,13 @@ public class NPC_2_Caroline extends Entity {
     }
 
     public void setGiftPreferences() {
-        lovedItems.addAll(Arrays.asList("Firewood", "Coal")); // [cite: 77]
-        likedItems.addAll(Arrays.asList("Potato", "Wheat")); // [cite: 77]
-        hatedItems.addAll(Arrays.asList("Hot Pepper")); // [cite: 77]
+        lovedItems.addAll(Arrays.asList("Firewood", "Coal")); 
+        likedItems.addAll(Arrays.asList("Potato", "Wheat")); 
+        hatedItems.addAll(Arrays.asList("Hot Pepper")); 
     }
 
     @Override
     public void speak(){
-        // Anda bisa menambahkan logika khusus jika NPC ini berbicara secara berbeda
-        // Untuk saat ini, kita gunakan implementasi default dari superclass Entity
         super.speak();
     }
 }

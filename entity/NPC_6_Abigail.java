@@ -7,7 +7,7 @@ public class NPC_6_Abigail extends Entity {
     public NPC_6_Abigail(GamePanel gp){
         super(gp);
         this.name = "Abigail";
-        direction = "down"; // Menghadap ke kanan secara default
+        direction = "down"; 
         speed = 0;
         getImage();
         setDialogue();
@@ -43,13 +43,13 @@ public class NPC_6_Abigail extends Entity {
 
     public void setGiftPreferences() {
         lovedItems.addAll(Arrays.asList(
-            "Blueberry", "Melon", "Pumpkin", "Grape", "Cranberry" // [cite: 94]
+            "Blueberry", "Melon", "Pumpkin", "Grape", "Cranberry" 
         ));
         likedItems.addAll(Arrays.asList(
-            "Baguette", "Pumpkin Pie", "Wine" // [cite: 94]
+            "Baguette", "Pumpkin Pie", "Wine" 
         ));
         hatedItems.addAll(Arrays.asList(
-            "Hot Pepper", "Cauliflower", "Parsnip", "Wheat" // [cite: 94]
+            "Hot Pepper", "Cauliflower", "Parsnip", "Wheat" 
         ));
     }
 

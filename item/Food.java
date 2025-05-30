@@ -1,8 +1,6 @@
-package item; // Pastikan ini sesuai dengan struktur package Anda
+package item;
 
 import main.GamePanel;
-// import main.Player; // Anda mungkin perlu mengimpor Player jika belum
-
 public class Food extends Item {
 
     private int energiYangDiberikan;
@@ -19,21 +17,20 @@ public class Food extends Item {
      * @param imagePath Path ke gambar makanan (misalnya, "/items/food/fish_n_chips").
      */
     public Food(String name, int buyPrice, int sellPrice, GamePanel gp, String description, int energiYangDiberikan, String imagePath) {
-        super(name, buyPrice, sellPrice, gp); // Memanggil konstruktor kelas Item
+        super(name, buyPrice, sellPrice, gp); 
         this.description = description;
         this.energiYangDiberikan = energiYangDiberikan;
-        this.stackable = true; // Makanan umumnya bisa ditumpuk, bisa disesuaikan jika perlu
-        this.image = setUpImage(imagePath); // Memanggil metode dari kelas Item untuk memuat gambar
+        this.stackable = true;
+        this.image = setUpImage(imagePath); 
     }
 
-    // Getter
     public int getEnergiYangDiberikan() {
         return energiYangDiberikan;
     }
 
     @Override
     public String getCategory() {
-        return "Food"; // Implementasi metode abstrak dari Item
+        return "Food"; 
     }
 
     @Override
@@ -41,16 +38,14 @@ public class Food extends Item {
         if (this.gp != null && this.gp.player != null) {
             this.gp.player.gainEnergy(getEnergyValue());
             
-            // Ini akan menggunakan drawDialogueScreen() untuk menampilkan pesan
             this.gp.ui.currentDialogue = "Anda memakan " + getName() + ".\nEnergi pulih +" + getEnergyValue() + "!";
-            // Atur mode dialog jika Anda punya, agar GamePanel tahu cara menutupnya
-            // this.gp.ui.setDialogueMode("SYSTEM_MESSAGE"); // atau "ITEM_USE_RESULT"
-            this.gp.gameState = gp.dialogueState; // Pindah ke dialogueState untuk menampilkan pesan
+
+            this.gp.gameState = gp.dialogueState; 
 
             if (this.gp.player.removeItem(this.getName(), 1)) {
-                this.gp.gameStateSystem.advanceTimeByMinutes(5); // Biaya waktu makan
+                this.gp.gameStateSystem.advanceTimeByMinutes(5); 
             } else {
-                // Handle jika item gagal dihapus (seharusnya tidak terjadi jika logika benar)
+
             }
         }
     }

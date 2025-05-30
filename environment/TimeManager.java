@@ -14,7 +14,6 @@ public class TimeManager {
         this.minute = 0;
 
         System.out.println("TimeManager: Advanced to next morning. Day: " + this.day + ", Season: " + this.season + ", Weather: " + this.weather);
-        // Di sini Anda bisa menambahkan logika lain yang perlu di-reset setiap hari jika ada.
     }
 
     public void advanceTime(int minutes) {
@@ -48,9 +47,6 @@ public class TimeManager {
         } else {
             System.err.println("TimeManager Error: Menit tidak valid pada setTime: " + newMinute + ". Tidak diubah.");
         }
-        // Tidak ada updateSeason() atau weather di sini, karena setTime hanya mengubah jam & menit di hari yang sama.
-        // Jika setTime dilakukan setelah jam 24 (misal dari logika tidur), maka logika tidur
-        // harus menangani day++ dan update lainnya SEBELUM memanggil setTime(6,0).
     }
 
     public int getHour() { return hour; }

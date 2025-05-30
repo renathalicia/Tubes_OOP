@@ -13,7 +13,7 @@ public class GameState {
 
     public void setTime(int hour, int minute) {
         if (timeManager != null) {
-            timeManager.setTime(hour, minute); // Memanggil metode baru di TimeManager
+            timeManager.setTime(hour, minute); 
         }
     }
     
@@ -25,7 +25,7 @@ public class GameState {
 
     public void advanceTimeByMinutes(int minutes) {
         if (timeManager != null) {
-            timeManager.advanceTime(minutes); // Menggunakan metode advanceTime yang sudah ada di TimeManager
+            timeManager.advanceTime(minutes); 
         }
     }
 
