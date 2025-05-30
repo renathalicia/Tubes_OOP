@@ -39,10 +39,10 @@ public class Food extends Item {
     @Override
     public void use() {
         if (this.gp != null && this.gp.player != null) {
-            this.gp.player.gainEnergy(getEnergyValue());
+            this.gp.player.gainEnergy(this.energiYangDiberikan);
             
             // Ini akan menggunakan drawDialogueScreen() untuk menampilkan pesan
-            this.gp.ui.currentDialogue = "Anda memakan " + getName() + ".\nEnergi pulih +" + getEnergyValue() + "!";
+            this.gp.ui.currentDialogue = "Anda memakan " + getName() + ".\nEnergi pulih +" + this.energiYangDiberikan + "!";
             // Atur mode dialog jika Anda punya, agar GamePanel tahu cara menutupnya
             // this.gp.ui.setDialogueMode("SYSTEM_MESSAGE"); // atau "ITEM_USE_RESULT"
             this.gp.gameState = gp.dialogueState; // Pindah ke dialogueState untuk menampilkan pesan

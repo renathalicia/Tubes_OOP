@@ -58,6 +58,11 @@ public class Store {
             // Item Misc yang bisa dibeli
             if (ItemRepository.Coal != null && ItemRepository.Coal.getBuyPrice() > 0) itemsForSale.add(ItemRepository.Coal);
             if (ItemRepository.Firewood != null && ItemRepository.Firewood.getBuyPrice() > 0) itemsForSale.add(ItemRepository.Firewood);
+
+            // Proposal ring
+            if (item.ItemRepository.ProposalRing != null && item.ItemRepository.ProposalRing.getBuyPrice() > 0) {
+                itemsForSale.add(item.ItemRepository.ProposalRing);
+            }
     }
 
     /**

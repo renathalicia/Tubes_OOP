@@ -309,7 +309,7 @@ public class ItemRepository {
                 "/res/item/equipment/fishingrod"); 
         
         ProposalRing = new Equipment("Proposal Ring",
-                1000, 500, gp,
+                3000, 500, gp,
                 "Cincin lamaran untuk KAWIN.",
                 "/res/item/equipment/proposalring");
     }

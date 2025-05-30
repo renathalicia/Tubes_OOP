@@ -33,7 +33,7 @@ public class Player extends Entity {
     public String partner;
     public int gold;
     public ArrayList<ItemStack> inventory = new ArrayList<>();
-    public final int inventorySize = 10; 
+    public final int inventorySize = 99; 
 
     public Entity currentInteractingNPC = null; 
 
@@ -205,7 +205,7 @@ public class Player extends Entity {
         name = "Bujanginam";
         gender = "Male";
         energy = maxEnergy;
-        gold = 3000;
+        gold = 70000000;
         farmName = "Tanah Batak";
         partner = "None";
 
@@ -383,7 +383,7 @@ public class Player extends Entity {
     public void gainEnergy(int amount) {
         energy += amount;
         if (energy > maxEnergy) {
-            energy = maxEnergy; // Pastikan energi tidak melebihi maksimum
+            energy = maxEnergy;
         }
     }
 
