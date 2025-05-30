@@ -1,8 +1,9 @@
 package main;
 
+// Impor kelas objek yang akan Anda tempatkan
 import object.OBJ_ShippingBin;
-import object.OBJ_Television;
-import object.OBJ_Key;     
+import object.OBJ_Television; // Pastikan ini nama kelas TV Anda
+import object.OBJ_Key;      // Contoh objek lain
 
 public class AssetSetter {
     GamePanel gp;

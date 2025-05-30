@@ -48,10 +48,10 @@ public class EventHandler {
         if (canTouchEvent) {
             if (hit(0, 10, 33, "any")) {
                 visiting(1, 12, 13);
-                eventRect[0][10][33].eventDone = true; 
+                eventRect[0][10][33].eventDone = true; //menandai bahwa visiting telah berhasil
             } else if (hit(1, 12, 13, "any")) {
                 visiting(0, 10, 33);
-                eventRect[1][12][13].eventDone = true; 
+                eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
 
             }
         }
