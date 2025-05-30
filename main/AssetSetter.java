@@ -1,10 +1,6 @@
 package main;
 
-import object.OBJ_Boots;
-import object.OBJ_Chest;
-import object.OBJ_Door;
-import object.OBJ_Key;
-import object.OBJ_Television;
+import object.*;
 
 public class AssetSetter {
     GamePanel gp;
@@ -13,16 +9,17 @@ public class AssetSetter {
     }
 
     public void setObject(){
-        int mapNum = 0;
-        int i = 0;
-        gp.obj[mapNum][i] = new OBJ_Television(gp);
-        gp.obj[mapNum][i].worldX = 23*gp.tileSize;
-        gp.obj[mapNum][i].worldY = 28 * gp.tileSize;
-        i++;
+        gp.obj[1][0] = new OBJ_Television(gp);
+        gp.obj[1][0].worldX = 23 * gp.tileSize;
+        gp.obj[1][0].worldY = 28 * gp.tileSize;
 
-        // gp.obj[1][0] = new OBJ_Television();
-        // gp.obj[1][0].worldX = 23 * gp.tileSize;
-        // gp.obj[1][0].worldY = 28 * gp.tileSize;
+        gp.obj[0][0] = new OBJ_House(gp);
+        gp.obj[0][0].worldX = 29 * gp.tileSize;
+        gp.obj[0][0].worldY = 22 * gp.tileSize;
+
+        gp.obj[0][1] = new OBJ_ShippingBin(gp);
+        gp.obj[0][1].worldX = 36 * gp.tileSize;
+        gp.obj[0][1].worldY = 22 * gp.tileSize;
 
 //         gp.obj[1] = new OBJ_Key(gp);
 //         gp.obj[1].worldX = 23*gp.tileSize;

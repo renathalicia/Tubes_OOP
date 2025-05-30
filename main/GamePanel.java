@@ -39,7 +39,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldRow = 50;
 
     //Map Settings (untuk pindah Map)
-    public final int maxMap = 5; // jumlah map yang ada
+    public final int maxMap = 6; // jumlah map yang ada
     public int currentMap = 0;
 
     // FPS
@@ -113,32 +113,32 @@ public class GamePanel extends JPanel implements Runnable{
         int mapNum = 0;
 
         // NPC 1 (yang sudah ada)
-        npc[mapNum][0] = new NPC_1_MayorTadi(this);
-        npc[mapNum][0].worldX = tileSize * 21; // Contoh posisi X
-        npc[mapNum][0].worldY = tileSize * 21; // Contoh posisi Y
+        npc[0][0] = new NPC_1_MayorTadi(this);
+        npc[0][0].worldX = tileSize * 21; // Contoh posisi X
+        npc[0][0].worldY = tileSize * 21; // Contoh posisi Y
 
         // NPC 2 (baru)
-        npc[mapNum][1] = new NPC_2_Caroline(this);
-        npc[mapNum][1].worldX = tileSize * 25; // Atur posisi yang berbeda
-        npc[mapNum][1].worldY = tileSize * 21;
+        npc[0][1] = new NPC_2_Caroline(this);
+        npc[0][1].worldX = tileSize * 25; // Atur posisi yang berbeda
+        npc[0][1].worldY = tileSize * 21;
 
         // NPC 3 (baru)
-        npc[mapNum][2] = new NPC_3_Perry(this);
-        npc[mapNum][2].worldX = tileSize * 28;
-        npc[mapNum][2].worldY = tileSize * 21;
+        npc[0][2] = new NPC_3_Perry(this);
+        npc[0][2].worldX = tileSize * 28;
+        npc[0][2].worldY = tileSize * 21;
 
         // NPC 4 (baru)
-        npc[mapNum][3] = new NPC_4_Dasco(this);
-        npc[mapNum][3].worldX = tileSize * 17;
-        npc[mapNum][3].worldY = tileSize * 21;
+        npc[0][3] = new NPC_4_Dasco(this);
+        npc[0][3].worldX = tileSize * 17;
+        npc[0][3].worldY = tileSize * 21;
 
-        npc[mapNum][4] = new NPC_5_Emily(this);
-        npc[mapNum][4].worldX = tileSize * 13;
-        npc[mapNum][4].worldY = tileSize * 21;
+        npc[3][4] = new NPC_5_Emily(this);
+        npc[3][4].worldX = tileSize * 15;
+        npc[3][4].worldY = tileSize * 10;
 
-        npc[mapNum][5] = new NPC_6_Abigail(this);
-        npc[mapNum][5].worldX = tileSize * 23;
-        npc[mapNum][5].worldY = tileSize * 25;
+        npc[0][5] = new NPC_6_Abigail(this);
+        npc[0][5].worldX = tileSize * 23;
+        npc[0][5].worldY = tileSize * 25;
 
         // Pastikan posisi worldX dan worldY ini berada dalam batas peta Anda
         // (maxWorldCol * tileSize dan maxWorldRow * tileSize)
@@ -456,6 +456,16 @@ public class GamePanel extends JPanel implements Runnable{
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D)g;
 
+        // Gambar objek HANYA untuk map yang sedang aktif
+        // Pastikan currentMap tidak melebihi batas array gp.obj
+        if (currentMap >= 0 && currentMap < obj.length && obj[currentMap] != null) {
+            for (int i = 0; i < obj[currentMap].length; i++) {
+                if (obj[currentMap][i] != null) {
+                    obj[currentMap][i].draw(g2, this);
+                }
+            }
+        }
+
         // debug
         long drawStart = 0;
         if (keyH.showDebugText == true){
@@ -469,9 +479,14 @@ public class GamePanel extends JPanel implements Runnable{
 
         tileM.draw(g2); // tile
 
-        for(int i = 0; i < obj[currentMap].length; i++){
-            if(obj[currentMap][i] != null){
-                obj[currentMap][i].draw(g2, this);
+        for (int i = 0; i < obj.length; i++) {
+            if (obj[i][0] != null) { // Jika Anda menggunakan obj[mapNum][objectIndex]
+                // Iterasi melalui obj[currentMapNum]
+                for (int j = 0; j < obj[i].length; j++) {
+                    if (obj[i][j] != null) {
+                        obj[i][j].draw(g2, this); // Panggil metode draw objek
+                    }
+                }
             }
         }
 

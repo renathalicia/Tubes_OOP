@@ -47,13 +47,21 @@ public class EventHandler {
         }
 
         if (canTouchEvent) {
-            if (hit(0, 10, 33, "any")) {
-                visiting(1, 12, 13);
+            if (hit(0, 30, 27, "any")) {
+                visiting(2, 12, 20);
                 eventRect[0][10][33].eventDone = true; //menandai bahwa visiting telah berhasil
+            } else if (hit(2, 12, 20, "any")){
+                visiting(0, 30, 27);
             } else if (hit(1, 12, 13, "any")) {
-                visiting(0, 10, 33);
+                visiting(0, 23, 24);
                 eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
-
+            } else if (hit(0, 39, 12, "any")){
+//                visiting(3, 13, 13);
+                visiting(4, 19, 16);
+            } else if (hit(3, 13, 13, "any")){
+                visiting(0, 39, 12);
+            } else if (hit(0, 30, 20, "any")){
+                visiting(4, 14, 10);
             }
         }
     }
