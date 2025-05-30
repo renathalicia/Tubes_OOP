@@ -8,14 +8,16 @@ import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
 import javax.imageio.ImageIO;
+
+import environment.GameState;
 import environment.Weather;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import item.ItemRepository;
 import object.CropObject;
+import object.SuperObject;
 
 public class Player extends Entity {
 
@@ -146,6 +148,52 @@ public class Player extends Entity {
             return true;
         }
         return false;
+    }
+
+    public void interactWithObject(int objIndex) {
+        if (objIndex == 999) { // Jika tidak ada objek yang terdeteksi
+            return;
+        }
+
+        // Dapatkan objek yang berinteraksi dari array objek di GamePanel
+        SuperObject interactedObject = gp.obj[gp.currentMap][objIndex];
+
+        if (interactedObject != null) {
+            String objectName = interactedObject.name;
+            System.out.println("PLAYER: Berinteraksi dengan objek: " + objectName + " melalui Player.java");
+
+            // Logika untuk SHIPPING BIN
+            if ("Shipping Bin".equals(objectName)) {
+                if (gp.hasShippedToday) { // Akses hasShippedToday dari GamePanel
+                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE"); // Akses ui dari GamePanel
+                    gp.gameState = gp.dialogueState; // Akses gameState dan dialogueState dari GamePanel
+                } else {
+                    gp.isTimePaused = true; // Akses isTimePaused dari GamePanel
+                    gp.gameState = gp.shippingBinState; // Akses gameState dan shippingBinState dari GamePanel
+                    gp.ui.slotCol = 0; // Akses ui dari GamePanel
+                    gp.ui.slotRow = 0;
+                    System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
+                }
+                // gp.interactionHandled = true; // Variabel ini lokal untuk GamePanel, mungkin tidak diperlukan di sini
+                                            // atau perlu cara lain untuk menandakan interaksi sudah ditangani jika diperlukan.
+            }
+            // Logika untuk TELEVISI (menggunakan metode watchTV() yang sudah ada jika sesuai)
+            else if ("Television".equals(objectName)) {
+                // Anda bisa memanggil metode watchTV() yang sudah ada di Player.java
+                // atau memindahkan logika konfirmasi TV ke sini jika perlu.
+                // Untuk sekarang, asumsikan watchTV() sudah menangani interaksi TV:
+                watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
+            }
+            // Tambahkan else if untuk objek lain di sini
+            // else if ("Bed".equals(objectName)) {
+            // gp.gameState = gp.sleepState;
+            // }
+            else {
+                System.out.println("PLAYER: Objek '" + objectName + "' belum memiliki interaksi khusus di Player.java.");
+            }
+        } else {
+            System.err.println("PLAYER: Interacted object is null for index: " + objIndex);
+        }
     }
     
     public boolean removeItem(String itemName, int quantityToRemove) {
@@ -297,8 +345,65 @@ public class Player extends Entity {
         }
 
     if (keyH.enterPressed) {
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-        interactNPC(npcIndex);
+        // Konsumsi tombol Enter agar tidak diproses berulang kali dalam satu frame oleh sistem lain
+        // Namun, interactNPC dan interactWithObject mungkin perlu tahu bahwa Enter baru saja ditekan.
+        // Untuk amannya, biarkan interactNPC dan interactWithObject yang mereset keyH.enterPressed jika perlu.
+        // Atau, reset di sini setelah semua pengecekan interaksi.
+
+        System.out.println("PLAYER.UPDATE: Enter ditekan.");
+
+        // 1. Prioritaskan Interaksi NPC
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc); // Cek NPC
+        if (npcIndex != 999) {
+            System.out.println("PLAYER.UPDATE: NPC terdeteksi (index: " + npcIndex + "), panggil interactNPC.");
+            interactNPC(npcIndex); // Metode interactNPC Anda akan menangani ini
+                                   // pastikan interactNPC mereset keyH.enterPressed jika sudah diproses.
+        } else {
+            // 2. Jika tidak ada NPC, cek Interaksi Objek
+            System.out.println("PLAYER.UPDATE: Tidak ada NPC terdeteksi, cek objek.");
+            int objIndex = gp.cChecker.checkObject(this, true); // Cek objek di depan pemain
+            if (objIndex != 999) {
+                System.out.println("PLAYER.UPDATE: Objek terdeteksi (index: " + objIndex + "), panggil interactWithObject.");
+                interactWithObject(objIndex); // Panggil metode baru Anda
+            } else {
+                System.out.println("PLAYER.UPDATE: Tidak ada NPC atau Objek yang bisa diajak berinteraksi.");
+            }
+        }
+        keyH.enterPressed = false; // Reset enterPressed di sini setelah semua potensi interaksi dicek.
+    }
+    // Logika Gerakan (HANYA JIKA TIDAK ADA ENTER YANG BARU DIPROSES UNTUK INTERAKSI)
+    // dan ada tombol arah yang ditekan
+    else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+        collisionOn = false;
+        gp.cChecker.checkTile(this);
+
+        // Untuk tabrakan objek saat bergerak, kita tidak ingin memicu interaksi, hanya tabrakan fisik.
+        // Metode checkObject bisa dimodifikasi atau dipanggil dengan flag berbeda jika hanya untuk tabrakan.
+        // Untuk sekarang, kita asumsikan checkObject tidak memicu interaksi di sini.
+        gp.cChecker.checkObject(this, false); // `false` berarti bukan untuk interaksi, hanya cek tabrakan
+
+        // Cek tabrakan NPC saat bergerak
+        gp.cChecker.checkEntity(this, gp.npc); // Sama, hanya untuk tabrakan
+
+        gp.eHandler.checkEvent();
+
+        if (!collisionOn) {
+            switch (direction) {
+                case "up": worldY -= speed; break;
+                case "down": worldY += speed; break;
+                case "left": worldX -= speed; break;
+                case "right": worldX += speed; break;
+            }
+            isMoving = true;
+        }
+
+        if (isMoving) { // Tidak perlu cek gp.gameState == gp.playState di sini karena sudah di playState
+            spriteCounter++;
+            if (spriteCounter > 10) {
+                spriteNum = (spriteNum == 1) ? 2 : 1;
+                spriteCounter = 0;
+            }
+        }
     }
 
         else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
@@ -349,8 +454,7 @@ public class Player extends Entity {
         if (objectName.equals("Television")) {
             watchTV();
         }
-        // else if untuk object lain seperti bed, stove, dsb
-        }
+    }
     }
 
     public void interactNPC(int i) {
