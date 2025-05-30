@@ -432,7 +432,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import item.ItemStack;
+
 import item.ItemRepository;
 
 public class Player extends Entity {
@@ -451,9 +451,9 @@ public class Player extends Entity {
     public String partner;
     public int gold;
     public ArrayList<ItemStack> inventory = new ArrayList<>();
-    public final int inventorySize = 10; // Ukuran inventaris, bisa diubah sesuai kebutuhan
+    public final int inventorySize = 10; 
 
-    public Entity currentInteractingNPC = null; // Menyimpan NPC yang sedang diajak interaksi
+    public Entity currentInteractingNPC = null; 
 
     public boolean removeItem(String itemName, int quantityToRemove) {
         for (int i = 0; i < inventory.size(); i++) {
@@ -468,12 +468,12 @@ public class Player extends Entity {
                     return true;
                 } else {
                     System.out.println("Not enough " + itemName + " ("+ currentItemStack.getQuantity() +") to remove " + quantityToRemove + ".");
-                    return false; // Tidak cukup kuantitas
+                    return false; 
                 }
             }
         }
         System.out.println(itemName + " not found in inventory to remove.");
-        return false; // Item tidak ditemukan
+        return false; 
     }
 
     public void addTestGiftableItems() {
@@ -512,7 +512,7 @@ public class Player extends Entity {
         name = "Bujanginam";
         gender = "Male";
         energy = maxEnergy;
-        gold = 0;
+        gold = 3000;
         farmName = "Tanah Batak";
         partner = "None";
 
@@ -531,7 +531,6 @@ public class Player extends Entity {
             inventory.add(new ItemStack(ItemRepository.Pickaxe, 1));
             inventory.add(new ItemStack(ItemRepository.Fishing_Rod, 1));
         } 
-        
         else {
             System.out.println("Item tidak ditemukan di ItemRepository.");
         }
@@ -551,7 +550,7 @@ public class Player extends Entity {
             System.out.println("Gagal memuat gambar item: " + imagePath + ".png");
             e.printStackTrace();
         }
-            return image;
+        return image;
     }
 
     public void getPlayerImage() {
@@ -698,7 +697,7 @@ public class Player extends Entity {
     public void changeGold(int amount) {
         gold += amount;
         if (gold < 0) {
-            gold = 0; // Pastikan gold tidak negatif
+            gold = 0; 
         }
     }
 
@@ -746,95 +745,155 @@ public class Player extends Entity {
 
     // action tilling
     public boolean tileLand() {
-    int centerX = worldX + solidArea.x + (solidArea.width / 2);
-    int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
 
-    int col = centerX / gp.tileSize;
-    int row = centerY / gp.tileSize;
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
 
-    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-    if (tileIndex >= 43 && tileIndex <= 51) {
-        if (!hasItem("Hoe")) {
-            gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
+        if (tileIndex >= 43 && tileIndex <= 51) {
+            if (!hasItem("Hoe")) {
+                gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
+                gp.gameState = gp.dialogueState;
+                return true;
+            }
+
+            if (!consumeEnergy(5)) return true;
+
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; 
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Menambahkan item ke inventaris pemain.
+     * Akan mencoba menumpuk item jika stackable dan ada stack yang sama dengan ruang kosong.
+     * Jika tidak, atau jika stack penuh, akan membuat stack baru jika ada slot kosong.
+     *
+     * @param itemToAdd Item yang akan ditambahkan.
+     * @param quantity Jumlah item yang akan ditambahkan.
+     * @return true jika setidaknya sebagian item berhasil ditambahkan, false jika tidak ada yang bisa ditambahkan.
+     */
+    public boolean addItemToInventory(Item itemToAdd, int quantity) {
+        if (itemToAdd == null || quantity <= 0) {
+            System.out.println("addItemToInventory: Item null atau quantity tidak valid.");
+            return false;
+        }
+
+        int originalQuantity = quantity; 
+        int remainingQuantity = quantity;
+        if (itemToAdd.stackable) {
+            for (ItemStack stack : inventory) {
+                if (stack.getItem() != null && stack.getItem().getName().equals(itemToAdd.getName())) {
+                    if (stack.getQuantity() < itemToAdd.maxStackAmount) {
+                        int spaceInStack = itemToAdd.maxStackAmount - stack.getQuantity();
+                        int amountToAddToThisStack = Math.min(remainingQuantity, spaceInStack);
+                        stack.addQuantity(amountToAddToThisStack);
+                        remainingQuantity -= amountToAddToThisStack;
+                        System.out.println("Menambahkan " + amountToAddToThisStack + " ke tumpukan " + itemToAdd.getName() + ". Sisa: " + remainingQuantity);
+
+                        if (remainingQuantity <= 0) {
+                            gp.ui.showMessage("Menambahkan " + originalQuantity + " " + itemToAdd.getName() + ".");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        while (remainingQuantity > 0) {
+            if (inventory.size() < inventorySize) {
+                int amountForNewStack;
+                if (itemToAdd.stackable) {
+                    amountForNewStack = Math.min(remainingQuantity, itemToAdd.maxStackAmount);
+                } else {
+                    amountForNewStack = 1;
+                }
+
+                inventory.add(new ItemStack(itemToAdd, amountForNewStack));
+                remainingQuantity -= amountForNewStack;
+                System.out.println("Membuat tumpukan baru untuk " + itemToAdd.getName() + " sejumlah " + amountForNewStack + ". Sisa: " + remainingQuantity);
+
+                if (remainingQuantity <= 0) {
+                    gp.ui.showMessage("Menambahkan " + originalQuantity + " " + itemToAdd.getName() + ".");
+                    return true;
+                }
+            } else {
+                // Tidak ada slot kosong lagi di inventaris, tetapi masih ada sisa item
+                gp.ui.showMessage("Inventaris penuh! Tidak semua " + itemToAdd.getName() + " bisa ditambahkan.");
+                System.out.println("Inventaris penuh. Sisa " + remainingQuantity + " " + itemToAdd.getName() + " tidak dapat ditambahkan.");
+                return originalQuantity > remainingQuantity;
+            }
+        }
+        return true;
+    }
+
+    public boolean hasItem(String itemName) {
+        for (ItemStack stack : inventory) {
+            if (stack.getItem() != null && stack.getItem().getName().equalsIgnoreCase(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // action planting
+    public boolean plantSeed() {
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
+
+        int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+
+        if (tileIndex == 55) { // 55 = tilled soil
+            ItemStack seed = getSeedFromInventory();
+            if (seed == null) {
+                gp.ui.currentDialogue = "Kamu tidak punya seed!";
+                gp.gameState = gp.dialogueState;
+                return true;
+            }
+
+            if (!consumeEnergy(5)) return true;
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
+            removeItem(seed.getItem().getName(), 1); // Kurangi seed dari inventory
+            gp.ui.currentDialogue = "Berhasil menanam " + seed.getItem().getName();
+            gp.gameState = gp.dialogueState;
+            return true;
+        }
+        return false;
+    }
+    public ItemStack getSeedFromInventory() {
+        for (ItemStack stack : inventory) {
+            if (stack.getItem() != null && stack.getItem() instanceof Seed) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
+    // watching
+    public boolean watchTV() {
+        Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
+        // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
+        if (gp.currentMap != 0) { 
+            gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
             gp.gameState = gp.dialogueState;
             return true;
         }
 
+        // Cek energi cukup
         if (!consumeEnergy(5)) return true;
 
-        gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // jadi tile 55
-        return true;
-    }
+        // Tambah waktu menggunakan GameState (biar konsisten)
+        gp.gameStateSystem.advanceTimeByMinutes(15);
 
-    return false;
-}
-
-public boolean hasItem(String itemName) {
-    for (ItemStack stack : inventory) {
-        if (stack.getItem() != null && stack.getItem().getName().equalsIgnoreCase(itemName)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// action planting
-public boolean plantSeed() {
-    int centerX = worldX + solidArea.x + (solidArea.width / 2);
-    int centerY = worldY + solidArea.y + (solidArea.height / 2);
-    int col = centerX / gp.tileSize;
-    int row = centerY / gp.tileSize;
-
-    int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
-
-    if (tileIndex == 55) { // 55 = tilled soil
-        ItemStack seed = getSeedFromInventory();
-        if (seed == null) {
-            gp.ui.currentDialogue = "Kamu tidak punya seed!";
-            gp.gameState = gp.dialogueState;
-            return true;
-        }
-
-        if (!consumeEnergy(5)) return true;
-
-        // Tanam: ubah tile menjadi planted (index 56)
-        gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
-        removeItem(seed.getItem().getName(), 1); // Kurangi seed dari inventory
-        gp.ui.currentDialogue = "Berhasil menanam " + seed.getItem().getName();
+        gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
         gp.gameState = gp.dialogueState;
         return true;
     }
-
-    return false;
-}
-public ItemStack getSeedFromInventory() {
-    for (ItemStack stack : inventory) {
-        if (stack.getItem() != null && stack.getItem() instanceof Seed) {
-            return stack;
-        }
-    }
-    return null;
-}
-
-// watching
-public boolean watchTV() {
-    Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
-    // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
-    if (gp.currentMap != 0) { 
-        gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
-        gp.gameState = gp.dialogueState;
-        return true;
-    }
-
-    // Cek energi cukup
-    if (!consumeEnergy(5)) return true;
-
-    // Tambah waktu menggunakan GameState (biar konsisten)
-    gp.gameStateSystem.advanceTimeByMinutes(15);
-
-    gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
-    gp.gameState = gp.dialogueState;
-    return true;
-}
 }

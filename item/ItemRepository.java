@@ -115,70 +115,70 @@ public class ItemRepository {
                 Set.of("Sunny"), // Weather
                 Set.of("Forest River", "Mountain Lake"), 
                 "Regular");
-        Sturgeon = new Fish("Sturgeon", gp, "Ikan besar yang hidup di danau pada musim panas dan dingin.", "/items/fish/sturgeon",
+        Sturgeon = new Fish("Sturgeon", gp, "Ikan besar yang hidup di danau pada musim panas dan dingin.", "/res/item/fish/regular/sturgeon",
                 Set.of("Summer", "Winter"), // Seasons: Summer, Winter [cite: 124]
                 List.of(new Fish.TimeWindow(6, 18)), // Time: 06.00-18.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Mountain Lake"), // Locations [cite: 124]
                 "Regular");
 
-        Midnight_Carp = new Fish("Midnight Carp", gp, "Jenis ikan mas yang aktif di malam hari pada musim gugur dan dingin.", "/items/fish/midnight_carp",
+        Midnight_Carp = new Fish("Midnight Carp", gp, "Jenis ikan mas yang aktif di malam hari pada musim gugur dan dingin.", "/res/item/fish/regular/midnightcarp",
                 Set.of("Winter", "Fall"), // Seasons: Winter, Fall [cite: 124]
                 List.of(new Fish.TimeWindow(20, 2)), // Time: 20.00-02.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Mountain Lake", "Pond"), // Locations [cite: 124]
                 "Regular");
 
-        Flounder = new Fish("Flounder", gp, "Ikan pipih yang bisa ditemukan di laut saat musim semi dan panas.", "/items/fish/flounder",
+        Flounder = new Fish("Flounder", gp, "Ikan pipih yang bisa ditemukan di laut saat musim semi dan panas.", "/res/item/fish/regular/flounder",
                 Set.of("Spring", "Summer"), // Seasons: Spring, Summer [cite: 124]
                 List.of(new Fish.TimeWindow(6, 22)), // Time: 06.00-22.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Halibut = new Fish("Halibut", gp, "Ikan pipih besar dari laut, aktif pada jam-jam tertentu.", "/items/fish/halibut",
+        Halibut = new Fish("Halibut", gp, "Ikan pipih besar dari laut, aktif pada jam-jam tertentu.", "/res/item/fish/regular/halibut",
                 Set.of("Any"), // Seasons [cite: 124]
                 List.of(new Fish.TimeWindow(6, 11), new Fish.TimeWindow(19, 2)), // Time: 06.00-11.00, 19.00-02.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Octopus = new Fish("Octopus", gp, "Gurita yang cerdas, ditemukan di laut saat musim panas.", "/items/fish/octopus",
+        Octopus = new Fish("Octopus", gp, "Gurita yang cerdas, ditemukan di laut saat musim panas.", "/res/item/fish/regular/octopus",
                 Set.of("Summer"), // Season: Summer [cite: 124]
                 List.of(new Fish.TimeWindow(6, 22)), // Time: 06.00-22.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Pufferfish = new Fish("Pufferfish", gp, "Ikan buntal yang mengembang, hanya muncul di laut saat musim panas dan cerah.", "/items/fish/pufferfish",
+        Pufferfish = new Fish("Pufferfish", gp, "Ikan buntal yang mengembang, hanya muncul di laut saat musim panas dan cerah.", "/res/item/fish/regular/pufferfish",
                 Set.of("Summer"), // Season: Summer [cite: 124]
                 List.of(new Fish.TimeWindow(0, 16)), // Time: 00.00-16.00 [cite: 124]
                 Set.of("Sunny"), // Weather: Sunny [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Sardine = new Fish("Sardine", gp, "Ikan kecil bergerombol yang bisa ditemukan di laut.", "/items/fish/sardine",
+        Sardine = new Fish("Sardine", gp, "Ikan kecil bergerombol yang bisa ditemukan di laut.", "/res/item/fish/regular/sardine",
                 Set.of("Any"), // Seasons [cite: 124]
                 List.of(new Fish.TimeWindow(6, 18)), // Time: 06.00-18.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Super_Cucumber = new Fish("Super Cucumber", gp, "Teripang super yang langka, aktif di laut pada malam hari.", "/items/fish/super_cucumber",
+        Super_Cucumber = new Fish("Super Cucumber", gp, "Teripang super yang langka, aktif di laut pada malam hari.", "/res/item/fish/regular/supercucumber",
                 Set.of("Summer", "Fall", "Winter"), // Seasons: Summer, Fall, Winter [cite: 124]
                 List.of(new Fish.TimeWindow(18, 2)), // Time: 18.00-02.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
                 Set.of("Ocean"), // Locations [cite: 124]
                 "Regular");
 
-        Catfish = new Fish("Catfish", gp, "Ikan lele yang menyukai cuaca hujan.", "/items/fish/catfish",
+        Catfish = new Fish("Catfish", gp, "Ikan lele yang menyukai cuaca hujan.", "/res/item/fish/regular/catfish",
                 Set.of("Spring", "Summer", "Fall"), // Seasons: Spring, Summer, Fall [cite: 124]
                 List.of(new Fish.TimeWindow(6, 22)), // Time: 06.00-22.00 [cite: 124]
                 Set.of("Rainy"), // Weather: Rainy [cite: 124]
                 Set.of("Forest River", "Pond"), // Locations [cite: 124]
                 "Regular");
 
-        Salmon= new Fish("Salmon", gp, "Ikan yang bermigrasi ke sungai pada musim gugur.", "/items/fish/salmon",
+        Salmon = new Fish("Salmon", gp, "Ikan yang bermigrasi ke sungai pada musim gugur.", "/res/item/fish/regular/salmon",
                 Set.of("Fall"), // Season: Fall [cite: 124]
                 List.of(new Fish.TimeWindow(6, 18)), // Time: 06.00-18.00 [cite: 124]
                 Set.of("Any"), // Weather [cite: 124]
@@ -186,21 +186,21 @@ public class ItemRepository {
                 "Regular");
 
         // Legendary Fish
-        ANGLER = new Fish("Angler", gp, "Ikan aneh yang menggunakan umpannya untuk menarik mangsa di kedalaman kolam.", "/items/fish/angler",
+        Angler = new Fish("Angler", gp, "Ikan aneh yang menggunakan umpannya untuk menarik mangsa di kedalaman kolam.", "/res/item/fish/legendary/angler",
             Set.of("Fall"), // Season: Fall
             List.of(new Fish.TimeWindow(8, 20)), // Time: 08.00-20.00
             Set.of("Any"), // Weather: Any
             Set.of("Pond"), // Locations: Pond
             "Legendary");
 
-        CRIMSONFISH = new Fish("Crimsonfish", gp, "Ikan berwarna merah menyala yang hidup di perairan laut hangat saat musim panas.", "/items/fish/crimsonfish",
+        Crimsonfish = new Fish("Crimsonfish", gp, "Ikan berwarna merah menyala yang hidup di perairan laut hangat saat musim panas.", "/res/item/fish/legendary/crimsonfish",
                 Set.of("Summer"), // Season: Summer
                 List.of(new Fish.TimeWindow(8, 20)), // Time: 08.00-20.00
                 Set.of("Any"), // Weather: Any
                 Set.of("Ocean"), // Locations: Ocean
                 "Legendary");
 
-        GLACIERFISH = new Fish("Glacierfish", gp, "Ikan yang sangat langka, ditemukan di perairan dingin hutan saat musim dingin.", "/items/fish/glacierfish",
+        Glacierfish = new Fish("Glacierfish", gp, "Ikan yang sangat langka, ditemukan di perairan dingin hutan saat musim dingin.", "/res/item/fish/legendary/glacierfish",
                 Set.of("Winter"), // Season: Winter
                 List.of(new Fish.TimeWindow(8, 20)), // Time: 08.00-20.00
                 Set.of("Any"), // Weather: Any
