@@ -38,7 +38,6 @@ public class Food extends Item {
 
     @Override
     public void use() {
-        // Logika saat makanan dimakan oleh pemain
         if (gp.player != null) {
             gp.player.gainEnergy(this.energiYangDiberikan); // Menggunakan metode gainEnergy dari Player.java
             gp.ui.showMessage("Anda memakan " + getName() + " dan memulihkan " + this.energiYangDiberikan + " energi.");
@@ -50,7 +49,6 @@ public class Food extends Item {
                 System.out.println("Peringatan: Gagal mengurangi " + getName() + " dari inventory setelah digunakan.");
                 // Anda mungkin ingin menangani kasus ini lebih lanjut jika diperlukan
             }
-
         } else {
             System.out.println("Objek Player tidak ditemukan di GamePanel. Makanan tidak bisa digunakan.");
             gp.ui.showMessage("Error: Tidak bisa menggunakan " + getName() + ".");
