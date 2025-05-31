@@ -93,6 +93,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int helpState = 8; 
     public final int fishingState = 10;
     public final int shippingBinState = 11;
+    public final int characterCreationState = 12;
 
     // fishing
     public Fish fishBeingFished = null;
@@ -625,7 +626,34 @@ public class GamePanel extends JPanel implements Runnable{
         } else if (gameState == sleepState) {
             
 
-        } else if (gameState == npcInteractionState) { 
+        } else if (gameState == characterCreationState) {
+    if (keyH.enterPressed) { // Flag ini sekarang HANYA true jika Enter ditekan pada tombol "Selesai"
+        keyH.enterPressed = false; // Selalu konsumsi flag setelah diproses
+
+        System.out.println("GamePanel: Finalizing character creation.");
+
+        // Terapkan data yang dikumpulkan dari UI ke objek player
+        player.name = ui.tempPlayerName.isEmpty() ? "Petani" : ui.tempPlayerName;
+        player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; // Asumsi 0=Laki, 1=Perempuan
+        player.farmName = ui.tempFarmName.isEmpty() ? "Kebunku" : ui.tempFarmName;
+        if (player.favoriteItem != null) { // Pastikan field favoriteItem ada di Player
+            player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; // Beri default jika kosong
+        }
+
+        System.out.println("Pembuatan Karakter Selesai:");
+        System.out.println("Nama: " + player.name);
+        System.out.println("Gender: " + player.gender);
+        System.out.println("Nama Kebun: " + player.farmName);
+        if (player.favoriteItem != null) {
+            System.out.println("Item Favorit: " + player.favoriteItem);
+        }
+
+        ui.activeInputField = 0; // Reset fokus untuk penggunaan berikutnya jika ada
+        gameState = playState; // Pindah ke playState
+        // playMusic(0); // Mainkan musik game utama
+    }
+    // Tidak ada 'else if (keyH.enterPressed)' lagi di sini, karena navigasi field ditangani KeyHandler
+} else if (gameState == npcInteractionState) { 
             Entity currentNpc = player.currentInteractingNPC;
 
             if (keyH.enterPressed) {
