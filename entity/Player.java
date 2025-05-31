@@ -98,41 +98,40 @@ public class Player extends Entity {
         return false;
     }
 
-    /**
-     * @param worldX Koordinat X dunia dari tile
-     * @param worldY Koordinat Y dunia dari tile
-     * @return 
-     */
     private boolean checkSpecificTileIsWater(int worldX, int worldY) {
-        if (gp == null || gp.tileM == null) return false; 
+    if (gp == null || gp.tileM == null) return false;
 
-        int tileCol = worldX / gp.tileSize;
-        int tileRow = worldY / gp.tileSize;
+    int tileCol = worldX / gp.tileSize;
+    int tileRow = worldY / gp.tileSize;
 
-        // Pengecekan batas peta
-        if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
-            return false; 
-        }
-
-        if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
-            tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
-            tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
-            System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
-            return false;
-        }
-        
-        int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
-
-        if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
-            System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
-            return false;
-        }
-
-        if (tileNum == 37) {
-            return true;
-        }
+    // Pengecekan batas peta (sudah ada dan benar)
+    if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
         return false;
     }
+    // Pengecekan batas array mapTileNum (sudah ada dan benar)
+    if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
+        tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
+        tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
+        System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
+        return false;
+    }
+    int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
+
+    // Pengecekan batas array tile properties (sudah ada dan benar)
+    if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
+        System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
+        return false;
+    }
+
+    // Menghilangkan pengecekan spesifik untuk tile 37.
+    // Sekarang metode ini akan selalu mengembalikan false, atau
+    // Anda bisa menambahkan logika lain jika tile memiliki properti umum 'isWater'.
+    // Untuk sekarang, jika tujuannya hanya menghilangkan dependensi tile 37 untuk fishing:
+    // if (gp.tileM.tile[tileNum].isWaterType() && !gp.tileM.tile[tileNum].collision) { // Contoh jika ada properti isWaterType()
+    //     return true;
+    // }
+    return false; // Karena pengecekan spesifik (59, 249, OBJ_Pond) ada di GamePanel
+}
 
     public int getTileInFront() {
         // Titik tengah dari solidArea pemain sebagai referensi

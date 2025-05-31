@@ -130,69 +130,187 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void startFishingMinigame() {
+    String currentFishingLocation = "Unknown";
+    boolean canFishAtCurrentSpot = false;
 
-        gameStateSystem.advanceTimeByMinutes(15);
-        System.out.println("GAMEPANEL: Waktu dimajukan 15 menit untuk memancing.");
+    // 0. DEFINISIKAN INDEKS PETA ANDA DENGAN BENAR
+    final int FARM_MAP_INDEX = 0; // Sesuaikan jika indeks peta Farm Anda berbeda
+    final int MOUNTAIN_LAKE_MAP_INDEX = 3; // Anda memberi nilai 3 di kode GamePanel
+    final int FOREST_RIVER_MAP_INDEX = 4;  // Anda memberi nilai 4 di kode GamePanel
+    final int OCEAN_MAP_INDEX = 1;         // Anda memberi nilai 1 di kode GamePanel
 
-        String currentLocationString = "Default_Location"; 
-        if (currentMap == 0) { 
-            currentLocationString = "Pond"; 
-        } else {
-            System.out.println("GAMEPANEL: Saat ini hanya bisa memancing di map 0.");
-            ui.currentDialogue = "Kamu hanya bisa memancing di area tertentu di peta utama.";
-            gameState = dialogueState;
-            return;
+    // 1. PENGECEKAN SYARAT AWAL UMUM (Alat Pancing & Energi)
+    //    Dilakukan sebelum menentukan spot agar lebih efisien.
+    boolean hasFishingRod = false;
+    for (ItemStack stack : player.inventory) {
+        if (stack.getItem() != null && "Fishing Rod".equals(stack.getItem().getName())) {
+            hasFishingRod = true;
+            break;
         }
-
-        List<Fish> catchableFishToday = new ArrayList<>();
-
-        if (ItemRepository.Bullhead != null) catchableFishToday.add(ItemRepository.Bullhead);
-        if (ItemRepository.Carp != null) catchableFishToday.add(ItemRepository.Carp);
-        if (ItemRepository.Largemouth_Bass != null) catchableFishToday.add(ItemRepository.Largemouth_Bass);
-
-        if (catchableFishToday.isEmpty()) {
-            ui.currentDialogue = "Sepertinya tidak ada ikan yang aktif saat ini";
-            gameState = dialogueState;
-            System.out.println("GAMEPANEL: Tidak ada ikan yang bisa ditangkap saat ini.");
-            return;
-        }
-
-        java.util.Random random = new java.util.Random();
-        fishBeingFished = catchableFishToday.get(random.nextInt(catchableFishToday.size()));
-        System.out.println("GAMEPANEL: Ikan yang berpotensi ditangkap: " + fishBeingFished.name + " (" + fishBeingFished.getFishRarity() + ")");
-
-
-        String rarity = fishBeingFished.getFishRarity().toLowerCase(); 
-        switch (rarity) {
-            case "common":
-                fishingMinRange = 1; fishingMaxRange = 10;
-                fishingAttemptsLeft = 10; 
-                break;
-            case "regular":
-                fishingMinRange = 1; fishingMaxRange = 100;
-                fishingAttemptsLeft = 10; 
-                break;
-            case "legendary":
-                fishingMinRange = 1; fishingMaxRange = 500;
-                fishingAttemptsLeft = 7;
-                break;
-            default: 
-                System.err.println("GAMEPANEL: Rarias ikan tidak dikenal - " + rarity + ". Menggunakan default Common.");
-                fishingMinRange = 1; fishingMaxRange = 10;
-                fishingAttemptsLeft = 10;
-                break;
-        }
-        fishingTargetNumber = random.nextInt(fishingMaxRange - fishingMinRange + 1) + fishingMinRange;
-        currentFishingGuess = ""; 
-        fishingFeedbackMessage = "Tebak angka antara " + fishingMinRange + " dan " + fishingMaxRange + "!";
-
-        System.out.println("GAMEPANEL: Minigame Fishing. Target Angka: " + fishingTargetNumber + ", Percobaan: " + fishingAttemptsLeft);
-
-        gameState = fishingState;
-
-        ui.setDialogue(fishingFeedbackMessage, "FISHING_MINIGAME"); 
-        System.out.println("GAMEPANEL: Pindah ke fishingState (" + fishingState + ")");
     }
+    if (!hasFishingRod) {
+        ui.setDialogue("Kamu membutuhkan Pancingan (Fishing Rod)!", "SYSTEM_MESSAGE");
+        gameState = dialogueState;
+        System.out.println("GAMEPANEL: Gagal memulai memancing, tidak ada Fishing Rod.");
+        return;
+    }
+
+    if (!player.consumeEnergy(5)) { // consumeEnergy akan menampilkan dialog jika energi kurang
+        System.out.println("GAMEPANEL: Gagal memulai memancing, energi tidak cukup.");
+        return; // Keluar jika energi tidak cukup (consumeEnergy sudah set gameState ke dialogueState)
+    }
+
+    // 2. TENTUKAN APAKAH PEMAIN MENGHADAP TEMPAT MEMANCING YANG VALID
+    // Prioritaskan pengecekan objek "Pond" jika di Farm Map
+    if (currentMap == FARM_MAP_INDEX) {
+        int objIndex = cChecker.checkObject(player, true); // Cek objek di depan pemain
+        if (objIndex != 999 && obj[currentMap][objIndex] != null) {
+            String objectName = obj[currentMap][objIndex].name;
+            // Pastikan nama objek Pond Anda konsisten
+            if (objectName.equals("Pond") || objectName.equals("OBJ_Pond") || objectName.equals("Kolam")) { // Sesuaikan
+                currentFishingLocation = "Pond";
+                canFishAtCurrentSpot = true;
+                System.out.println("GAMEPANEL: Menghadap objek " + objectName + " (Pond) di Farm Map.");
+            }
+        }
+    }
+
+    // Jika bukan objek Pond (atau tidak di Farm Map), cek tile di depan pemain
+    if (!canFishAtCurrentSpot) {
+        int tileNumInFront = player.getTileInFront(); // Metode dari Player.java
+        System.out.println("GAMEPANEL: Tile di depan pemain: " + tileNumInFront + " di peta: " + currentMap);
+
+        if (currentMap == MOUNTAIN_LAKE_MAP_INDEX && (tileNumInFront == 259 || tileNumInFront == 260 || tileNumInFront == 261 || tileNumInFront == 262 || tileNumInFront == 263 || tileNumInFront == 264)) {
+            currentFishingLocation = "Mountain Lake";
+            canFishAtCurrentSpot = true;
+        } else if (currentMap == FOREST_RIVER_MAP_INDEX && (tileNumInFront == 271 || tileNumInFront == 272 || tileNumInFront == 273 || tileNumInFront == 275 || tileNumInFront == 276 || tileNumInFront == 277)) {
+            currentFishingLocation = "Forest River";
+            canFishAtCurrentSpot = true;
+        } else if (currentMap == OCEAN_MAP_INDEX && (tileNumInFront == 247 || tileNumInFront == 248 || tileNumInFront == 249 || tileNumInFront == 250 || tileNumInFront == 251)) {
+            currentFishingLocation = "Ocean";
+            canFishAtCurrentSpot = true;
+        }
+        // Anda bisa menambahkan 'else if' untuk tile air umum (misal 37) di Farm Map jika Pond tidak terdeteksi
+        // else if (currentMap == FARM_MAP_INDEX && tileNumInFront == 37) {
+        //     currentFishingLocation = "FarmWater"; // Atau nama lokasi air umum di farm
+        //     canFishAtCurrentSpot = true;
+        // }
+    }
+
+    // Jika setelah semua pengecekan tidak ada spot memancing valid
+    if (!canFishAtCurrentSpot) {
+        ui.setDialogue("Kamu tidak bisa memancing di sini atau tidak menghadap tempat yang benar.", "SYSTEM_MESSAGE");
+        gameState = dialogueState;
+        player.gainEnergy(5); // Kembalikan energi karena aksi memancing tidak jadi dimulai
+        System.out.println("GAMEPANEL: Gagal memulai memancing, tidak ada spot valid. Energi dikembalikan.");
+        return;
+    }
+
+    // 3. MAJUKAN WAKTU (setelah semua syarat terpenuhi dan spot valid)
+    gameStateSystem.advanceTimeByMinutes(15);
+    System.out.println("GAMEPANEL: Memancing dimulai di " + currentFishingLocation + ". Waktu dimajukan 15 menit.");
+
+
+    // 4. PENGECEKAN BATASAN WAKTU MEMANCING PER LOKASI
+    int currentHour = gameStateSystem.getTimeManager().getHour();
+    boolean canFishAtThisTimeAndLocation = false;
+    switch (currentFishingLocation) {
+        case "Mountain Lake": // Bisa dipancing hingga pukul 19:00 (sebelum jam 7 malam)
+        case "Forest River":  // Bisa dipancing hingga pukul 19:00
+            if (currentHour >= 6 && currentHour < 19) {
+                canFishAtThisTimeAndLocation = true;
+            }
+            break;
+        case "Ocean": // Bisa dipancing hingga pukul 17:00 (sebelum jam 5 sore)
+            if (currentHour >= 6 && currentHour < 17) {
+                canFishAtThisTimeAndLocation = true;
+            }
+            break;
+        case "Pond": // Bisa kapan saja
+            canFishAtThisTimeAndLocation = true;
+            break;
+        // case "FarmWater": // Jika Anda menambahkan lokasi air umum di farm
+        //     canFishAtThisTimeAndLocation = true; // Atau beri batasan waktu sendiri
+        //     break;
+        default: // Seharusnya tidak terjadi karena sudah divalidasi di atas
+            System.err.println("GAMEPANEL: Lokasi memancing tidak dikenal saat pengecekan waktu: " + currentFishingLocation);
+            break;
+    }
+
+    if (!canFishAtThisTimeAndLocation) {
+        ui.setDialogue("Kamu tidak bisa memancing di " + currentFishingLocation + " pada jam " + String.format("%02d:00", currentHour) + ".", "SYSTEM_MESSAGE");
+        gameState = dialogueState;
+        // Waktu sudah dimajukan, energi sudah dikonsumsi. Mungkin ini adalah konsekuensi.
+        // Atau, jika ingin lebih ramah, batalkan pemajuan waktu dan kembalikan energi jika di sini gagal.
+        System.out.println("GAMEPANEL: Waktu tidak valid (" + currentHour + "h) untuk memancing di " + currentFishingLocation);
+        return;
+    }
+
+    // 5. DAPATKAN DAN FILTER DAFTAR IKAN
+    List<Fish> allFishInGame = ItemRepository.getAllFishInstances(this); // Pastikan metode ini ada dan mengembalikan List<Fish>
+    List<Fish> catchableFishToday = new ArrayList<>();
+    String currentSeason = gameStateSystem.getTimeManager().getSeason().toString();
+    String currentWeather = gameStateSystem.getTimeManager().getWeather().toString(); // Asumsi Enum: "SUNNY", "RAINY"
+
+    if (allFishInGame == null || allFishInGame.isEmpty()) {
+        ui.setDialogue("Ada masalah dengan data ikan...", "SYSTEM_MESSAGE");
+        gameState = dialogueState;
+        System.err.println("GAMEPANEL: Tidak ada data ikan di ItemRepository!");
+        return;
+    }
+
+    System.out.println("GAMEPANEL: Filtering ikan untuk Lokasi: " + currentFishingLocation +
+                       ", Jam: " + currentHour + ", Musim: " + currentSeason + ", Cuaca: " + currentWeather);
+
+    for (Fish fish : allFishInGame) {
+        // Asumsi metode isCatchable di Fish.java menerima parameter ini dan memiliki logika pengecekan internal
+        if (fish.isCatchable(currentFishingLocation, currentHour, currentSeason, currentWeather)) {
+            catchableFishToday.add(fish);
+        }
+    }
+
+    if (catchableFishToday.isEmpty()) {
+        ui.setDialogue("Sepertinya tidak ada ikan yang aktif di " + currentFishingLocation + " saat ini...", "SYSTEM_MESSAGE");
+        gameState = dialogueState;
+        System.out.println("GAMEPANEL: Tidak ada ikan yang bisa ditangkap di " + currentFishingLocation + " (Jam: " + currentHour + ", Musim: " + currentSeason + ", Cuaca: " + currentWeather + ")");
+        return;
+    }
+
+    // 6. SISA LOGIKA MINIGAME (pilih ikan acak, tentukan raritas, angka target, dll.)
+    java.util.Random random = new java.util.Random();
+    fishBeingFished = catchableFishToday.get(random.nextInt(catchableFishToday.size()));
+    System.out.println("GAMEPANEL: Ikan yang berpotensi ditangkap: " + fishBeingFished.name + " (" + fishBeingFished.getFishRarity() + ")");
+
+    // Tentukan Rentang Angka dan Jumlah Percobaan berdasarkan raritas
+    String rarity = fishBeingFished.getFishRarity().toLowerCase();
+    switch (rarity) {
+        case "common":
+            fishingMinRange = 1; fishingMaxRange = 10;
+            fishingAttemptsLeft = 10;
+            break;
+        case "regular":
+            fishingMinRange = 1; fishingMaxRange = 100;
+            fishingAttemptsLeft = 10;
+            break;
+        case "legendary":
+            fishingMinRange = 1; fishingMaxRange = 500;
+            fishingAttemptsLeft = 7;
+            break;
+        default:
+            System.err.println("GAMEPANEL: Rarias ikan tidak dikenal - " + rarity + ". Menggunakan default Common.");
+            fishingMinRange = 1; fishingMaxRange = 10;
+            fishingAttemptsLeft = 10;
+            break;
+    }
+    fishingTargetNumber = random.nextInt(fishingMaxRange - fishingMinRange + 1) + fishingMinRange;
+    currentFishingGuess = "";
+    fishingFeedbackMessage = "Tebak angka antara " + fishingMinRange + " dan " + fishingMaxRange + "!";
+    System.out.println("GAMEPANEL: Minigame Fishing. Target Angka: " + fishingTargetNumber + ", Percobaan: " + fishingAttemptsLeft);
+
+    gameState = fishingState; // Pindah ke fishingState
+    ui.setDialogue(fishingFeedbackMessage, "FISHING_MINIGAME"); // Mode untuk UI
+    System.out.println("GAMEPANEL: Pindah ke fishingState (" + fishingState + ")");
+}
 
     public void endFishingMinigame(boolean caughtFish, String finalMessage) {
         System.out.println("GAMEPANEL: Minigame Fishing Selesai. Berhasil: " + caughtFish + ". Pesan: " + finalMessage);
@@ -340,43 +458,10 @@ public class GamePanel extends JPanel implements Runnable{
                 if (npc[currentMap][i] != null) npc[currentMap][i].update();
             }
 
-            if (keyH.fPressed) { 
-                keyH.fPressed = false; 
-                System.out.println("GAMEPANEL (playState): Tombol F ditekan untuk memancing.");
-
-                boolean hasFishingRod = false;
-                for (ItemStack stack : player.inventory) {
-                    if (stack.getItem() != null && "Fishing Rod".equals(stack.getItem().getName())) {
-                        hasFishingRod = true;
-                        break;
-                    }
-                }
-
-                if (!hasFishingRod) {
-                    ui.currentDialogue = "Kamu membutuhkan Pancingan (Fishing Rod)!";
-            
-                    gameState = dialogueState;
-                    System.out.println("GAMEPANEL: Gagal memancing, tidak ada Fishing Rod.");
-                } else {
-         
-                    if (player.isFacingWaterTile()) { 
-          
-                        if (player.consumeEnergy(5)) {
-                            System.out.println("GAMEPANEL: Memulai aksi Fishing");
-                            startFishingMinigame(); 
-                        } else {
-                            ui.currentDialogue = "Tidak cukup energi untuk memancing.";
-                  
-                            gameState = dialogueState;
-                            System.out.println("GAMEPANEL: Gagal memancing, energi tidak cukup.");
-                        }
-                    } else {
-                        ui.currentDialogue = "Kamu tidak bisa memancing di sini.";
-           
-                        gameState = dialogueState;
-                        System.out.println("GAMEPANEL: Gagal memancing, tidak menghadap air.");
-                    }
-                }
+            if (keyH.fPressed) {
+                keyH.fPressed = false; // Konsumsi input
+                System.out.println("GAMEPANEL (playState): Tombol F ditekan, memanggil startFishingMinigame().");
+                startFishingMinigame(); // Langsung panggil, semua validasi ada di dalamnya
             }
 
             else if (keyH.enterPressed) {

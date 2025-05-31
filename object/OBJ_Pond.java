@@ -23,37 +23,35 @@ public class OBJ_Pond extends SuperObject {
 
         // --- PENTING: Tentukan dimensi objek dalam jumlah tile ---
         int tileSpanWidth = 4;  // Lebar objek ini adalah 6 tile
-        int tileSpanHeight = 3; // Tinggi objek ini adalah 6 tile
+        int tileSpanHeight = 3; 
 
-        // Hitung total dimensi piksel objek berdasarkan ukuran tile di GamePanel
-        // Properti 'width' dan 'height' di SuperObject harus diatur di sini
         this.width = gp.tileSize * tileSpanWidth;
         this.height = gp.tileSize * tileSpanHeight;
 
         try {
-            // Muat gambar asli terlebih dahulu
-            BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream("/res/objects/pond.png"));
+            BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream("/res/objects/pond.png")); // Pastikan path benar
 
             if (originalImage != null) {
-                // Skalakan gambar menggunakan UtilityTool atau secara manual
-                // Jika UtilityTool memiliki metode scaleImage(BufferedImage original, int width, int height)
+                // Jika UtilityTool.scaleImage adalah static:
                 this.image = UtilityTool.scaleImage(originalImage, this.width, this.height);
-                // ATAU jika tidak pakai UtilityTool:
-                // Image scaledTemp = originalImage.getScaledInstance(this.width, this.height, Image.SCALE_SMOOTH);
-                // this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
-                // Graphics2D g2d = ((BufferedImage)this.image).createGraphics();
-                // g2d.drawImage(scaledTemp, 0, 0, null);
-                // g2d.dispose();
-
-                collision = true; // Objek ini bisa bertabrakan
-
+                // Jika uTool adalah instance member dari SuperObject (dan diinisialisasi):
+                // this.image = uTool.scaleImage(originalImage, this.width, this.height);
             } else {
-                System.err.println("OBJ_House: Gambar asli untuk FarmHouse null. Path mungkin salah: /res/objects/farmhouse.png");
+                System.err.println("OBJ_Pond: Gambar asli untuk Pond null. Path mungkin salah: /res/objects/pond.png");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("OBJ_House: Gagal memuat atau menskalakan gambar FarmHouse.");
+            System.err.println("OBJ_Pond: Gagal memuat atau menskalakan gambar Pond.");
         }
+
+        collision = true; 
+
+        this.solidArea.width = this.width;
+        this.solidArea.height = this.height;
+        this.solidArea.x = 0; // Offset X area solid relatif terhadap worldX objek
+        this.solidArea.y = 0; // Offset Y area solid relatif terhadap worldY objek
+        this.solidAreaDefaultX = 0; // Untuk reset di CollisionChecker
+        this.solidAreaDefaultY = 0;
     }
 
     @Override

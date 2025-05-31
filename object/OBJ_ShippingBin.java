@@ -43,6 +43,14 @@ public class OBJ_ShippingBin extends SuperObject {
             e.printStackTrace();
         }
         collision = true;
+
+        solidArea.x = 0;
+        solidArea.y = 0;
+        solidArea.width = this.width;   // Lebar area solid sama dengan lebar objek
+        solidArea.height = this.height;  // Tinggi area solid sama dengan tinggi objek
+
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
     }
 
     @Override
