@@ -509,7 +509,7 @@ public void drawTitleScreen() {
     }
 
     try {
-        BufferedImage background = ImageIO.read(getClass().getResourceAsStream("/res/title/background.jpg"));
+        BufferedImage background = ImageIO.read(getClass().getResourceAsStream("/res/title/background.png"));
         g2.drawImage(background, 0, 0, gp.screenWidth, gp.screenHeight, null);
     } catch (IOException e) {
         e.printStackTrace();

@@ -6,11 +6,15 @@ import java.awt.event.KeyListener;
 import java.util.List;
 
 import item.Item;
+import item.ItemStack;
+import item.Seed;
 import entity.Player;
 import command.ActionCommand;
 import command.PlantCommand;
 import command.TillingCommand;
 import command.WaterCommand;
+import command.HarvestCommand; 
+import command.RecoverCommand; 
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
@@ -129,11 +133,20 @@ public class KeyHandler implements KeyListener {
                 } else {
                     gp.gameState = gp.playState;
                 }
-              
-            } else if (code == KeyEvent.VK_ENTER) {
-                System.out.println("DEBUG KEYHANDLER: InventoryState - Enter DITEKAN, enterPressed akan di-set true.");
-                enterPressed = true; 
-            } else if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+            } 
+            else if (code == KeyEvent.VK_ENTER) {
+                // UPDATED: Equip item yang dipilih + langsung keluar inventory
+                if (equipSelectedItem()) {
+                    // Jika berhasil equip, langsung keluar dari inventory
+                    gp.gameState = gp.playState;
+                } else {
+                    // Jika gagal equip, tetap di inventory dengan pesan error
+                    gp.ui.currentDialogue = "Tidak bisa equip item ini!";
+                    gp.gameState = gp.dialogueState;
+                }
+                // JANGAN set enterPressed = true di sini, karena sudah di-handle
+            } 
+            else if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
                 if (gp.ui.slotRow > 0) { gp.ui.slotRow--; }
             } else if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
                 if (gp.ui.slotRow < gp.ui.inventoryMaxRow - 1) { gp.ui.slotRow++; }
@@ -141,6 +154,10 @@ public class KeyHandler implements KeyListener {
                 if (gp.ui.slotCol > 0) { gp.ui.slotCol--; }
             } else if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
                 if (gp.ui.slotCol < gp.ui.inventoryMaxCol - 1) { gp.ui.slotCol++; }
+            }
+            // TAMBAHAN: Unequip item dengan U key
+            else if (code == KeyEvent.VK_U) {
+                gp.player.unequipItem();
             }
         }
 
@@ -238,27 +255,136 @@ public class KeyHandler implements KeyListener {
                 gp.gameState = gp.playState;
             } else if (gp.gameState == gp.playState) {
 
-                // Ambil posisi tile yang sedang diinjak
-                int centerX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
-                int centerY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
-                int col = centerX / gp.tileSize;
-                int row = centerY / gp.tileSize;
-
-                int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
-
-                if (tileIndex >= 35 && tileIndex <= 36) {
-                    new TillingCommand(gp.player).execute(); 
-                } else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
-                    new PlantCommand(gp.player).execute();  
-                } else if (gp.tileM.cropMap[col][row] != null) {
-                    new WaterCommand(gp.player).execute();  
-                }
+                handleSmartFarmingAction();
             }
         }
         
         if (code == KeyEvent.VK_N) {
             gp.executeSleepSequence();
         }
+    }
+
+    // Method untuk equip item yang dipilih di inventory
+    private boolean equipSelectedItem() {
+        int slotIndex = gp.ui.slotCol + (gp.ui.slotRow * gp.ui.inventoryMaxCol);
+        
+        if (slotIndex >= 0 && slotIndex < gp.player.inventory.size()) {
+            ItemStack selectedItem = gp.player.inventory.get(slotIndex);
+            if (selectedItem != null && selectedItem.getItem() != null) {
+                // Cek apakah item bisa di-equip (Tools, Seeds, etc.)
+                Item item = selectedItem.getItem();
+                if (canBeEquipped(item)) {
+                    gp.player.equipItem(selectedItem);
+                    System.out.println("Equipped: " + item.getName());
+                    return true; // Berhasil equip
+                } else {
+                    System.out.println("Item tidak bisa di-equip: " + item.getName());
+                    return false; // Gagal equip
+                }
+            }
+        }
+        return false; // Tidak ada item atau slot kosong
+    }
+    
+    // UPDATED: Smart farming action dengan 3 tools yang tersedia
+    private void handleSmartFarmingAction() {
+        // Ambil posisi tile yang sedang diinjak
+        int centerX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
+        int centerY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
+
+        int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
+        
+        // Cek apakah ada equipped item
+        if (gp.player.equippedItem == null) {
+            gp.ui.currentDialogue = "Kamu harus equip item terlebih dahulu!";
+            gp.gameState = gp.dialogueState;
+            return;
+        }
+
+        String equippedItemName = gp.player.equippedItem.getItem().getName();
+        Item equippedItem = gp.player.equippedItem.getItem();
+        ActionCommand command = null;
+        
+        // DEBUG: Print info
+        System.out.println("DEBUG: Equipped item: " + equippedItemName);
+        System.out.println("DEBUG: Tile index: " + tileIndex);
+        System.out.println("DEBUG: Crop at position [" + col + ", " + row + "]: " + gp.tileM.cropMap[col][row]);
+        
+        // TILLING 
+        if (equippedItemName.equals("Hoe") && (tileIndex >= 35 && tileIndex <= 36)) {
+            System.out.println("DEBUG: Tilling condition met!");
+            command = new TillingCommand(gp.player);
+        }
+        
+        // PLANTING - TAMBAHAN: Untuk seeds di tilled land
+        else if (equippedItem instanceof Seed && tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
+            System.out.println("DEBUG: Planting condition met!");
+            command = new PlantCommand(gp.player);
+        }
+        
+        // WATERING 
+        else if (equippedItemName.equals("Watering Can")) {
+            System.out.println("DEBUG: Watering Can detected");
+            if (gp.tileM.cropMap[col][row] != null) {
+                System.out.println("DEBUG: Crop found, creating WaterCommand");
+                command = new WaterCommand(gp.player);
+            } else {
+                System.out.println("DEBUG: No crop found at this position");
+            }
+        }
+        
+        // RECOVERING 
+        else if (equippedItemName.equals("Pickaxe") && (tileIndex == 56)) {
+            System.out.println("DEBUG: Recovering condition met!");
+            command = new RecoverCommand(gp.player);
+        }
+        
+        // HARVESTING - Untuk tanaman yang sudah siap panen
+        else if (gp.tileM.cropMap[col][row] != null) {
+            // Bisa harvest tanpa alat khusus (dengan tangan kosong)
+            command = new HarvestCommand(gp.player);
+        }
+        
+        // Eksekusi command jika ada
+        if (command != null) {
+            System.out.println("DEBUG: Executing command: " + command.getClass().getSimpleName());
+            command.execute();
+        } else {
+            // Pesan error yang lebih spesifik
+            if (equippedItemName.equals("Hoe")) {
+                gp.ui.currentDialogue = "Tidak bisa membajak tile ini! Cari tanah rumput (grass).";
+            } else if (equippedItem instanceof Seed) {
+                gp.ui.currentDialogue = "Tidak bisa menanam di sini! Perlu tanah yang sudah dibajak.";
+            } else if (equippedItemName.equals("Watering Can")) {
+                gp.ui.currentDialogue = "Tidak ada tanaman di sini untuk disiram!";
+            } else if (equippedItemName.equals("Pickaxe")) {
+                gp.ui.currentDialogue = "Tidak ada tanah yang perlu dipulihkan di sini!";
+            } else {
+                gp.ui.currentDialogue = "Tidak bisa menggunakan " + equippedItemName + " di sini!";
+            }
+            gp.gameState = gp.dialogueState;
+        }
+    }
+
+    private boolean canBeEquipped(Item item) {
+        String itemName = item.getName();
+        
+        // tools bisa di equip
+        if (itemName.equals("Hoe") || 
+            itemName.equals("Watering Can") || 
+            itemName.equals("Pickaxe") ||
+            itemName.equals("Fishing Rod")) {
+            return true;
+        }
+        
+        // seeds bisa di equip
+        if (item instanceof Seed) {
+            return true;
+        }
+        
+        return false; // Item lain tidak bisa di-equip
     }
 
     public void npcInteractionState(int code) {

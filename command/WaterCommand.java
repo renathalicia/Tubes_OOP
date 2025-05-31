@@ -11,6 +11,7 @@ public class WaterCommand implements ActionCommand {
 
     @Override
     public boolean execute() {
+        System.out.println("DEBUG: WaterCommand.execute() called");
         return player.waterTile();
     }
 }

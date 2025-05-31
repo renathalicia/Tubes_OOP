@@ -1,5 +1,6 @@
 package tile;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -335,8 +336,21 @@ public class TileManager {
                worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                worldY - gp.tileSize < gp.player.worldY + gp.player.screenY){
+                
+                // Draw tile terlebih dahulu
                 g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
-               }
+                
+                // Draw crop jika ada di tile ini
+                CropObject crop = cropMap[worldCol][worldRow];
+                if (crop != null) {
+                    int currentDay = gp.gameStateSystem.getTimeManager().getDay();
+                    BufferedImage cropImage = crop.getCurrentImage(currentDay);
+                    if (cropImage != null) {
+                        g2.drawImage(cropImage, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                    }
+                }
+            }
+            
             worldCol++;
 
             if(worldCol== gp.maxWorldCol){
