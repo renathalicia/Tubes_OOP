@@ -19,7 +19,7 @@ public class OBJ_ShippingBin extends SuperObject {
         // Asumsi SuperObject punya konstruktor SuperObject(GamePanel gp)
         this.gp = gp; // Simpan referensi GamePanel jika diperlukan untuk operasi lain di OBJ_House
 
-        name = "ShippingBin";
+        name = "Shipping Bin";
 
         // --- PENTING: Tentukan dimensi objek dalam jumlah tile ---
         int tileSpanWidth = 3;  // Lebar objek ini adalah 6 tile
@@ -31,29 +31,26 @@ public class OBJ_ShippingBin extends SuperObject {
         this.height = gp.tileSize * tileSpanHeight;
 
         try {
-            // Muat gambar asli terlebih dahulu
             BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream("/res/objects/shippingbin.png"));
-
             if (originalImage != null) {
-                // Skalakan gambar menggunakan UtilityTool atau secara manual
-                // Jika UtilityTool memiliki metode scaleImage(BufferedImage original, int width, int height)
-                this.image = UtilityTool.scaleImage(originalImage, this.width, this.height);
-                // ATAU jika tidak pakai UtilityTool:
-                // Image scaledTemp = originalImage.getScaledInstance(this.width, this.height, Image.SCALE_SMOOTH);
-                // this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
-                // Graphics2D g2d = ((BufferedImage)this.image).createGraphics();
-                // g2d.drawImage(scaledTemp, 0, 0, null);
-                // g2d.dispose();
-
-                collision = false; // Objek ini bisa bertabrakan
-
+                // Simpan hasil scaleImage ke this.image
+                // Pastikan uTool di SuperObject sudah diinisialisasi (UtilityTool uTool = new UtilityTool();)
+                this.image = uTool.scaleImage(originalImage, gp.tileSize, gp.tileSize);
             } else {
-                System.err.println("OBJ_House: Gambar asli untuk FarmHouse null. Path mungkin salah: /res/objects/farmhouse.png");
+                System.err.println("Error: Gambar shippingbin.png tidak ditemukan.");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("OBJ_House: Gagal memuat atau menskalakan gambar FarmHouse.");
         }
+        collision = true;
+
+        solidArea.x = 0;
+        solidArea.y = 0;
+        solidArea.width = this.width;   // Lebar area solid sama dengan lebar objek
+        solidArea.height = this.height;  // Tinggi area solid sama dengan tinggi objek
+
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
     }
 
     @Override

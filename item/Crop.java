@@ -1,4 +1,6 @@
-package item;
+package item; // Pastikan ini sesuai dengan struktur package Anda
+import java.util.ArrayList;
+import java.util.List;
 import main.GamePanel;
 
 public class Crop extends Item {

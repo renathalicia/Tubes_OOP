@@ -38,14 +38,8 @@ public class OBJ_House extends SuperObject {
                 // Skalakan gambar menggunakan UtilityTool atau secara manual
                 // Jika UtilityTool memiliki metode scaleImage(BufferedImage original, int width, int height)
                 this.image = UtilityTool.scaleImage(originalImage, this.width, this.height);
-                // ATAU jika tidak pakai UtilityTool:
-                // Image scaledTemp = originalImage.getScaledInstance(this.width, this.height, Image.SCALE_SMOOTH);
-                // this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
-                // Graphics2D g2d = ((BufferedImage)this.image).createGraphics();
-                // g2d.drawImage(scaledTemp, 0, 0, null);
-                // g2d.dispose();
 
-                collision = false; // Objek ini bisa bertabrakan
+                collision = true; // Objek ini bisa bertabrakan
 
             } else {
                 System.err.println("OBJ_House: Gambar asli untuk FarmHouse null. Path mungkin salah: /res/objects/farmhouse.png");

@@ -9,6 +9,7 @@ public class CropObject {
     private String cropName;
     private String seedName; // Nama seed asli (misal: "Parsnip Seeds")
     private int plantedDay;
+    private int growthDay;
     private int lastWateredDay;
     private int growthTime; // Berapa hari untuk tumbuh
     
@@ -23,8 +24,8 @@ public class CropObject {
         this.plantedDay = plantedDay;
         this.lastWateredDay = -999; // diasumsikan langsung disiram saat tanam
         this.growthTime = getGrowthTimeFromSeed(seedName);
-        
         loadCropImages();
+        this.growthDay = cropName.contains("Parsnip") ? 4 : (cropName.contains("Pumpkin") ? 13 : 7);
     }
 
     // Load gambar untuk 3 fase
@@ -131,5 +132,8 @@ public class CropObject {
 
     public int getGrowthTime() {
         return growthTime;
+    }
+    public boolean canBeHarvested(int currentDay){
+        return currentDay - plantedDay >+ growthDay;
     }
 }
