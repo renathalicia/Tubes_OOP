@@ -47,21 +47,23 @@ public class EventHandler {
         }
 
         if (canTouchEvent) {
+            //dari FarmHouse[0] ke InteriorFarmHouse[2]
             if (hit(0, 30, 27, "any")) {
                 visiting(2, 12, 20);
-                eventRect[0][10][33].eventDone = true; //menandai bahwa visiting telah berhasil
+                eventRect[0][30][27].eventDone = true; //menandai bahwa visiting telah berhasil
             } else if (hit(2, 12, 20, "any")){
                 visiting(0, 30, 27);
+                eventRect[2][12][20].eventDone = true;
+            //dari WorldMap[1] ke NPCInterior[4]
             } else if (hit(1, 12, 13, "any")) {
-                visiting(0, 23, 24);
+                visiting(4, 23, 24);
                 eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
-            } else if (hit(0, 39, 12, "any")){
-//                visiting(3, 13, 13);
-                visiting(4, 19, 16);
             } else if (hit(3, 13, 13, "any")){
                 visiting(0, 39, 12);
             } else if (hit(0, 30, 20, "any")){
                 visiting(4, 14, 10);
+            } else if (hit(0, 30, 30, "any")){
+                visiting(1,25,39);
             }
         }
     }
@@ -69,18 +71,24 @@ public class EventHandler {
     public boolean hit(int map, int col, int row, String reqDirection) {
         boolean hit = false;
 
+        // Pastikan kita berada di map yang benar
         if (map == gp.currentMap) {
+            // Ambil solidArea player dan eventRect dari default (relatif) mereka
+            // Kemudian hitung posisi dunia mereka.
+            // Gunakan RECTANGLE SEMENTARA untuk perhitungan tabrakan
+            // Ini mencegah perubahan pada objek asli gp.player.solidArea dan eventRect
 
             Rectangle playerSolidAreaWorld = new Rectangle(
                     gp.player.worldX + gp.player.solidAreaDefaultX,
                     gp.player.worldY + gp.player.solidAreaDefaultY,
-                    gp.player.solidArea.width, 
-                    gp.player.solidArea.height 
+                    gp.player.solidArea.width, // Gunakan lebar dari solidArea asli
+                    gp.player.solidArea.height // Gunakan tinggi dari solidArea asli
             );
 
+            // Pastikan eventRect[map][col][row] tidak null
             if (eventRect[map][col][row] == null) {
                 System.err.println("Error: eventRect[" + map + "][" + col + "][" + row + "] is null!");
-                return false;
+                return false; // Jangan lanjutkan jika EventRect null
             }
 
             Rectangle eventWorldRect = new Rectangle(
@@ -94,10 +102,12 @@ public class EventHandler {
             if (playerSolidAreaWorld.intersects(eventWorldRect) && !eventRect[map][col][row].eventDone) {
                 if (gp.player.direction.contentEquals(reqDirection) || reqDirection.contentEquals("any")) {
                     hit = true;
-                    previousEventX = gp.player.worldX; 
+                    previousEventX = gp.player.worldX; // Simpan posisi player saat event dipicu
                     previousEventY = gp.player.worldY;
                 }
             }
+            // TIDAK PERLU MERESET gp.player.solidArea.x/y dan eventRect[map][col][row].x/y di sini
+            // karena kita menggunakan objek Rectangle sementara yang baru dibuat setiap kali.
         }
         return hit;
     }
@@ -108,6 +118,7 @@ public class EventHandler {
         tempCol = col;
         tempRow = row;
         canTouchEvent = false;
+////        gp.playSE(13); untuk play sound, klo mau
     }
 }
 

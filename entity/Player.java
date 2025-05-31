@@ -37,7 +37,8 @@ public class Player extends Entity {
     public ArrayList<ItemStack> inventory = new ArrayList<>();
     public final int inventorySize = 10; 
 
-    public Entity currentInteractingNPC = null; 
+    public Entity currentInteractingNPC = null;
+    private int counter;
 
     public boolean isFacingWaterTile() {
         int pWorldX = this.worldX; 
@@ -512,7 +513,6 @@ public class Player extends Entity {
             System.out.println("Gambar player null untuk direction: " + direction);
         }
     }
-
     // action tilling
     public boolean tileLand() {
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
@@ -699,8 +699,6 @@ public class Player extends Entity {
         gp.gameState = gp.dialogueState;
         return true;
     }
-
-
     // watching
     public boolean watchTV() {
         Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
@@ -721,4 +719,5 @@ public class Player extends Entity {
         gp.gameState = gp.dialogueState;
         return true;
     }
+
 }
