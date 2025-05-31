@@ -83,6 +83,41 @@ public class ItemRepository {
     public static Fish Glacierfish;
     private static List<Item> allGameItems = new ArrayList<>();
 
+    public static List<Fish> getAllFishInstances(GamePanel gp) {
+    // Pastikan initFish sudah dipanggil sebelumnya (biasanya di initializeAllItems)
+    // Jika belum, panggil di sini atau pastikan urutannya benar.
+    // Untuk amannya, bisa dicek:
+    if (Bullhead == null) { // Cek salah satu ikan, jika null berarti belum diinisialisasi
+        System.out.println("ItemRepository: Memanggil initFish karena ikan belum diinisialisasi.");
+        initFish(gp);
+    }
+
+    List<Fish> allFish = new ArrayList<>();
+    // Tambahkan semua static Fish field Anda ke list ini
+    if (Bullhead != null) allFish.add(Bullhead);
+    if (Carp != null) allFish.add(Carp);
+    if (Chub != null) allFish.add(Chub);
+    if (Largemouth_Bass != null) allFish.add(Largemouth_Bass);
+    if (Rainbow_Trout != null) allFish.add(Rainbow_Trout);
+    if (Sturgeon != null) allFish.add(Sturgeon);
+    if (Midnight_Carp != null) allFish.add(Midnight_Carp);
+    if (Flounder != null) allFish.add(Flounder);
+    if (Halibut != null) allFish.add(Halibut);
+    if (Octopus != null) allFish.add(Octopus);
+    if (Pufferfish != null) allFish.add(Pufferfish);
+    if (Sardine != null) allFish.add(Sardine);
+    if (Super_Cucumber != null) allFish.add(Super_Cucumber);
+    if (Catfish != null) allFish.add(Catfish);
+    if (Salmon != null) allFish.add(Salmon);
+    if (Angler != null) allFish.add(Angler);
+    if (Crimsonfish != null) allFish.add(Crimsonfish);
+    if (Glacierfish != null) allFish.add(Glacierfish);
+    if (Legend != null) allFish.add(Legend);
+    // Tambahkan semua ikan lainnya...
+
+    return allFish;
+}
+
     public static void initFish(GamePanel gp) {
         // Common Fish
         Bullhead = new Fish("Bullhead", gp, "Ikan lele umum yang hidup di danau.", "/res/item/fish/common/bullhead",

@@ -19,7 +19,7 @@ public class ItemStack {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-        if (this.quantity < 0) { // Sebaiknya kuantitas tidak negatif
+        if (this.quantity < 0) { 
             this.quantity = 0;
         }
     }
@@ -35,7 +35,6 @@ public class ItemStack {
         }
     }
 
-    // Contoh method untuk mendapatkan nama tampilan
     public String getDisplayName() {
         if (item != null) {
             return item.getName() + (quantity > 1 ? " x" + quantity : "");

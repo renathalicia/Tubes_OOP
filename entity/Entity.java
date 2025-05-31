@@ -33,9 +33,9 @@ public class Entity {
     public int heartPoints = 0;
     public boolean isProposedTo = false;
     public boolean isMarriedTo = false;
-    public String name = "NPC"; // Nama default, bisa di-override di subclass NPC
+    public String name = "NPC"; 
 
-    public String[] chatDialogues = new String[5]; // Ukuran array bisa disesuaikan, misal 5 baris per chat
+    public String[] chatDialogues = new String[5]; 
     public int currentChatLineIndex = 0;
 
     public List<String> lovedItems = new ArrayList<>();
@@ -53,7 +53,7 @@ public class Entity {
 
     public String getNextChatLine() {
         if (chatDialogues == null || currentChatLineIndex >= chatDialogues.length || chatDialogues[currentChatLineIndex] == null) {
-            return null; // Tidak ada lagi baris dialog atau array belum diinisialisasi
+            return null; 
         }
         String line = chatDialogues[currentChatLineIndex];
         currentChatLineIndex++;
@@ -61,14 +61,11 @@ public class Entity {
     }
 
     public void setDialogue() {
-        // Contoh:
-        // dialogues[0] = "Halo, saya entitas generik.";
+
     }
 
     public void setChatDialogues() {
-        // Contoh:
-        // chatDialogues[0] = "Ini adalah percakapan pertama dari entitas generik.";
-        // chatDialogues[1] = "Ini adalah percakapan kedua.";
+
     }
 
     public Entity(GamePanel gp){
@@ -103,7 +100,7 @@ public class Entity {
         if(collisionOn == false){
             switch (direction) {
                 case "up":
-                    worldY -= speed; // aslinya y aja
+                    worldY -= speed;
                     break;
                 case "down":
                     worldY += speed;
@@ -136,12 +133,12 @@ public class Entity {
         } else if (hatedItems.contains(itemName)) {
             return -25;
         }
-        return 0; // Default untuk item netral selain Mayor Tadi
+        return 0; 
     }
 
     public void updateHeartPoints(int amount) {
         this.heartPoints += amount;
-        if (this.heartPoints > maxHeartPoints) { // maxHeartPoints harus sudah didefinisikan
+        if (this.heartPoints > maxHeartPoints) { 
             this.heartPoints = maxHeartPoints;
         }
         if (this.heartPoints < 0) {

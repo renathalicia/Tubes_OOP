@@ -12,7 +12,7 @@ public class EnvironmentManager {
 
     public EnvironmentManager(GamePanel gp) {
         this.gp = gp;
-        generateRainDrops(); // generate awal
+        generateRainDrops(); 
     }
 
     public void draw(Graphics2D g2) {

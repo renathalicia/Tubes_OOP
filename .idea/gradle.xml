@@ -5,7 +5,8 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/gradle" />
-        <option name="gradleJvm" value="temurin-17" />
+        <option name="gradleHome" value="C:\Users\asus\Downloads\gradle-8.14.1-bin\gradle-8.14.1" />
+        <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/gradle" />

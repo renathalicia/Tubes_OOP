@@ -3,7 +3,6 @@ package data;
 import java.io.Serializable;
 
 public class DataStorage implements Serializable {
-    /* Deklarasikan segala macam state yang ingin di-Save dan load */
     //Player Stats
     //name
     //gender
@@ -11,8 +10,8 @@ public class DataStorage implements Serializable {
     //FarmName
     //partner
     //gold
-    //inventory -> belum tau cara implemen
-    //location -> belum tau cara implemen
+    //inventory 
+    //location 
     //CONTOH
     String name;
     String gender;

@@ -38,38 +38,36 @@ public class Player extends Entity {
     public final int inventorySize = 99; 
     private Set<String> learnedRecipeIds = new HashSet<>();
     public Entity currentInteractingNPC = null; 
-    private String currentFuel = null; // Fuel yang sedang digunakan
-    private int fuelCapacityRemaining = 0; // Kapasitas bahan bakar yang tersisa
-    private boolean hasHarvestedBefore = false; // Status panen pertama
-    private int totalFishCaught = 0; // Total ikan yang ditangkap
-    private boolean hasCaughtPufferfish = false; // Apakah sudah menangkap Pufferfish
-    private boolean hasCaughtLegendFish = false; // Apakah sudah menangkap Legend Fish
-    private boolean hasHarvestedAnyCrop = false; // Apakah sudah memanen tanaman apa pun
-    private boolean hasHarvestedPumpkin = false; // Apakah sudah memanen Pumpkin
-    private boolean hasObtainedHotPepper = false; // Apakah sudah mendapatkan Hot Pepper
-    private List<String> purchasedRecipes = new ArrayList<>(); // Resep yang dibeli dari toko
+    private String currentFuel = null; 
+    private int fuelCapacityRemaining = 0; 
+    private boolean hasHarvestedBefore = false; 
+    private int totalFishCaught = 0; 
+    private boolean hasCaughtPufferfish = false; 
+    private boolean hasCaughtLegendFish = false;
+    private boolean hasHarvestedAnyCrop = false; 
+    private boolean hasHarvestedPumpkin = false; 
+    private boolean hasObtainedHotPepper = false; 
+    private List<String> purchasedRecipes = new ArrayList<>(); 
+
+    public String favoriteItem;
+    private int counter;
 
     public boolean isFacingWaterTile() {
-        int pWorldX = this.worldX; // Gunakan this untuk merujuk field Player
+        int pWorldX = this.worldX; 
         int pWorldY = this.worldY;
         String pDirection = this.direction;
-        int tileSize = gp.tileSize; // Ambil tileSize dari GamePanel
+        int tileSize = gp.tileSize; 
 
-        int tileX1 = pWorldX; // Koordinat X untuk tile pertama di depan
-        int tileY1 = pWorldY; // Koordinat Y untuk tile pertama di depan
-        int tileX2 = pWorldX; // Koordinat X untuk tile kedua di depan
-        int tileY2 = pWorldY; // Koordinat Y untuk tile kedua di depan
-
-        // Tentukan koordinat untuk dua tile di depan pemain berdasarkan arah
-        // Kita akan menggunakan titik tengah pemain sebagai referensi awal,
-        // lalu bergerak maju berdasarkan solidArea atau tileSize.
-        // Untuk kesederhanaan, kita akan cek tile berdasarkan pergerakan 1 dan 2 tileSize.
+        int tileX1 = pWorldX; 
+        int tileY1 = pWorldY; 
+        int tileX2 = pWorldX; 
+        int tileY2 = pWorldY; 
 
         switch(pDirection) {
             case "up":
                 // Tile 1 di depan (dari tengah player)
-                tileY1 = pWorldY - tileSize; // Y dari tile di atas player
-                tileX1 = pWorldX;            // X tetap sama dengan player (cek tile lurus di atas)
+                tileY1 = pWorldY - tileSize; 
+                tileX1 = pWorldX;         
                 // Tile 2 di depan
                 tileY2 = pWorldY - (tileSize * 2);
                 tileX2 = pWorldX;
@@ -94,11 +92,6 @@ public class Player extends Entity {
                 break;
         }
 
-        // Fungsi helper untuk mengecek satu tile
-        // Anda bisa letakkan ini di Player.java atau sebagai private static method jika hanya dipakai di sini
-        // atau di kelas Utility jika dipakai di banyak tempat.
-        // Untuk sekarang, kita buat sebagai inner lambda atau panggil langsung.
-
         // Cek tile pertama di depan
         if (checkSpecificTileIsWater(tileX1, tileY1)) {
             System.out.println("PLAYER: Menghadap air di tile 1 di depan.");
@@ -115,57 +108,93 @@ public class Player extends Entity {
         return false;
     }
 
-    /**
-     * Helper method untuk mengecek apakah tile pada koordinat dunia tertentu adalah air (kode 12)
-     * dan bisa dipancing (tidak solid).
-     * @param worldX Koordinat X dunia dari tile
-     * @param worldY Koordinat Y dunia dari tile
-     * @return true jika tile adalah air yang valid, false jika tidak.
-     */
     private boolean checkSpecificTileIsWater(int worldX, int worldY) {
-        if (gp == null || gp.tileM == null) return false; // Pengaman
+    if (gp == null || gp.tileM == null) return false;
 
-        int tileCol = worldX / gp.tileSize;
-        int tileRow = worldY / gp.tileSize;
+    int tileCol = worldX / gp.tileSize;
+    int tileRow = worldY / gp.tileSize;
 
-        // Pengecekan batas peta
-        if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
-            // System.out.println("checkSpecificTileIsWater: Koordinat (" + tileCol + "," + tileRow + ") di luar batas peta.");
-            return false; // Di luar batas peta
+    // Pengecekan batas peta (sudah ada dan benar)
+    if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
+        return false;
+    }
+    // Pengecekan batas array mapTileNum (sudah ada dan benar)
+    if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
+        tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
+        tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
+        System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
+        return false;
+    }
+    int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
+
+    // Pengecekan batas array tile properties (sudah ada dan benar)
+    if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
+        System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
+        return false;
+    }
+    return false; // Karena pengecekan spesifik (59, 249, OBJ_Pond) ada di GamePanel
+}
+
+    public int getTileInFront() {
+        // Titik tengah dari solidArea pemain sebagai referensi
+        int checkX = this.worldX + this.solidArea.x + this.solidArea.width / 2;
+        int checkY = this.worldY + this.solidArea.y + this.solidArea.height / 2;
+
+        int tileInFrontX = checkX;
+        int tileInFrontY = checkY;
+        int tileSize = gp.tileSize;
+
+        switch (this.direction) {
+            case "up":
+                tileInFrontY = checkY - tileSize; // Satu tile di atas
+                break;
+            case "down":
+                tileInFrontY = checkY + tileSize; // Satu tile di bawah
+                break;
+            case "left":
+                tileInFrontX = checkX - tileSize; // Satu tile di kiri
+                break;
+            case "right":
+                tileInFrontX = checkX + tileSize; // Satu tile di kanan
+                break;
+            default:
+                System.err.println("Player.getTileInFront(): Arah tidak valid: " + this.direction);
+                return -1; // Arah tidak valid
         }
 
-        // Pengecekan batas array mapTileNum
+        int tileCol = tileInFrontX / tileSize;
+        int tileRow = tileInFrontY / tileSize;
+
+        // Pengecekan batas peta dunia
+        if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
+            // System.out.println("Player.getTileInFront(): Di luar batas peta dunia (" + tileCol + "," + tileRow + ")");
+            return -1;
+        }
+
+        // Pengecekan batas array mapTileNum untuk peta saat ini
         if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
             tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
             tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
-            System.err.println("checkSpecificTileIsWater: Akses array mapTileNum di luar batas! Map: " + gp.currentMap + ", Col: " + tileCol + ", Row: " + tileRow);
-            return false;
+            System.err.println("Player.getTileInFront(): Koordinat tile di luar batas array mapTileNum. Peta: " + gp.currentMap + ", Kol: " + tileCol + ", Bar: " + tileRow);
+            return -1;
         }
-        
+
         int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
 
-        // Pengecekan batas array tile properties
+        // Pengecekan batas untuk array properti tile
         if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
-            System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
-            return false;
+            System.err.println("Player.getTileInFront(): tileNum (" + tileNum + ") tidak valid untuk array properti tile.");
+            return -1;
         }
 
-        // Cek apakah tile tersebut adalah air (kode 12)
-        // dan tile tersebut tidak memiliki properti collision (agar tidak bisa memancing di atas tembok air)
-        // atau jika tile air itu sendiri punya flag 'isWater' atau 'canFish'.
-        // Untuk sekarang, kita asumsikan tile 12 = air dan jika !collision, bisa dipancing.
-        if (tileNum == 12 && !gp.tileM.tile[tileNum].collision) {
-            return true;
-        }
-        return false;
+        return tileNum;
     }
 
-   public void interactWithObject(int objIndex) {
-        if (objIndex == 999) { // Jika tidak ada objek yang terdeteksi
+    public void interactWithObject(int objIndex) {
+        if (objIndex == 999) { 
             return;
         }
 
-        // Dapatkan objek yang berinteraksi dari array objek di GamePanel
         SuperObject interactedObject = gp.obj[gp.currentMap][objIndex];
 
         if (interactedObject != null) {
@@ -174,18 +203,19 @@ public class Player extends Entity {
 
             // Logika untuk SHIPPING BIN
             if ("Shipping Bin".equals(objectName)) {
-                if (gp.hasShippedToday) { // Akses hasShippedToday dari GamePanel
-                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE"); // Akses ui dari GamePanel
-                    gp.gameState = gp.dialogueState; // Akses gameState dan dialogueState dari GamePanel
+                if (gp.hasShippedToday) { 
+                    gp.ui.setDialogue("Kamu sudah menjual barang hari ini.", "SYSTEM_MESSAGE");
+                    gp.gameState = gp.dialogueState; 
                 } else {
-                    gp.isTimePaused = true; // Akses isTimePaused dari GamePanel
-                    gp.gameState = gp.shippingBinState; // Akses gameState dan shippingBinState dari GamePanel
-                    gp.ui.slotCol = 0; // Akses ui dari GamePanel
+                    gp.isTimePaused = true; 
+                    gp.gameState = gp.shippingBinState; 
+                    gp.ui.filterSellableItemsForShipping(gp.player);
+                    gp.ui.slotCol = 0; 
                     gp.ui.slotRow = 0;
                     System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
                 }
             }
-            // Logika untuk TELEVISI
+            
             else if ("Television".equals(objectName)) {
                 watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
             }
@@ -517,6 +547,7 @@ public class Player extends Entity {
         gold = 70000000;
         farmName = "Tanah Batak";
         partner = "None";
+        favoriteItem = "None";
 
         // ENERGY
         maxLife = 6;
@@ -591,74 +622,81 @@ public class Player extends Entity {
         return image;
     }
 
-    public void update() {
-        boolean up = keyH.upPressed;
-        boolean down = keyH.downPressed;
-        boolean left = keyH.leftPressed;
-        boolean right = keyH.rightPressed;
-        int lastKey = keyH.lastPresseedDirectionKey;
-        boolean isMoving = false;
+    // Di dalam kelas Player.java
+@Override
+public void update() {
+    boolean isMovingThisFrame = false; // Untuk melacak apakah pemain bergerak di frame ini
 
-        if((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && up) {
-            direction = "up";
-        } else if((lastKey == KeyEvent.VK_S || lastKey == KeyEvent.VK_DOWN) && down) {
-            direction = "down";
-        } else if((lastKey == KeyEvent.VK_A || lastKey == KeyEvent.VK_LEFT) && left) {
-            direction = "left";
-        } else if((lastKey == KeyEvent.VK_D || lastKey == KeyEvent.VK_RIGHT) && right) {
-            direction = "right";
-        } else if(up) {
-            direction = "up";
-        } else if(down) {
-            direction = "down";
-        } else if(left) {
-            direction = "left";
-        } else if(right) {
-            direction = "right";
+    // 1. PENANGANAN INPUT UNTUK INTERAKSI (Tombol Enter)
+    if (keyH.enterPressed) {
+        System.out.println("PLAYER.UPDATE: Tombol Enter ditekan (Awal).");
+        keyH.enterPressed = false; // Langsung konsumsi/reset flag Enter di sini!
+
+        boolean interactionOccurred = false;
+
+        // Cek Interaksi NPC
+        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+        if (npcIndex != 999) {
+            System.out.println("PLAYER.UPDATE: NPC terdeteksi (indeks: " + npcIndex + "), memanggil interactNPC.");
+            interactNPC(npcIndex); // interactNPC akan mengubah gameState jika perlu
+            interactionOccurred = true;
         }
 
-    if (keyH.enterPressed) {
-        // Konsumsi tombol Enter agar tidak diproses berulang kali dalam satu frame oleh sistem lain
-        // Namun, interactNPC dan interactWithObject mungkin perlu tahu bahwa Enter baru saja ditekan.
-        // Untuk amannya, biarkan interactNPC dan interactWithObject yang mereset keyH.enterPressed jika perlu.
-        // Atau, reset di sini setelah semua pengecekan interaksi.
-
-        System.out.println("PLAYER.UPDATE: Enter ditekan.");
-
-        // 1. Prioritaskan Interaksi NPC
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc); // Cek NPC
-        if (npcIndex != 999) {
-            System.out.println("PLAYER.UPDATE: NPC terdeteksi (index: " + npcIndex + "), panggil interactNPC.");
-            interactNPC(npcIndex); // Metode interactNPC Anda akan menangani ini
-                                   // pastikan interactNPC mereset keyH.enterPressed jika sudah diproses.
-        } else {
-            // 2. Jika tidak ada NPC, cek Interaksi Objek
-            System.out.println("PLAYER.UPDATE: Tidak ada NPC terdeteksi, cek objek.");
-            int objIndex = gp.cChecker.checkObject(this, true); // Cek objek di depan pemain
+        // Jika tidak ada NPC, cek Interaksi Objek
+        if (!interactionOccurred) {
+            int objIndex = gp.cChecker.checkObject(this, true); // 'true' untuk interaksi
             if (objIndex != 999) {
-                System.out.println("PLAYER.UPDATE: Objek terdeteksi (index: " + objIndex + "), panggil interactWithObject.");
-                interactWithObject(objIndex); // Panggil metode baru Anda
-            } else {
-                System.out.println("PLAYER.UPDATE: Tidak ada NPC atau Objek yang bisa diajak berinteraksi.");
+                System.out.println("PLAYER.UPDATE: Objek terdeteksi (indeks: " + objIndex + "), memanggil interactWithObject.");
+                interactWithObject(objIndex); // interactWithObject akan mengubah gameState jika perlu
+                interactionOccurred = true;
             }
         }
-        keyH.enterPressed = false; // Reset enterPressed di sini setelah semua potensi interaksi dicek.
+
+        // Jika tidak ada NPC atau Objek, cek Interaksi Tile (misalnya, untuk TV)
+        if (!interactionOccurred) {
+            int tileNumInFront = getTileInFront(); // Asumsi metode ini ada
+            System.out.println("PLAYER.UPDATE: Tile di depan: " + tileNumInFront);
+            if (tileNumInFront >= 137 && tileNumInFront <= 144) { // Contoh untuk TV tile
+                System.out.println("PLAYER.UPDATE: Tile TV (" + tileNumInFront + ") terdeteksi, memanggil watchTV().");
+                watchTV(); // watchTV akan mengubah gameState jika perlu
+                interactionOccurred = true;
+            }
+        }
+
+        if (!interactionOccurred) {
+            System.out.println("PLAYER.UPDATE: Enter ditekan, tapi tidak ada target interaksi spesifik.");
+        }
     }
-    // Logika Gerakan (HANYA JIKA TIDAK ADA ENTER YANG BARU DIPROSES UNTUK INTERAKSI)
-    // dan ada tombol arah yang ditekan
-    else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
-        collisionOn = false;
+
+    // 2. PENANGANAN INPUT UNTUK PERGERAKAN (Tombol Arah)
+    // Hanya proses pergerakan jika TIDAK ADA INTERAKSI ENTER yang baru saja terjadi (opsional, tapi bisa mencegah "bergerak saat bicara")
+    // Namun, karena enterPressed sudah di-false-kan di atas, kita bisa langsung cek tombol arah.
+    if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+        // Tentukan arah berdasarkan input terakhir atau prioritas
+        // (Gunakan logika penentuan 'direction' Anda yang sudah ada di sini, atau sederhanakan jika perlu)
+        // Contoh sederhana (prioritas, bukan lastPressed):
+        if (keyH.upPressed) { direction = "up"; }
+        else if (keyH.downPressed) { direction = "down"; }
+        else if (keyH.leftPressed) { direction = "left"; }
+        else if (keyH.rightPressed) { direction = "right"; }
+        // ATAU, gunakan logika lastPressedDirectionKey Anda:
+        // int lastKey = keyH.lastPressedDirectionKey; // Pastikan typo sudah diperbaiki
+        // if((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && keyH.upPressed) { direction = "up"; }
+        // else if((lastKey == KeyEvent.VK_S || lastKey == KeyEvent.VK_DOWN) && keyH.downPressed) { direction = "down"; }
+        // else if((lastKey == KeyEvent.VK_A || lastKey == KeyEvent.VK_LEFT) && keyH.leftPressed) { direction = "left"; }
+        // else if((lastKey == KeyEvent.VK_D || lastKey == KeyEvent.VK_RIGHT) && keyH.rightPressed) { direction = "right"; }
+        // else if(keyH.upPressed) { direction = "up"; }
+        // else if(keyH.downPressed) { direction = "down"; }
+        // else if(keyH.leftPressed) { direction = "left"; }
+        // else if(keyH.rightPressed) { direction = "right"; }
+
+
+        collisionOn = false; // Reset flag tabrakan sebelum pengecekan
         gp.cChecker.checkTile(this);
+        gp.cChecker.checkObject(this, false); // 'false' untuk tabrakan fisik
+        gp.cChecker.checkEntity(this, gp.npc);    // untuk tabrakan fisik
 
-        // Untuk tabrakan objek saat bergerak, kita tidak ingin memicu interaksi, hanya tabrakan fisik.
-        // Metode checkObject bisa dimodifikasi atau dipanggil dengan flag berbeda jika hanya untuk tabrakan.
-        // Untuk sekarang, kita asumsikan checkObject tidak memicu interaksi di sini.
-        gp.cChecker.checkObject(this, false); // `false` berarti bukan untuk interaksi, hanya cek tabrakan
-
-        // Cek tabrakan NPC saat bergerak
-        gp.cChecker.checkEntity(this, gp.npc); // Sama, hanya untuk tabrakan
-
-        gp.eHandler.checkEvent();
+        gp.eHandler.checkEvent(); // Cek event
 
         if (!collisionOn) {
             switch (direction) {
@@ -667,58 +705,21 @@ public class Player extends Entity {
                 case "left": worldX -= speed; break;
                 case "right": worldX += speed; break;
             }
-            isMoving = true;
-        }
-
-        if (isMoving) { // Tidak perlu cek gp.gameState == gp.playState di sini karena sudah di playState
-            spriteCounter++;
-            if (spriteCounter > 10) {
-                spriteNum = (spriteNum == 1) ? 2 : 1;
-                spriteCounter = 0;
-            }
+            isMovingThisFrame = true;
         }
     }
 
-        else if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed || keyH.enterPressed) {
-
-            // CHECK TILE COLLISION
-            collisionOn = false;
-            gp.cChecker.checkTile(this);
-
-            // CHECK OBJECT COLLISION
-            int objIndex = gp.cChecker.checkObject(this, true);
-            pickUpObject(objIndex);
-
-            // CHECK NPC COLLISION
-            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-            interactNPC(npcIndex);
-
-            //CHECK EVENT
-            gp.eHandler.checkEvent();
-
-            // IF COLLISION IS FALSE, PLAYER CAN MOVE
-            if (!collisionOn && !keyH.enterPressed && (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed)) {
-                switch (direction) {
-                    case "up": worldY -= speed; isMoving = true; break;
-                    case "down": worldY += speed; isMoving = true; break;
-                    case "left": worldX -= speed; isMoving = true; break;
-                    case "right": worldX += speed; isMoving = true; break;
-                }
-                isMoving = true;
-            }
-
-            if (isMoving && gp.gameState == gp.playState) {
-            gp.keyH.enterPressed = false; // jumpa npc tinggal enter tanpa WASD
-            spriteCounter++;
-                if (spriteCounter > 10) { // Kecepatan animasi
-                    spriteNum = (spriteNum == 1) ? 2 : 1;
-                    spriteCounter = 0;
-                }
-            } else {
-
-            }
+    // 3. ANIMASI PEMAIN
+    if (isMovingThisFrame) {
+        spriteCounter++;
+        if (spriteCounter > 10) { // Sesuaikan angka ini untuk kecepatan animasi
+            spriteNum = (spriteNum == 1) ? 2 : 1;
+            spriteCounter = 0;
         }
+    } else {
+        spriteNum = 1; // Kembali ke sprite idle/default jika tidak bergerak
     }
+}
 
     public void pickUpObject(int i) {
         if (i != 999 && gp.obj[gp.currentMap][i] != null) {
@@ -731,20 +732,14 @@ public class Player extends Entity {
     }
 
     public void interactNPC(int i) {
-        if (gp.keyH.enterPressed) { 
-            if (i != 999) { 
-                currentInteractingNPC = gp.npc[gp.currentMap][i];
-
-                gp.gameState = gp.npcInteractionState; 
-                gp.ui.commandNum = 0; 
-
-                gp.keyH.enterPressed = false;
-            }
-            else {
-                gp.keyH.enterPressed = false;
-            }
+        if (i != 999 && gp.npc[gp.currentMap][i] != null) { // Tambahkan null check untuk NPC
+            System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
+            currentInteractingNPC = gp.npc[gp.currentMap][i];
+            gp.gameState = gp.npcInteractionState; // Langsung ubah state
+            gp.ui.commandNum = 0;
+            // Jangan reset keyH.enterPressed di sini. Biarkan pemanggil (Player.update) yang melakukannya.
         }
-    }
+    } 
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){
@@ -812,7 +807,6 @@ public class Player extends Entity {
             System.out.println("Gambar player null untuk direction: " + direction);
         }
     }
-
     // action tilling
     public boolean tileLand() {
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
@@ -823,7 +817,7 @@ public class Player extends Entity {
 
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-        if (tileIndex >= 43 && tileIndex <= 51) {
+        if (tileIndex >= 35 && tileIndex <= 36) {
             if (!hasItem("Hoe")) {
                 gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
                 gp.gameState = gp.dialogueState;
@@ -832,7 +826,7 @@ public class Player extends Entity {
 
             if (!consumeEnergy(5)) return true;
 
-            gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; 
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
             return true;
         }
 
@@ -921,7 +915,7 @@ public class Player extends Entity {
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
         // Pastikan tile dibajak
-        if (tileIndex == 55 && gp.tileM.cropMap[col][row] == null) {
+        if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
             ItemStack seed = getSeedFromInventory();
             if (seed == null) {
                 gp.ui.currentDialogue = "Kamu tidak punya seed!";
@@ -999,13 +993,11 @@ public class Player extends Entity {
         gp.gameState = gp.dialogueState;
         return true;
     }
-
-
     // watching
     public boolean watchTV() {
         Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
         // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
-        if (gp.currentMap != 0) {
+        if (gp.currentMap != 2) {
             gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
             gp.gameState = gp.dialogueState;
             return true;
@@ -1021,4 +1013,5 @@ public class Player extends Entity {
         gp.gameState = gp.dialogueState;
         return true;
     }
+
 }

@@ -47,14 +47,67 @@ public class EventHandler {
         }
 
         if (canTouchEvent) {
-            if (hit(0, 10, 33, "any")) {
-                visiting(1, 12, 13);
-                eventRect[0][10][33].eventDone = true; //menandai bahwa visiting telah berhasil
-            } else if (hit(1, 12, 13, "any")) {
-                visiting(0, 10, 33);
-                eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
+            //dari FarmHouse[0] ke InteriorFarmHouse[2]
+            if (hit(0, 30, 27, "any")) {
+                visiting(5, 12, 20);
+                eventRect[0][30][27].eventDone = true; //menandai bahwa visiting telah berhasil
+            } else if (hit(5, 12, 20, "any")){
+                visiting(0, 30, 27);
+                eventRect[2][12][20].eventDone = true;
 
+            //dari FarmMap[0] ke Ocean[1]
+            } else if (hit(0, 40, 39, "any")) {
+                visiting(1, 21, 39);
+                eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
+            } else if (hit(1, 21, 39, "any")){
+                visiting(0, 40, 39);
             }
+            //dari Ocean[1] ke InteriorOcean[2]
+            else if (hit(1, 25, 38, "any")){
+                visiting(2, 18, 15);
+            } else if (hit(2, 18, 15, "any")){
+                visiting(1, 25, 38);
+            }else if (hit(1, 31, 38, "any")){
+                visiting(6, 13, 13);
+            }else if (hit(6, 13, 13, "any")){
+                visiting(1, 31, 38);
+            }
+
+
+
+            //dari FarmMap[0] ke MountainLake[3]
+            else if (hit(0, 40, 10, "any")){
+                visiting(3, 22, 39);
+            } else if (hit(3, 22, 39, "any")){
+                visiting(0, 40, 10);
+            }
+            //dari MountainLake[3] ke InteriorMountainLake[7]
+            else if (hit(3, 15, 41, "any")){
+                visiting(7, 18,15);
+            }else if (hit(7, 18, 15, "any")){
+                visiting(3, 15,41);
+            }else if (hit(3, 43, 41, "any")){
+                    visiting(8, 18,15);
+            }else if (hit(8, 18, 15, "any")){
+                visiting(3, 43,41);
+            }
+            //dari FarmMap[0] ke ForestRiver[4]
+            else if (hit(0,9,10, "any")){
+                visiting(4, 22, 41);
+            }else if (hit(4, 22, 41, "any")){
+                visiting(0, 9, 10);
+            }
+            //dari ForestRiver[4] ke InteriorForestRiver[8]
+            else if (hit(4, 14, 41, "any")){
+                visiting(9, 18,15);
+            }else if (hit(9, 18, 15, "any")){
+                visiting(4, 14,41);
+            }else if (hit(4, 43, 41, "any")){
+                visiting(10, 18,15);
+            }else if (hit(10, 18, 15, "any")) {
+                visiting(4, 43, 41);
+            }
+
         }
     }
 

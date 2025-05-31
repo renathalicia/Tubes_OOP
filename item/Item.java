@@ -16,7 +16,7 @@ public abstract class Item {
     public boolean stackable = false;
     public int amount = 1;
     protected GamePanel gp;
-    public int maxStackAmount = 99; // Default maximum stack amount
+    public int maxStackAmount = 99; 
 
     //konstruktor
     public Item(String name, int buyPrice, int sellPrice, GamePanel gp) {
@@ -33,25 +33,12 @@ public abstract class Item {
 
     public int getSellPrice() { return sellPrice; }
 
-    //method abstak untuk mengenali item termasuk ke kategori apa saja, wajib diimplementasikan di setiap inheritance dari kelas Item.java
     public abstract String getCategory();
 
     public int getEnergyValue() {
-        return 0; // Default tidak memberi energi
+        return 0; 
     }
 
-    // public BufferedImage setUpImage(String imagePath) {
-    //     UtilityTool uTool = new UtilityTool();
-    //     BufferedImage scaledImage = null;  
-    //     try {
-    //         BufferedImage originalImage = ImageIO.read(getClass().getResourceAsStream(imagePath+ ".png"));
-    //         scaledImage = uTool.scaleImage(originalImage, gp.tileSize, gp.tileSize);
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //         System.out.println("Error loading image: " + imagePath);
-    //     }
-    //     return scaledImage;
-    // }
     public BufferedImage setUpImage(String imagePath) {
         UtilityTool uTool = new UtilityTool();
         BufferedImage scaledImage = null;  
@@ -74,7 +61,6 @@ public abstract class Item {
 
 
     public void use(){
-        // Default implementation for using an item
         System.out.println("Using item: " + name);
         gp.ui.showMessage("Anda menggunakan " + name + ".");
     }

@@ -1,8 +1,9 @@
-package item; // Atau package yang sesuai
+package item; 
 
 import item.Item;
 import item.ItemStack;
 import main.GamePanel;
+import item.ItemRepository;
 import entity.Player;
 
 import java.util.ArrayList;
@@ -82,7 +83,6 @@ public class Store {
                     item.getName(),
                     item.getBuyPrice(), // Harga diambil langsung dari atribut item
                     item.getCategory());
-            // System.out.println("   Deskripsi: " + item.description); // Opsional
         }
         System.out.println("0. Keluar");
         System.out.println("======================");
@@ -133,11 +133,8 @@ public class Store {
         }
     }
 
-    /**
-     * Loop utama untuk interaksi toko (CLI).
-     */
     public void openStoreInterface(Player player) {
-        Scanner scanner = gp.getSharedScanner(); // Gunakan scanner bersama jika ada, atau buat baru
+        Scanner scanner = gp.getSharedScanner(); 
         boolean isShopping = true;
 
         while (isShopping) {
@@ -146,9 +143,9 @@ public class Store {
             int itemNumberChoice = -1;
             if (scanner.hasNextInt()) {
                 itemNumberChoice = scanner.nextInt();
-                scanner.nextLine(); // Konsumsi newline
+                scanner.nextLine(); 
             } else {
-                scanner.nextLine(); // Bersihkan input salah
+                scanner.nextLine(); 
                 gp.ui.showMessage("Input nomor tidak valid.");
                 continue;
             }
@@ -163,7 +160,7 @@ public class Store {
                     quantityToBuy = scanner.nextInt();
                     scanner.nextLine(); 
                 } else {
-                    scanner.nextLine();
+                    scanner.nextLine(); 
                     gp.ui.showMessage("Input jumlah tidak valid.");
                     continue;
                 }

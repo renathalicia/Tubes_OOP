@@ -11,6 +11,6 @@ public class WaterCommand implements ActionCommand {
 
     @Override
     public boolean execute() {
-        return player.waterTile(); // aksi asli tetap di Player
+        return player.waterTile();
     }
 }

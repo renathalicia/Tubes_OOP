@@ -1,13 +1,13 @@
 package main;
 
 import entity.Entity;
+import entity.Player;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
-// import object.OBJ_Heart;
-// import object.SuperObject;
 import item.ItemStack;
 import item.Item;
 import item.Recipe;
@@ -23,16 +23,13 @@ public class UI {
     Font arial_40, arial_80B;
     BufferedImage backgroundImage;
     Font stardewFont;
-    // Font maruMonica, purisaB;
 
     // Modifikasi inventory wak
     Color stardewPanelBg = new Color(130, 78, 57, 230); 
-    // Color stardewSlotBg = new Color(217, 160, 102, 200);
     Color stardewSlotBorder = new Color(130, 78, 57, 230); 
     Color stardewText = new Color(255, 255, 255);
     Color stardewHighlightBorder = new Color(255, 230, 100);
     Color stardewTitleText = new Color(247, 213, 120);
-    // Color stardewInventorySlotBg = new Color(235, 220, 195, 220);
     Color invPanelBg = new Color(247, 185, 109, 255);        
     Color invPanelBorder = new Color(101, 67, 33);
     Color invPanelGrid = new Color(247, 185, 109, 255);   
@@ -43,7 +40,6 @@ public class UI {
     BufferedImage citySeparatorImage;
 
     // modifikasi dialogue
-    // Color stardewDialogBg = new Color(222, 184, 135);
     Color stardewDialogText = new Color(56, 32, 13);
     Color stardewDialogBorder = new Color(101, 67, 33);
     
@@ -74,14 +70,165 @@ public class UI {
     private String currentDialogueMode = "";
     public int CMD_COOKING_BACK_OPTION;
     public int CMD_COOKING_COOK_OPTION;
-
     public int recipeScrollOffset = 0;
     public final int maxRecipesOnScreen = 5;
+    public int currentCreationStep = 0; // 0: Nama, 1: Gender, 2: NamaKebun, 3: ItemFavorit
+    public String tempPlayerName = "";
+    public int tempGenderSelection = 0; // 0: Male, 1: Female (contoh)
+    public String tempFarmName = "";
+    public String tempFavoriteItem = ""; // Tambahkan field ini jika belum ada
+    final int MAX_INPUT_LENGTH = 15; // Batas panjang input teks
+    public int activeInputField = 0; // 0: Nama, 1: Gender, 2: NamaKebun, 3: ItemFavorit, 4: Tombol Selesai
+    final int TOTAL_INPUT_FIELDS = 4;
+    public final int TOTAL_CREATION_FIELDS = 5;
 
-    
+    public ArrayList<ItemStack> currentSellableItemsView = new ArrayList<>();
+    public ArrayList<Integer> sellableItemsOriginalIndices = new ArrayList<>();
+
     public void setDialogue(String dialogue, String mode) {
         this.currentDialogue = dialogue;
         this.currentDialogueMode = mode;
+    }
+
+    public void resetInputFields() {
+        tempPlayerName = "";
+        tempGenderSelection = 0;
+        tempFarmName = "";
+        tempFavoriteItem = "";
+        // commandNum mungkin juga perlu direset atau diatur khusus untuk gender selection
+        commandNum = 0; // Untuk gender selection, commandNum bisa dipakai
+    }
+
+    public void drawCharacterCreationScreen() {
+        // Gambar latar belakang (misalnya, warna krem solid atau gambar)
+        g2.setColor(invPanelBg); // Gunakan warna krem Anda (misalnya: new Color(245, 222, 179) atau dari variabel Anda)
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        // Atur font utama Anda
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 30f)); // Sesuaikan ukuran jika perlu
+        g2.setColor(stardewDialogText); // Gunakan warna teks Anda (misalnya: new Color(101, 67, 33))
+
+        // Pengaturan Posisi
+        int labelX = gp.tileSize * 2;               // Posisi X untuk semua label
+        int inputX = gp.tileSize * 6 + gp.tileSize / 2; // Posisi X untuk semua kotak input, beri jarak dari label
+        int inputWidth = gp.tileSize * 8;           // Lebar kotak input
+        int fieldHeight = gp.tileSize + 10;         // Tinggi area per field (termasuk jarak antar field)
+        int currentY = gp.tileSize * 3;             // Posisi Y awal
+        int textOffsetY = gp.tileSize / 2 + 10;     // Offset Y untuk teks di dalam kotak input agar terlihat di tengah
+
+        String blinkingCursor = ((System.currentTimeMillis() / 500) % 2 == 0 && activeInputField < (TOTAL_CREATION_FIELDS -1)) ? "_" : " "; // Kursor hanya untuk field teks aktif
+
+        // 1. Input Nama Pemain
+        g2.drawString("Nama Pemain:", labelX, currentY + textOffsetY);
+        drawInputField(inputX, currentY, inputWidth, gp.tileSize, tempPlayerName, activeInputField == 0, (activeInputField == 0 ? blinkingCursor : ""));
+        currentY += fieldHeight;
+
+        // 2. Pilih Gender
+        g2.drawString("Gender:", labelX, currentY + textOffsetY);
+        String genderText = (tempGenderSelection == 0) ? "Laki-laki" : "Perempuan";
+        // Tampilkan < > jika field gender aktif untuk menandakan bisa diubah dengan kiri/kanan
+        String displayGenderText = (activeInputField == 1) ? "< " + genderText + " >" : genderText;
+        drawInputField(inputX, currentY, inputWidth, gp.tileSize, displayGenderText, activeInputField == 1, ""); // Tidak ada kursor berkedip untuk pilihan gender
+        currentY += fieldHeight;
+
+        // 3. Input Nama Kebun
+        g2.drawString("Nama Kebun:", labelX, currentY + textOffsetY);
+        drawInputField(inputX, currentY, inputWidth, gp.tileSize, tempFarmName, activeInputField == 2, (activeInputField == 2 ? blinkingCursor : ""));
+        currentY += fieldHeight;
+
+        // 4. Input Item Favorit
+        g2.drawString("Item Favorit:", labelX, currentY + textOffsetY);
+        drawInputField(inputX, currentY, inputWidth, gp.tileSize, tempFavoriteItem, activeInputField == 3, (activeInputField == 3 ? blinkingCursor : ""));
+        currentY += fieldHeight * 1.5; // Beri jarak lebih untuk tombol
+
+        // Tombol Selesai
+        String finishText = "Selesai";
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 32f)); // Font untuk tombol mungkin sedikit lebih besar
+        FontMetrics fmButton = g2.getFontMetrics();
+        int finishTextWidth = fmButton.stringWidth(finishText);
+        int finishButtonWidth = finishTextWidth + 40; // Lebar tombol
+        int finishButtonHeight = gp.tileSize + 10;    // Tinggi tombol
+        int finishButtonX = (gp.screenWidth - finishButtonWidth) / 2; // Tombol di tengah
+        int finishButtonY = currentY;
+
+        // Gambar latar tombol
+        g2.setColor(stardewDialogBorder); // Gunakan warna border Anda untuk latar tombol
+        g2.fillRect(finishButtonX, finishButtonY, finishButtonWidth, finishButtonHeight);
+
+        // Highlight tombol jika aktif
+        if (activeInputField == (TOTAL_CREATION_FIELDS - 1)) { // TOTAL_CREATION_FIELDS - 1 adalah indeks untuk tombol "Selesai"
+            g2.setColor(stardewHighlightBorder.darker()); // Warna highlight, mungkin sedikit digelapkan agar teks tetap terbaca
+            g2.fillRect(finishButtonX + 3, finishButtonY + 3, finishButtonWidth - 6, finishButtonHeight - 6); // Efek inset highlight
+        }
+
+        // Teks Tombol
+        g2.setColor(stardewText); // Warna teks putih untuk kontras
+        int textButtonX = finishButtonX + (finishButtonWidth - finishTextWidth) / 2;
+        int textButtonY = finishButtonY + fmButton.getAscent() + (finishButtonHeight - fmButton.getHeight()) / 2;
+        g2.drawString(finishText, textButtonX, textButtonY);
+
+        // Kembali ke font dan warna default jika ada perubahan
+        g2.setFont(arial_40); // Asumsi font default
+        g2.setColor(Color.WHITE); // Asumsi warna default
+    }
+
+    // Metode helper drawInputField (pastikan warna sesuai tema)
+    private void drawInputField(int x, int y, int width, int height, String text, boolean isActive, String cursor) {
+        // Latar belakang field input
+        g2.setColor(invSlotBg); // Warna krem muda untuk field input
+        g2.fillRect(x, y, width, height);
+
+        // Border field input
+        g2.setColor(stardewDialogBorder); // Warna coklat tua untuk border
+        g2.setStroke(new BasicStroke(2)); // Ketebalan border
+        g2.drawRect(x, y, width, height);
+        g2.setStroke(new BasicStroke(1)); // Kembalikan ketebalan stroke
+
+        // Teks di dalam field
+        g2.setColor(stardewDialogText); // Warna teks coklat tua
+        FontMetrics fm = g2.getFontMetrics();
+        // Posisi Y teks agar sedikit di tengah vertikal dalam kotak input
+        int textY = y + (height - fm.getHeight()) / 2 + fm.getAscent();
+        g2.drawString(text + (isActive ? cursor : ""), x + 10, textY);
+    }
+
+    public int getSelectedItemIndexInSellableView() {
+        if (currentSellableItemsView.isEmpty()) {
+            return -1;
+        }
+        int linearIndex = slotCol + (slotRow * inventoryMaxCol); 
+        if (linearIndex >= 0 && linearIndex < currentSellableItemsView.size()) {
+            return linearIndex;
+        }
+        return -1; 
+    }
+
+    public void filterSellableItemsForShipping(Player player) {
+        currentSellableItemsView.clear();
+        sellableItemsOriginalIndices.clear();
+        if (player == null || player.inventory == null) {
+            return;
+        }
+
+        for (int i = 0; i < player.inventory.size(); i++) {
+            ItemStack stack = player.inventory.get(i);
+            if (stack != null && stack.getItem() != null && stack.getItem().getSellPrice() > 0) {
+                currentSellableItemsView.add(stack);
+                sellableItemsOriginalIndices.add(i); 
+            }
+        }
+
+        if (!currentSellableItemsView.isEmpty()) {
+            int currentLinearSelection = slotCol + slotRow * inventoryMaxCol; 
+            if (currentLinearSelection >= currentSellableItemsView.size()) {
+                int lastValidLinearIndex = Math.max(0, currentSellableItemsView.size() - 1);
+                slotCol = lastValidLinearIndex % inventoryMaxCol;
+                slotRow = lastValidLinearIndex / inventoryMaxCol;
+            }
+        } else {
+            slotCol = 0;
+            slotRow = 0;
+        }
     }
 
     public String getCurrentDialogueMode() {
@@ -89,15 +236,23 @@ public class UI {
     }
 
     public void clearDialogueMode() {
-        this.currentDialogueMode = "";
+        this.currentDialogueMode = ""; 
     }
 
     public void drawTransition() {
-        counter++;
+        counter++; 
+        g2.setColor(new Color(0, 0, 0, counter*5));
         g2.setColor(new Color(0, 0, 0, Math.min(255, counter * 5))); 
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
         if (counter == 50) { 
+            counter = 0;
+            gp.gameState = gp.playState;
+            gp.currentMap = gp.eHandler.tempMap;
+            gp.player.worldX = gp.tileSize * gp.eHandler.tempCol;
+            gp.player.worldY = gp.tileSize * gp.eHandler.tempRow;
+            gp.eHandler.previousEventX = gp.player.worldX;
+            gp.eHandler.previousEventY = gp.player.worldY;
         }
     }
 
@@ -118,23 +273,7 @@ public class UI {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
         arial_80B = new Font("Arial", Font.BOLD, 80);
-        // Jika Anda ingin menggunakan font kustom:
-        // try {
-        //     InputStream is = getClass().getResourceAsStream("/font/MaruMonica.ttf");
-        //     maruMonica = Font.createFont(Font.TRUETYPE_FONT, is);
-        //     is = getClass().getResourceAsStream("/font/Purisa Bold.ttf");
-        //     purisaB = Font.createFont(Font.BOLD, is);
-        // } catch (FontFormatException | IOException e) {
-        //     e.printStackTrace();if (gp.gameState == gp.playState) {
-        // }
 
-        // CREATE HUD OBJECT
-        // SuperObject heart = new OBJ_Heart(gp);
-        // heart_full = heart.image;
-        // heart_half = heart.image2;
-        // heart_blank = heart.image3;
-        // Load background image once
-        // Di dalam konstruktor UI(GamePanel gp)
     try {
         InputStream is = getClass().getResourceAsStream("/res/title/StardewValley.ttf"); 
         if (is == null) {
@@ -159,10 +298,10 @@ public class UI {
             e.printStackTrace();
         }
 
-        // Load Stardew Valley font once
         try {
-            InputStream fontStream = getClass().getResourceAsStream("/title/StardewValley.ttf");
+            InputStream fontStream = getClass().getResourceAsStream("/res/title/StardewValley.ttf");
             if (fontStream == null) {
+                System.out.println(" Font file not found!");
                 stardewFont = new Font("Arial", Font.BOLD, 48); 
             } else {
                 stardewFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.BOLD, 48f);
@@ -199,9 +338,14 @@ public class UI {
 
         // SELLING STATE
         else if (gp.gameState == gp.shippingBinState) {
-            drawPlayerEnergy();  
-            drawTime();         
+            drawPlayerEnergy();
+            drawTime();      
             drawShippingBinScreen(); 
+        }
+
+        // NEW GAME STATE
+        else if (gp.gameState == gp.characterCreationState) {
+            drawCharacterCreationScreen();
         }
 
         // PLAY STATE
@@ -258,10 +402,7 @@ public class UI {
             drawPlayerEnergy();
             drawTime();
         }
-        // SLEEP STATE
-        // else if (gp.gameState == gp.sleepState) {
-        //     drawSleepScreen();
-        // }
+       
         // TRANSITION STATE
         else if (gp.gameState == gp.transitionState){
             drawTransition();
@@ -328,97 +469,116 @@ public class UI {
         int slotGridStrokeThickness = 4;
         int slotGridWidth = gp.tileSize * inventoryMaxCol;
         int slotGridHeight = gp.tileSize * inventoryMaxRow;
+        int titleAreaHeight = gp.tileSize;
         int frameWidth = slotGridWidth + (panelInternalPadding * 2);
-        // Tinggikan sedikit panel untuk memberi ruang pada judul/prompt
-        int titleAreaHeight = gp.tileSize; // Perkiraan tinggi area judul
         int frameHeight = slotGridHeight + (panelInternalPadding * 2) + titleAreaHeight;
         int frameX = (gp.screenWidth - frameWidth) / 2;
-        int frameY = (gp.screenHeight - frameHeight) / 2; // Lebih ke tengah layar
+        int frameY = (gp.screenHeight - frameHeight) / 2;
+        int panelBorderThickness = 3; // atau nilai sesuai kebutuhan
         if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
 
-        // Gambar panel utama (gunakan metode drawSubWindow jika ada atau gambar manual)
-        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
-        // Atau gambar manual jika drawSubWindow tidak sesuai:
-        // g2.setColor(invPanelBg);
-        // g2.fillRect(frameX, frameY, frameWidth, frameHeight);
-        // g2.setColor(invPanelBorder);
-        // g2.setStroke(new BasicStroke(panelBorderThickness));
-        // g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+        // Gambar panel utama
+        g2.setColor(invPanelBg);
+        g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setColor(invPanelBorder);
+        g2.setStroke(new BasicStroke(panelBorderThickness));
+        g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setStroke(new BasicStroke(1));
+
 
         // Gambar Judul/Prompt
-        g2.setColor(stardewDialogText); // Warna teks yang
-        Font titleFont = arial_40.deriveFont(Font.PLAIN, 20F); // Font untuk judul/prompt
+        g2.setColor(stardewDialogText);
+        Font titleFont = arial_40.deriveFont(Font.PLAIN, 20F);
         g2.setFont(titleFont);
         FontMetrics fmTitle = g2.getFontMetrics();
-        int titleX = frameX + (frameWidth - fmTitle.stringWidth(title)) / 2; // Judul di tengah panel
+        int titleX = frameX + (frameWidth - fmTitle.stringWidth(title)) / 2;
         int titleY = frameY + panelInternalPadding + fmTitle.getAscent();
         g2.drawString(title, titleX, titleY);
 
-        // --- Slot-Slot Inventory Pemain (adaptasi dari drawInventory()) ---
+        // Slot-Slot Inventory (MENGGUNAKAN currentSellableItemsView)
         final int slotStartX = frameX + panelInternalPadding;
-        // Mulai slot Y di bawah area judul
         final int slotStartY = frameY + panelInternalPadding + titleAreaHeight;
-        int currentSlotX = slotStartX;
-        int currentSlotY = slotStartY;
-        int itemIndex = 0;
-
-        Font quantityFont = arial_40.deriveFont(18F); // Font untuk kuantitas
-        int itemPadding = 4; // Padding di dalam slot
-        int itemDrawSize = gp.tileSize - (itemPadding * 2); // Ukuran gambar item
+        Font quantityFont = arial_40.deriveFont(18F);
+        int itemPadding = 4;
+        int itemDrawSize = gp.tileSize - (itemPadding * 2);
 
         for (int row = 0; row < inventoryMaxRow; row++) {
             for (int col = 0; col < inventoryMaxCol; col++) {
-                // Gambar latar slot
+                int linearIndex = col + (row * inventoryMaxCol);
+                int currentSlotX = slotStartX + (col * gp.tileSize);
+                int currentSlotY = slotStartY + (row * gp.tileSize);
+
                 g2.setColor(invSlotBg);
                 g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
-                // Gambar border slot
-                g2.setColor(invPanelGrid); // Atau invPanelBorder jika ingin lebih tebal
+                g2.setColor(invPanelGrid);
                 g2.setStroke(new BasicStroke(slotGridStrokeThickness));
                 g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
 
-                // Gambar item jika ada
-                if (itemIndex < gp.player.inventory.size()) {
-                    ItemStack currentItemStack = gp.player.inventory.get(itemIndex);
-                    if (currentItemStack != null) { // Tambahkan null check untuk ItemStack
-                        Item currentItem = currentItemStack.getItem();
-                        if (currentItem != null && currentItem.image != null) { // Null check untuk Item dan image-nya
-                            int itemX = currentSlotX + itemPadding;
-                            int itemY = currentSlotY + itemPadding;
-                            g2.drawImage(currentItem.image, itemX, itemY, itemDrawSize, itemDrawSize, null);
+                if (linearIndex < currentSellableItemsView.size()) {
+                    ItemStack stackToDraw = currentSellableItemsView.get(linearIndex);
+                    Item currentItem = stackToDraw.getItem();
 
-                            // Gambar kuantitas jika > 1
-                            if (currentItemStack.getQuantity() > 1) {
-                                g2.setFont(quantityFont);
-                                String quantityText = String.valueOf(currentItemStack.getQuantity());
-                                FontMetrics fmQty = g2.getFontMetrics();
-                                int qtyTextWidth = fmQty.stringWidth(quantityText);
-                                int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - (itemPadding > 2 ? itemPadding : 4);
-                                int qtyY = currentSlotY + gp.tileSize - (itemPadding > 2 ? itemPadding : 4);
-                                
-                                g2.setColor(Color.black); // Bayangan
-                                g2.drawString(quantityText, qtyX + 1, qtyY + 1);
-                                g2.setColor(stardewText); // Warna teks kuantitas
-                                g2.drawString(quantityText, qtyX, qtyY);
-                            }
+                    // Gambar item jika ada
+                    if (currentItem != null && currentItem.image != null) {
+                        int itemX = currentSlotX + itemPadding;
+                        int itemY = currentSlotY + itemPadding;
+                        g2.drawImage(currentItem.image, itemX, itemY, itemDrawSize, itemDrawSize, null);
+
+                        // Gambar kuantitas
+                        if (stackToDraw.getQuantity() > 1) {
+                            g2.setFont(quantityFont);
+                            String quantityText = String.valueOf(stackToDraw.getQuantity());
+                            FontMetrics fmQty = g2.getFontMetrics();
+                            int qtyTextWidth = fmQty.stringWidth(quantityText);
+                            int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - 4; // Posisi kanan bawah
+                            int qtyY = currentSlotY + gp.tileSize - 4;
+                            g2.setColor(Color.black); // Bayangan
+                            g2.drawString(quantityText, qtyX + 1, qtyY + 1);
+                            g2.setColor(stardewText); // Teks utama
+                            g2.drawString(quantityText, qtyX, qtyY);
                         }
                     }
                 }
-                currentSlotX += gp.tileSize;
-                itemIndex++;
-            }
-            currentSlotX = slotStartX;
-            currentSlotY += gp.tileSize;
-        }
-        g2.setStroke(new BasicStroke(1)); // Reset stroke
 
-        // --- KURSOR PEMILIHAN SLOT --- (Sama seperti di drawInventory)
-        int cursorX = slotStartX + (gp.tileSize * slotCol); // slotCol dari UI
-        int cursorY = slotStartY + (gp.tileSize * slotRow); // slotRow dari UI
-        g2.setColor(stardewHighlightBorder);
-        g2.setStroke(new BasicStroke(3));
-        g2.drawRect(cursorX, cursorY, gp.tileSize, gp.tileSize);
-        g2.setStroke(new BasicStroke(1));
-        g2.setFont(arial_40); 
+                if (row == slotRow && col == slotCol && linearIndex < currentSellableItemsView.size()) {
+                    g2.setColor(stardewHighlightBorder);
+                    g2.setStroke(new BasicStroke(3));
+                    g2.drawRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize);
+                    g2.setStroke(new BasicStroke(1));
+                }
+            }
+        }
+
+        // Tampilkan info item yang dipilih
+        int selectedIndex = getSelectedItemIndexInSellableView();
+        if (selectedIndex != -1) {
+            Item selectedItem = currentSellableItemsView.get(selectedIndex).getItem();
+            String itemName = selectedItem.getName();
+            String itemPrice = selectedItem.getSellPrice() + "g";
+
+            // Gambar panel kecil di bawah untuk menampilkan nama dan harga
+            int infoPanelHeight = gp.tileSize;
+            int infoPanelWidth = frameWidth;
+            int infoPanelX = frameX;
+            int infoPanelY = frameY + frameHeight + 5; // Sedikit di bawah panel utama
+
+            g2.setColor(invItemNamePanelBg);
+            g2.fillRect(infoPanelX, infoPanelY, infoPanelWidth, infoPanelHeight);
+            g2.setColor(invPanelBorder);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRect(infoPanelX, infoPanelY, infoPanelWidth, infoPanelHeight);
+
+            g2.setColor(invItemNameTextColor);
+            g2.setFont(arial_40.deriveFont(Font.BOLD, 20F));
+            FontMetrics fmInfo = g2.getFontMetrics();
+            int textY = infoPanelY + (infoPanelHeight - fmInfo.getHeight()) / 2 + fmInfo.getAscent();
+            g2.drawString(itemName, infoPanelX + 10, textY);
+            int priceX = infoPanelX + infoPanelWidth - fmInfo.stringWidth(itemPrice) - 10;
+            g2.drawString(itemPrice, priceX, textY);
+        }
+
+        g2.setFont(arial_40); // Kembalikan font default
+        g2.setStroke(new BasicStroke(1)); // Kembalikan stroke default
     }
 
     public void drawFishingScreen() {
@@ -438,19 +598,20 @@ public class UI {
         g2.setStroke(new BasicStroke(borderThickness));
         g2.drawRoundRect(windowX, windowY, windowWidth, windowHeight, 25, 25); 
 
-        g2.setColor(invPanelBg); // Warna latar belakang panel
+        g2.setColor(invPanelBg); 
         g2.fillRect(windowX + borderThickness, windowY + borderThickness,
                     windowWidth - (borderThickness * 2), windowHeight - (borderThickness * 2));
         g2.setStroke(new BasicStroke(1));
 
         g2.setColor(stardewDialogText); 
-        Font fishingFont = arial_40.deriveFont(Font.PLAIN, 22F); 
+        Font fishingFont = arial_40.deriveFont(Font.PLAIN, 22F);
         g2.setFont(fishingFont);
         FontMetrics fm = g2.getFontMetrics();
 
         int textX = windowX + dialogueBoxPadding;
         int currentTextY = windowY + dialogueBoxPadding + fm.getAscent();
-        int lineHeight = fm.getHeight() + 7; 
+        int lineHeight = fm.getHeight() + 7;
+
         if (gp.fishBeingFished != null) {
             String fishInfo = "Memancing: " + gp.fishBeingFished.name +
                             " (" + gp.fishBeingFished.getFishRarity() + ")"; 
@@ -467,7 +628,6 @@ public class UI {
         
         currentTextY += lineHeight * 0.5; 
 
-        // 3. Tampilkan Input Tebakan Pemain Saat Ini (jika minigame masih berjalan)
         if (gp.fishBeingFished != null && gp.fishingAttemptsLeft > 0) {
             String cursorIndicator = (System.currentTimeMillis() / 500) % 2 == 0 ? "_" : " ";
             g2.drawString("Tebakanmu: " + gp.currentFishingGuess + cursorIndicator, textX, currentTextY);
@@ -476,6 +636,7 @@ public class UI {
     }
 
     public void drawPlayerEnergy() {
+        int framePadding = 4; 
         int frameThickness = 6;
         int outerFrameX = gp.tileSize / 2;
         int outerFrameY = gp.tileSize / 2;
@@ -533,52 +694,104 @@ public class UI {
 
 public void drawTitleScreen() {
     try {
-        // load font
-        InputStream is = getClass().getResourceAsStream("/res/title/StardewValley.ttf");
-        Font stardewFont = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.BOLD, 48f);
-        g2.setFont(stardewFont);
-    } catch (Exception e) {
-        e.printStackTrace();
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f)); // fallback
-    }
-
-    // masukin bg
-    try {
-        BufferedImage background = ImageIO.read(getClass().getResourceAsStream("/res/title/background.jpg"));
-        g2.drawImage(background, 0, 0, gp.screenWidth, gp.screenHeight, null);
+        // Jika backgroundImage adalah field kelas dan sudah dimuat di konstruktor:
+        if (backgroundImage != null) {
+            g2.drawImage(backgroundImage, 0, 0, gp.screenWidth, gp.screenHeight, null);
+        } else {
+            // Fallback jika backgroundImage null
+            InputStream bgIs = getClass().getResourceAsStream("/res/title/background.jpg"); // Pastikan path ini benar
+            if (bgIs != null) {
+                BufferedImage bg = ImageIO.read(bgIs);
+                g2.drawImage(bg, 0, 0, gp.screenWidth, gp.screenHeight, null);
+            } else {
+                g2.setColor(Color.black); // Fallback jika gambar tidak ada
+                g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+            }
+        }
     } catch (IOException e) {
         e.printStackTrace();
-        // jadi gelap
         g2.setColor(Color.black);
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
     }
 
-    // TITLE NAME
-    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 100f));
+    // 2. GAMBAR JUDUL GAME (seperti yang sudah ada)
+    // Gunakan this.stardewFont yang sudah di-load di konstruktor
+    if (this.stardewFont != null) {
+        g2.setFont(this.stardewFont.deriveFont(Font.BOLD, 100f));
+    } else {
+        g2.setFont(new Font("Arial", Font.BOLD, 100)); // Fallback font jika stardewFont null
+    }
     String text = "Spakbor Hills";
     int x = getXforCenteredText(text);
-    int y = gp.tileSize * 7;
+    int y = gp.tileSize * 7; // Sesuaikan posisi Y jika perlu
 
-    // shadow
+    // Bayangan untuk judul
     g2.setColor(Color.gray);
     g2.drawString(text, x + 5, y + 5);
-    g2.setColor(Color.white);
+    // Teks judul utama
+    g2.setColor(Color.white); // Atau stardewTitleText Anda
     g2.drawString(text, x, y);
 
-    // menu
+    // 3. GAMBAR OPSI MENU (seperti yang sudah ada)
+    if (this.stardewFont != null) {
+        g2.setFont(this.stardewFont.deriveFont(Font.BOLD, 48f));
+    } else {
+        g2.setFont(new Font("Arial", Font.BOLD, 48)); // Fallback
+    }
     String[] options = { "NEW GAME", "LOAD GAME", "HELP", "QUIT" };
-    g2.setFont(g2.getFont().deriveFont(Font.BOLD, 48f));
-    y += gp.tileSize * 1;
+    y += gp.tileSize * 1; // Jarak dari judul ke menu
 
     for (int i = 0; i < options.length; i++) {
         text = options[i];
         x = getXforCenteredText(text);
-        y += gp.tileSize;
-        g2.drawString(text, x, y);
+        y += gp.tileSize; // Jarak antar item menu
+        // Warna teks menu (misalnya, putih atau stardewText)
+        g2.setColor(stardewText); // Gunakan warna teks yang sudah Anda definisikan jika ada
         if (commandNum == i) {
-            g2.drawString(">", x - gp.tileSize, y);
+            g2.setColor(stardewHighlightBorder); // Warna highlight untuk opsi yang dipilih
+            g2.drawString(">", x - gp.tileSize, y); // Penanda pilihan
+            g2.drawString(text, x, y); // Gambar teks opsi dengan warna highlight jika perlu, atau tetap
+        } else {
+            g2.drawString(text, x, y);
         }
     }
+
+    // --- MULAI BAGIAN KREDIT ---
+    String creditsTextLine1 = "Samuel CMBS - 18223011     |     M Azzam Robbani - 18223025";
+    String creditsTextLine2 = "Amudi Purba - 18223049     |     Audy Alicia Renatha Tirayoh - 18223097";
+
+    Font creditsFont;
+    if (this.stardewFont != null) {
+        creditsFont = this.stardewFont.deriveFont(18f); // Ukuran font lebih kecil untuk kredit
+    } else {
+        creditsFont = new Font("Arial", Font.PLAIN, 12); // Fallback font kredit
+    }
+    
+    g2.setFont(creditsFont);
+    g2.setColor(Color.WHITE); // Atau warna lain yang Anda inginkan
+
+    FontMetrics fmCredits = g2.getFontMetrics();
+    int lineHeight = fmCredits.getHeight(); // Untuk jarak antar baris
+    int bottomPadding = 20; // Jarak dari bawah layar
+
+    // Hitung posisi untuk Baris 2 (baris paling bawah)
+    int creditsTextWidthLine2 = fmCredits.stringWidth(creditsTextLine2);
+    int creditsXLine2 = (gp.screenWidth - creditsTextWidthLine2) / 2; // Posisi X agar di tengah
+    int creditsYLine2 = gp.screenHeight - bottomPadding - fmCredits.getDescent(); // Baseline untuk baris 2
+
+    // Hitung posisi untuk Baris 1 (di atas baris 2)
+    int creditsTextWidthLine1 = fmCredits.stringWidth(creditsTextLine1);
+    int creditsXLine1 = (gp.screenWidth - creditsTextWidthLine1) / 2; // Posisi X agar di tengah
+    int creditsYLine1 = creditsYLine2 - lineHeight; // Posisikan baris 1 di atas baris 2
+
+    // Gambar kedua baris kredit
+    g2.drawString(creditsTextLine1, creditsXLine1, creditsYLine1);
+    g2.drawString(creditsTextLine2, creditsXLine2, creditsYLine2);
+    // --- AKHIR BAGIAN KREDIT ---
+
+    // Kembalikan ke font default jika diperlukan oleh bagian lain dari UI setelah ini
+    // (Biasanya tidak perlu jika ini adalah akhir dari penggambaran state spesifik)
+    // g2.setFont(arial_40); // Contoh
 }
 
     public void drawHelpScreen() {
@@ -661,10 +874,10 @@ public void drawTitleScreen() {
         int titleDataGap = 8;           
 
         String statusTitle = gp.player.name + " - Status";
-        String[] statusLabels = {"Gender:", "Energi:", "Farm:", "Partner:", "Gold:", "Items:"};
+        String[] statusLabels = {"Gender:", "Energi:", "Farm:", "Partner:", "Gold:", "Favorite Item:", "Items:"};
         String[] statusValues = {
             gp.player.gender, gp.player.energy + "/" + gp.player.maxEnergy,
-            gp.player.farmName, gp.player.partner, gp.player.gold + " G",
+            gp.player.farmName, gp.player.partner, gp.player.gold + " G", gp.player.favoriteItem,
             (gp.player.inventory != null ? gp.player.inventory.size() + " jenis" : "0 jenis")
         };
 
@@ -691,7 +904,7 @@ public void drawTitleScreen() {
         int frameWidth = contentWidth + (mainPanelPadding * 2) + (mainPanelBorderThickness * 2); 
         if (frameWidth < gp.tileSize * 8) frameWidth = gp.tileSize * 8; 
 
-        // Tinggi Area Judul (termasuk padding atas dan bawah untuk judul di dalam panel utama)
+        // Tinggi Area Judul 
         int titleAreaHeight = mainPanelPadding + titleTextHeight + mainPanelPadding;
 
         // Tinggi Sub-Panel Data (termasuk padding internalnya)
@@ -727,18 +940,12 @@ public void drawTitleScreen() {
         int dataSubPanelX = frameX + mainPanelPadding;
         int dataSubPanelY = frameY + titleAreaHeight; 
         g2.setColor(invSlotBg); 
-        // g2.setColor(invPanelBorder);
-        // g2.setStroke(new BasicStroke(1));
-        // g2.drawRect(dataSubPanelX, dataSubPanelY, dataSubPanelWidth, dataSubPanelHeight);g2.fillRect(dataSubPanelX, dataSubPanelY, dataSubPanelWidth, dataSubPanelHeight);
-       
-
 
         // GAMBAR DETAIL STATUS (di atas dataSubPanelBg)
         g2.setFont(statusTextFont);
         g2.setColor(invItemNameTextColor);
 
         int currentTextX = dataSubPanelX + dataAreaInternalPadding;
-        // Posisi Y awal untuk baris status pertama (di dalam dataSubPanelY)
         int currentTextY = dataSubPanelY + dataAreaInternalPadding + statusFm.getAscent();
 
         for (int i = 0; i < statusLabels.length; i++) {
@@ -827,19 +1034,21 @@ public void drawTitleScreen() {
                     StringBuilder line = new StringBuilder();
                     for (String word : words) {
                         if (fm.stringWidth(line.toString() + word + " ") > availableTextWidth) {
+                            if ( false ) {break; }
                             g2.drawString(line.toString().trim(), textX, currentTextY);
-                            currentTextY += lineHeight; // Gunakan lineHeight
+                            currentTextY += lineHeight; 
                             line = new StringBuilder(word + " ");
                         } else {
                             line.append(word).append(" ");
                         }
                     }
                     if (line.length() > 0) {
-                        if (/* ... kondisi cek tinggi ... */ true) {
+                        if ( true) {
                             g2.drawString(line.toString().trim(), textX, currentTextY);
-                            currentTextY += lineHeight; // Gunakan lineHeight
-                        } 
+                            currentTextY += lineHeight; 
+                        } else {}
                     }
+                    if ( false) { break; }
                 }
             }
         }
@@ -1435,9 +1644,8 @@ public void drawTitleScreen() {
 
         Font quantityFont = arial_40.deriveFont(18F);
 
-        // TENTUKAN UKURAN BARU UNTUK GAMBAR ITEM
-        int itemPadding = 4; // Padding di setiap sisi item di dalam slot (misalnya 4 pixel)
-                            // Anda bisa juga menggunakan persentase, misal: gp.tileSize / 10
+        int itemPadding = 4; 
+                         
         int itemDrawSize = gp.tileSize - (itemPadding * 2); 
 
         for (int row = 0; row < inventoryMaxRow; row++) {
@@ -1454,26 +1662,25 @@ public void drawTitleScreen() {
                     BufferedImage itemImage = (currentItem != null) ? currentItem.image : null;
 
                     if (itemImage != null) {
-                        // Hitung posisi X dan Y agar item tergambar di tengah slot dengan ukuran barunya
+              
                         int itemX = currentSlotX + itemPadding;
                         int itemY = currentSlotY + itemPadding;
 
-                        // Gambar item dengan ukuran yang sudah ditentukan (itemDrawSize)
+         
                         g2.drawImage(itemImage, itemX, itemY, itemDrawSize, itemDrawSize, null);
 
-                        // Logika untuk kuantitas (biarkan seperti sebelumnya)
                         if (currentItemStack.getQuantity() > 1) {
                             g2.setFont(quantityFont);
                             String quantityText = String.valueOf(currentItemStack.getQuantity());
                             FontMetrics fmQty = g2.getFontMetrics();
                             int qtyTextWidth = fmQty.stringWidth(quantityText);
-                            // Posisi teks kuantitas sedikit disesuaikan agar tidak terlalu menempel jika item lebih kecil
+                       
                             int qtyX = currentSlotX + gp.tileSize - qtyTextWidth - (itemPadding > 2 ? itemPadding : 4);
                             int qtyY = currentSlotY + gp.tileSize - (itemPadding > 2 ? itemPadding : 4);
                             
                             g2.setColor(Color.black);
                             g2.drawString(quantityText, qtyX + 1, qtyY + 1);
-                            g2.setColor(stardewText); // Atau warna teks kuantitas Anda
+                            g2.setColor(stardewText); 
                             g2.drawString(quantityText, qtyX, qtyY);
                         }
                     }
@@ -1497,7 +1704,7 @@ public void drawTitleScreen() {
                         gp.tileSize + (cursorOffset*2) -1 , gp.tileSize + (cursorOffset*2) -1);
             g2.setStroke(new BasicStroke(1));
 
-            // PANEL NAMA ITEM (MENGGANTIKAN DESKRIPSI)
+            // PANEL NAMA ITEM 
             int selectedItemIndex = slotRow * inventoryMaxCol + slotCol;
             if (selectedItemIndex < gp.player.inventory.size()) {
                 ItemStack selectedItemStack = gp.player.inventory.get(selectedItemIndex);

@@ -8,7 +8,7 @@ public class NPC_3_Perry extends Entity {
     public NPC_3_Perry(GamePanel gp){
         super(gp);
         this.name = "Perry";
-        direction = "down"; // Menghadap ke kiri secara default
+        direction = "down"; 
         speed = 0;
         getImage();
         setDialogue();
@@ -43,21 +43,15 @@ public class NPC_3_Perry extends Entity {
     }
 
     public void setGiftPreferences() {
-        lovedItems.addAll(Arrays.asList("Cranberry", "Blueberry")); // [cite: 82]
-        likedItems.addAll(Arrays.asList("Wine")); // [cite: 82]
-        // Hated: Semua item Fish [cite: 82]
-        // Pendekatan sederhana: daftarkan semua nama ikan yang ada di game Anda.
-        // Pastikan nama-nama ini SAMA PERSIS dengan Item.getName() untuk ikan.
+        lovedItems.addAll(Arrays.asList("Cranberry", "Blueberry")); 
+        likedItems.addAll(Arrays.asList("Wine")); 
         hatedItems.addAll(Arrays.asList(
-            "Bullhead", "Carp", "Chub", // Common fish [cite: 104]
-            "Largemouth Bass", "Rainbow Trout", "Sturgeon", "Midnight Carp", // Regular fish [cite: 106]
-            "Flounder", "Halibut", "Octopus", "Pufferfish", "Sardine", // Regular fish [cite: 106]
-            "Super Cucumber", "Catfish", "Salmon", // Regular fish [cite: 106]
-            "Angler", "Crimsonfish", "Glacierfish", "Legend" // Legendary fish [cite: 108]
-            // Tambahkan nama ikan lain jika ada
+            "Bullhead", "Carp", "Chub", 
+            "Largemouth Bass", "Rainbow Trout", "Sturgeon", "Midnight Carp", 
+            "Flounder", "Halibut", "Octopus", "Pufferfish", "Sardine", 
+            "Super Cucumber", "Catfish", "Salmon", 
+            "Angler", "Crimsonfish", "Glacierfish", "Legend" 
         ));
-        // Pendekatan Lanjutan (memerlukan modifikasi `processGift` dan cara mendapatkan info item):
-        // Anda bisa override processGift dan cek kategori item jika item memiliki getCategory() == "Fish".
     }
 
     @Override

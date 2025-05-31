@@ -139,8 +139,74 @@ public class Fish extends Item {
 
     @Override
     public int getEnergyValue() {
-        return this.energyRestoredOnEat; // energyRestoredOnEat sudah ada (nilainya 1)
+        return this.energyRestoredOnEat; 
     }
+
+    public boolean isCatchable(String currentLocation, int currentHour, String currentSeason, String currentWeather) {
+    // 1. Cek Lokasi
+    if (!this.catchableLocations.contains(currentLocation)) {
+        return false;
+    }
+
+    // 2. Cek Musim
+    if (!this.catchableSeasons.contains("Any") && !this.catchableSeasons.contains(currentSeason)) {
+        return false;
+    }
+
+    // 3. Cek Cuaca
+    if (!this.catchableWeathers.contains("Any") && !this.catchableWeathers.contains(currentWeather)) {
+        return false;
+    }
+
+    // 4. Cek Waktu
+    boolean timeMatch = false;
+    if (this.catchableTimeWindows == null || this.catchableTimeWindows.isEmpty()) {
+        // Jika tidak ada batasan waktu spesifik (dianggap "Any" time)
+        // ATAU jika Anda punya ikan seperti Bullhead, Carp, Chub yang Anda set dengan list kosong
+        // untuk menandakan "Any"
+        if (this.name.equals("Bullhead") || this.name.equals("Carp") || this.name.equals("Chub")) { // Sesuaikan dengan ikan "Any" time Anda
+             timeMatch = true;
+        } else if (this.catchableTimeWindows == null || this.catchableTimeWindows.isEmpty()){
+             // Jika ikan lain tidak punya time window, mungkin tidak bisa ditangkap kecuali Anda definisikan "Any"
+             // Untuk keamanan, jika list kosong dan bukan ikan "Any" yang dikenal, anggap false kecuali ada logika lain
+             // Ini bergantung pada bagaimana Anda ingin menangani List kosong untuk ikan non-"Any"
+             // Untuk contoh, kita anggap jika list kosong dan bukan ikan "Any" spesifik, maka false.
+             // Sebaiknya semua ikan punya TimeWindow, atau ada cara handle "Any" TimeWindow.
+             // Atau, modifikasi kalkulasi harga dan ItemRepository untuk ikan "Any" time.
+             // Untuk sekarang, kita anggap ikan "Any" time sudah dihandle dengan benar di ItemRepository
+             // dengan list kosong (seperti Bullhead, Carp, Chub)
+             // Jika tidak, dan ikan ini tidak punya time window, return false.
+             // Untuk contoh ini, kita akan asumsikan jika list kosong, itu artinya "Any" time untuk ikan tersebut.
+             timeMatch = true; // Asumsi list kosong = Any Time jika tidak spesifik
+        }
+
+
+    } else {
+        for (TimeWindow tw : this.catchableTimeWindows) {
+            if (tw.endHour >= tw.startHour) { // Rentang waktu tidak melewati tengah malam
+                if (currentHour >= tw.startHour && currentHour < tw.endHour) { // Jam selesai eksklusif
+                    timeMatch = true;
+                    break;
+                }
+            } else { // Rentang waktu melewati tengah malam (misal, 20:00 - 02:00)
+                if (currentHour >= tw.startHour || currentHour < tw.endHour) {
+                    timeMatch = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (!timeMatch && !(this.catchableTimeWindows == null || this.catchableTimeWindows.isEmpty())) {
+      // Jika ada time window tapi tidak ada yang cocok
+      return false;
+    } else if (!timeMatch && (this.name.equals("Bullhead") || this.name.equals("Carp") || this.name.equals("Chub"))){
+      // Ini seharusnya sudah dihandle oleh timeMatch = true di atas jika list kosong untuk ikan ini
+      // Baris ini mungkin redundant atau perlu logika yang lebih baik untuk "Any Time"
+    }
+
+
+    return true; // Jika semua kondisi terpenuhi
+}
 
     @Override
     public void use() {

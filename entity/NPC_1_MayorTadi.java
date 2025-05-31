@@ -27,7 +27,7 @@ public class NPC_1_MayorTadi extends Entity {
     }
 
     @Override
-    public void setDialogue() { // Dialog standar jika pemain hanya "speak" tanpa memilih chat
+    public void setDialogue() { 
         dialogues[0] = "Hmph, ada apa?";
     }
 
@@ -37,34 +37,27 @@ public class NPC_1_MayorTadi extends Entity {
         chatDialogues[0] = "Ah, kamu lagi. Ada perlu apa?";
         chatDialogues[1] = "Kota ini butuh banyak perbaikan, tapi dana selalu jadi masalah.";
         chatDialogues[2] = "Jangan lupa bayar pajak ya, haha!";
-        // Anda bisa tambahkan hingga chatDialogues[4] jika arraynya berukuran 5
     }
 
     public void setGiftPreferences() {
-        // Inisialisasi jika belum di Entity atau jika ingin spesifik di sini
-        // lovedItems = new ArrayList<>();
-        // likedItems = new ArrayList<>();
-        // hatedItems = new ArrayList<>(); // Tidak perlu diisi manual untuk Mayor Tadi
 
-        lovedItems.addAll(Arrays.asList("Legend")); //
-        likedItems.addAll(Arrays.asList("Angler", "Crimsonfish", "Glacierfish")); //
-        // Hated items ditangani oleh override processGi
+        lovedItems.addAll(Arrays.asList("Legend")); 
+        likedItems.addAll(Arrays.asList("Angler", "Crimsonfish", "Glacierfish"));
+
     }
 
     @Override
     public int processGift(String itemName) {
         if (lovedItems.contains(itemName)) {
-            return 25; // Sesuai spesifikasi Gifting
+            return 25;
         } else if (likedItems.contains(itemName)) {
-            return 20; // Sesuai spesifikasi Gifting
+            return 20; 
         }
-        return -25; // Semua item lain dibenci oleh Mayor Tadi [cite: 74]
+        return -25; 
     }
     
     public void speak(){
-        // if (dialogueIndex >= dialogues.length) {
-        //     dialogueIndex = 0; // Reset ke awal jika mencapai akhir
-        // }
+
         super.speak();
         
     }
