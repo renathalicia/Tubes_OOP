@@ -453,5 +453,6 @@ public class ItemRepository {
         initEquipment(gp);
         initSeeds(gp);
         initFish(gp);
+        initMisc(gp);
     }
 }

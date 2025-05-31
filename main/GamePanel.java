@@ -20,6 +20,8 @@ import item.ItemRepository;
 import environment.EnvironmentManager;
 import item.Store;
 
+import main.StatisticsManager;
+
 public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
     final int scale = 3;
@@ -94,6 +96,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int fishingState = 10;
     public final int shippingBinState = 11;
     public final int characterCreationState = 12;
+    public final int endGameStatisticsState = 13;
 
     // fishing
     public Fish fishBeingFished = null;
@@ -110,6 +113,10 @@ public class GamePanel extends JPanel implements Runnable{
     public GameState gameStateSystem = new GameState();
     public EnvironmentManager envManager = new EnvironmentManager(this);
 
+    // end game
+    public StatisticsManager statsManager = new StatisticsManager();
+    
+
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.black);
@@ -125,6 +132,20 @@ public class GamePanel extends JPanel implements Runnable{
         ItemRepository.initializeAllItems(this);
         aSetter.setObject();
         initializeNPCs();
+        if (statsManager != null && npc != null) {
+            for (int mapIdx = 0; mapIdx < npc.length; mapIdx++) {
+                if (npc[mapIdx] != null) {
+                    for (int i = 0; i < npc[mapIdx].length; i++) {
+                        if (npc[mapIdx][i] != null && npc[mapIdx][i].name != null) {
+                            statsManager.updateNpcRelationshipStatus(npc[mapIdx][i].name, "Single");
+                            statsManager.npcChattingFrequency.put(npc[mapIdx][i].name, 0);
+                            statsManager.npcGiftingFrequency.put(npc[mapIdx][i].name, 0);
+                            statsManager.npcVisitingFrequency.put(npc[mapIdx][i].name, 0); // Inisialisasi
+                        }
+                    }
+                }
+            }
+        }
         playMusic(0);
         gameState = titleState;
     }
@@ -207,7 +228,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     // 3. MAJUKAN WAKTU (setelah semua syarat terpenuhi dan spot valid)
-    gameStateSystem.advanceTimeByMinutes(15);
+    gameStateSystem.advanceTimeByMinutes(15, this.statsManager);
     System.out.println("GAMEPANEL: Memancing dimulai di " + currentFishingLocation + ". Waktu dimajukan 15 menit.");
 
 
@@ -315,6 +336,13 @@ public class GamePanel extends JPanel implements Runnable{
     public void endFishingMinigame(boolean caughtFish, String finalMessage) {
         System.out.println("GAMEPANEL: Minigame Fishing Selesai. Berhasil: " + caughtFish + ". Pesan: " + finalMessage);
 
+        if (caughtFish && fishBeingFished != null) {
+
+            if (statsManager != null) { // Periksa null
+                statsManager.incrementFishCaught(fishBeingFished.getFishRarity());
+            }
+            System.out.println("STATISTICS: Fish caught: " + fishBeingFished.name + ", Rarity: " + fishBeingFished.getFishRarity());
+        }
         ui.currentDialogue = finalMessage;
         gameState = dialogueState;         
         fishBeingFished = null;
@@ -331,7 +359,7 @@ public class GamePanel extends JPanel implements Runnable{
         if (gameState != shippingBinState) return;
         System.out.println("GAMEPANEL: Finalisasi Shipping Bin. Jumlah item di bin: " + itemsToShip.size());
         isTimePaused = false;
-        gameStateSystem.advanceTimeByMinutes(15);
+        gameStateSystem.advanceTimeByMinutes(15, this.statsManager);
         hasShippedToday = true;
         if (!itemsToShip.isEmpty()) {
             ui.setDialogue("Semua item telah ditempatkan di Shipping Bin.", "SYSTEM_MESSAGE");
@@ -683,10 +711,11 @@ public class GamePanel extends JPanel implements Runnable{
                         if (itemToGift != null && itemToGift.getItem() != null) {
                             System.out.println("GAMEPANEL (inventoryState): Akan memberi hadiah '" + itemToGift.getItem().getName() + "' kepada " + npcForGifting.name);
                             if (player.consumeEnergy(5)) {
+                                statsManager.incrementGiftingFrequency(npcForGifting.name);
                                 int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
                                 npcForGifting.updateHeartPoints(heartPointsChange);
                                 player.removeItem(itemToGift.getItem().getName(), 1);
-                                gameStateSystem.advanceTimeByMinutes(10);
+                                gameStateSystem.advanceTimeByMinutes(10, this.statsManager);
                                 String reaction = "";
                                 if (heartPointsChange > 15) reaction = " sangat senang!";
                                 else if (heartPointsChange > 0) reaction = " terlihat senang.";
@@ -785,6 +814,7 @@ public class GamePanel extends JPanel implements Runnable{
                                             gameStateSystem.setTime(22, 0); 
                                         }
                                         ui.currentDialogue = "Kita akhirnya menikah, " + player.name + "!\nAku sangat bahagia!";
+                                        statsManager.updateNpcRelationshipStatus(currentNpc.name, "Spouse");
                                     } else {
                                         ui.currentDialogue = "Tidak cukup energi untuk upacara pernikahan.";
                                     }
@@ -795,16 +825,17 @@ public class GamePanel extends JPanel implements Runnable{
                                         if (player.consumeEnergy(10)) { 
                                             currentNpc.isProposedTo = true;
                                             if (gameStateSystem != null) {
-                                                gameStateSystem.advanceTimeByMinutes(60); 
+                                                gameStateSystem.advanceTimeByMinutes(60, this.statsManager); 
                                             }
                                             ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
+                                            statsManager.updateNpcRelationshipStatus(currentNpc.name, "Fiance");
                                         } else {
                                             ui.currentDialogue = "Tidak cukup energi untuk melamar saat ini.";
                                         }
                                     } else {
                                         if (player.consumeEnergy(20)) { 
                                             if (gameStateSystem != null) {
-                                                gameStateSystem.advanceTimeByMinutes(60); 
+                                                gameStateSystem.advanceTimeByMinutes(60, this.statsManager); 
                                             }
                                             ui.currentDialogue = "Maaf, " + player.name + " Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
                                         } else {
@@ -823,10 +854,11 @@ public class GamePanel extends JPanel implements Runnable{
                         } else if (selectedOption == 3) { 
                             System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
                             if (player.consumeEnergy(10)) { 
-                                gameStateSystem.advanceTimeByMinutes(10); 
+                                gameStateSystem.advanceTimeByMinutes(10, this.statsManager); 
                                 currentNpc.updateHeartPoints(10); 
 
                                 currentNpc.startChat();
+                                statsManager.incrementChatFrequency(currentNpc.name);
                                 String firstChatLine = currentNpc.getNextChatLine();
                                 if (firstChatLine != null) {
                                     ui.setDialogue(firstChatLine, "CHAT_NPC"); 
@@ -891,7 +923,7 @@ public class GamePanel extends JPanel implements Runnable{
                                         if (player.consumeEnergy(10)) { 
                                             currentNpc.isProposedTo = true;
                                             if (gameStateSystem != null) {
-                                                gameStateSystem.advanceTimeByMinutes(60); 
+                                                gameStateSystem.advanceTimeByMinutes(60, this.statsManager); 
                                             }
                                             ui.currentDialogue = "Ya, " + player.name + "! Aku mau menikah denganmu!";
                                         } else {
@@ -900,7 +932,7 @@ public class GamePanel extends JPanel implements Runnable{
                                     } else {
                                         if (player.consumeEnergy(20)) { 
                                             if (gameStateSystem != null) {
-                                                gameStateSystem.advanceTimeByMinutes(60); 
+                                                gameStateSystem.advanceTimeByMinutes(60, this.statsManager); 
                                             }
                                             ui.currentDialogue = "Maaf, " + player.name + " Aku belum siap.\n(Butuh 150 hati, kini: " + currentNpc.heartPoints + ")";
                                         } else {
@@ -919,8 +951,9 @@ public class GamePanel extends JPanel implements Runnable{
                         } else if (selectedOption == 2) { 
                             System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
                             if (player.consumeEnergy(10)) { 
-                                gameStateSystem.advanceTimeByMinutes(10); 
+                                gameStateSystem.advanceTimeByMinutes(10, this.statsManager); 
                                 currentNpc.updateHeartPoints(10); 
+                                statsManager.incrementChatFrequency(currentNpc.name);
 
                                 currentNpc.startChat();
                                 String firstChatLine = currentNpc.getNextChatLine();
@@ -953,60 +986,59 @@ public class GamePanel extends JPanel implements Runnable{
             System.out.println("GAMEPANEL: Di dalam shippingBinState. keyH.enterPressed=" + keyH.enterPressed);
 
             if (keyH.enterPressed) {
-    keyH.enterPressed = false;
-    int selectedIndexInView = ui.getSelectedItemIndexInSellableView(); 
+                keyH.enterPressed = false;
+                int selectedIndexInView = ui.getSelectedItemIndexInSellableView(); 
 
-    if (selectedIndexInView != -1) { 
-        int originalInventoryIndex = ui.sellableItemsOriginalIndices.get(selectedIndexInView);
-        ItemStack stackInPlayerInventory = player.inventory.get(originalInventoryIndex);
+                if (selectedIndexInView != -1) { 
+                    int originalInventoryIndex = ui.sellableItemsOriginalIndices.get(selectedIndexInView);
+                    ItemStack stackInPlayerInventory = player.inventory.get(originalInventoryIndex);
 
-        if (stackInPlayerInventory != null && stackInPlayerInventory.getItem() != null && stackInPlayerInventory.getQuantity() > 0) {
-            Item itemToSell = stackInPlayerInventory.getItem();
+                    if (stackInPlayerInventory != null && stackInPlayerInventory.getItem() != null && stackInPlayerInventory.getQuantity() > 0) {
+                        Item itemToSell = stackInPlayerInventory.getItem();
 
-       
-            if (itemToSell.getSellPrice() <= 0) {
-                ui.showMessage("Item ini tidak bisa dijual.");
-  
-            } else {
-                boolean itemProcessedForBin = false;
-                boolean mergedWithExistingInBin = false;
-    
-                for (ItemStack stackInBin : itemsToShip) {
-                    if (stackInBin.getItem().getName().equals(itemToSell.getName())) {
-                        stackInBin.addQuantity(1);
-                        mergedWithExistingInBin = true;
-                        itemProcessedForBin = true;
-                        System.out.println("GAMEPANEL (shippingBinState): Menambah jumlah '" + itemToSell.getName() + "' di bin.");
-                        break;
+                
+                        if (itemToSell.getSellPrice() <= 0) {
+                            ui.showMessage("Item ini tidak bisa dijual.");
+            
+                        } else {
+                            boolean itemProcessedForBin = false;
+                            boolean mergedWithExistingInBin = false;
+                
+                            for (ItemStack stackInBin : itemsToShip) {
+                                if (stackInBin.getItem().getName().equals(itemToSell.getName())) {
+                                    stackInBin.addQuantity(1);
+                                    mergedWithExistingInBin = true;
+                                    itemProcessedForBin = true;
+                                    System.out.println("GAMEPANEL (shippingBinState): Menambah jumlah '" + itemToSell.getName() + "' di bin.");
+                                    break;
+                                }
+                            }
+                            if (!mergedWithExistingInBin) {
+                                if (itemsToShip.size() < 16) { 
+                                    itemsToShip.add(new ItemStack(itemToSell, 1));
+                                    itemProcessedForBin = true;
+                                    System.out.println("GAMEPANEL (shippingBinState): Menambah item baru '" + itemToSell.getName() + "' (x1) ke bin.");
+                                } else {
+                                    ui.showMessage("Shipping Bin penuh untuk JENIS item baru!");
+                                }
+                            }
+                
+
+                            if (itemProcessedForBin) {
+                                stackInPlayerInventory.removeQuantity(1);
+                                System.out.println("GAMEPANEL (shippingBinState): Mengurangi 1 '" + itemToSell.getName() + "' dari inventory. Sisa: " + stackInPlayerInventory.getQuantity());
+                                if (stackInPlayerInventory.getQuantity() <= 0) {
+                                    player.inventory.remove(originalInventoryIndex);
+                                    System.out.println("GAMEPANEL (shippingBinState): Stack '" + itemToSell.getName() + "' habis dan dihapus.");
+                                }
+                            
+                                ui.filterSellableItemsForShipping(player);
+                        
+                            }
+                        }
                     }
-                }
-                if (!mergedWithExistingInBin) {
-                    if (itemsToShip.size() < 16) { 
-                        itemsToShip.add(new ItemStack(itemToSell, 1));
-                        itemProcessedForBin = true;
-                        System.out.println("GAMEPANEL (shippingBinState): Menambah item baru '" + itemToSell.getName() + "' (x1) ke bin.");
-                    } else {
-                        ui.showMessage("Shipping Bin penuh untuk JENIS item baru!");
-                    }
-                }
-      
-
-                if (itemProcessedForBin) {
-                    stackInPlayerInventory.removeQuantity(1);
-                    System.out.println("GAMEPANEL (shippingBinState): Mengurangi 1 '" + itemToSell.getName() + "' dari inventory. Sisa: " + stackInPlayerInventory.getQuantity());
-                    if (stackInPlayerInventory.getQuantity() <= 0) {
-                        player.inventory.remove(originalInventoryIndex);
-                        System.out.println("GAMEPANEL (shippingBinState): Stack '" + itemToSell.getName() + "' habis dan dihapus.");
-                    }
-                 
-                    ui.filterSellableItemsForShipping(player);
-               
                 }
             }
-        }
-    }
-}
-
         } else if (gameState == shoppingState) {
             if (keyH.enterPressed) {
             keyH.enterPressed = false; 
@@ -1066,7 +1098,7 @@ public class GamePanel extends JPanel implements Runnable{
                                 int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
                                 npcForGifting.updateHeartPoints(heartPointsChange);
                                 player.removeItem(itemToGift.getItem().getName(), 1);
-                                gameStateSystem.advanceTimeByMinutes(10);
+                                gameStateSystem.advanceTimeByMinutes(10, this.statsManager);
 
                                 String reaction = "";
                                 if (heartPointsChange > 15) reaction = " sangat senang!";
@@ -1147,8 +1179,47 @@ public class GamePanel extends JPanel implements Runnable{
         if (gameState == playState) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastTimeUpdate >= timeUpdateInterval) {
-                gameStateSystem.tickTime(5);
+                gameStateSystem.tickTime(5, statsManager);
                 lastTimeUpdate = currentTime;
+            }
+        }
+
+        if (gameState == playState && !statsManager.endGameStatsShown) { // Hanya cek jika statistik belum ditampilkan
+            boolean milestoneReached = false;
+            if (player.gold >= 17209) { // [cite: 196]
+                milestoneReached = true;
+                System.out.println("GAMEPANEL: Milestone Gold Tercapai!");
+            }
+            // Asumsi Player memiliki field 'partner' (String) atau 'isMarried' (boolean)
+            // dan diupdate saat menikah.
+            if (player.partner != null && !player.partner.equalsIgnoreCase("None") && !player.partner.isEmpty()) { // [cite: 196]
+                // Atau jika Anda punya boolean player.isMarried
+                milestoneReached = true;
+                System.out.println("GAMEPANEL: Milestone Menikah Tercapai!");
+            }
+
+            if (milestoneReached) {
+                System.out.println("GAMEPANEL: Salah satu milestone tercapai. Menampilkan End Game Statistics.");
+                statsManager.endGameStatsShown = true; // Tandai agar tidak ditampilkan lagi
+                // Simpan state sebelumnya jika perlu kembali setelah statistik
+                // int previousGameState = gameState; // Mungkin tidak perlu jika selalu kembali ke playState
+                gameState = endGameStatisticsState; // Pindah ke state baru untuk menampilkan statistik
+                // Anda mungkin ingin menghentikan musik playState dan memainkan musik khusus
+                // stopMusic();
+                // playMusic(MUSIK_STATISTIK_END_GAME);
+            }
+        }
+        // ...
+
+        // Tambahkan penanganan untuk state baru
+        else if (gameState == endGameStatisticsState) {
+            // Logika untuk state ini (misalnya, menunggu input untuk kembali ke playState)
+            if (keyH.enterPressed || keyH.escapePressed) {
+                keyH.enterPressed = false;
+                keyH.escapePressed = false; // Jika Anda pakai flag escape
+                System.out.println("GAMEPANEL: Keluar dari End Game Statistics. Kembali ke PlayState.");
+                gameState = playState; // Kembali ke permainan
+                // playMusic(MUSIK_PLAYSTATE_UTAMA); // Mainkan kembali musik playState
             }
         }
     }
@@ -1192,10 +1263,15 @@ public class GamePanel extends JPanel implements Runnable{
 
         hasShippedToday = false; 
 
-        gameStateSystem.advanceToNextMorning(); 
+        String seasonBeforeSleep = gameStateSystem.getTimeManager().getSeason().toString(); // Menggunakan toString()
+
+        gameStateSystem.getTimeManager().advanceToNextMorning(this.statsManager); // Teruskan statsManager ke advanceToNextMorning
+
+        statsManager.incrementDaysPlayed();
         
         String morningMessage = "Selamat pagi! Hari baru telah dimulai.";
         if (goldEarnedToday > 0) {
+            statsManager.addIncome(goldEarnedToday);
             morningMessage += "\nKamu mendapatkan " + goldEarnedToday + "G dari penjualan semalam!";
         }
         ui.setDialogue(morningMessage, "SYSTEM_MESSAGE");

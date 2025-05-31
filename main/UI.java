@@ -378,6 +378,12 @@ public class UI {
             drawPlayerEnergy();
             drawTime();
         }
+
+        // END GAME STATE
+        else if (gp.gameState == gp.endGameStatisticsState) {
+            drawEndGameStatisticsScreen(gp.statsManager, gp.player); // Kirim instance StatisticsManager
+        }
+
         else if (gp.gameState == gp.transitionState){
             drawTransition();
         }
@@ -785,6 +791,60 @@ public void drawTitleScreen() {
         g2.drawString(timeValue, textRenderX, firstLineBaselineY);
         g2.drawString(dayValue + " | " + seasonValue + " | " + weatherValue, textRenderX, firstLineBaselineY + actualLineHeight);
     }
+
+    public void drawEndGameStatisticsScreen(StatisticsManager stats, Player player) {
+        // Background
+        g2.setColor(new Color(0,0,0,220)); // Latar belakang gelap semi-transparan
+        g2.fillRect(0,0, gp.screenWidth, gp.screenHeight);
+
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 36F)); // Gunakan font Anda
+        g2.setColor(stardewTitleText); // Warna judul Anda
+
+        String title = "Statistik Akhir Permainan";
+        int x = getXforCenteredText(title);
+        int y = gp.tileSize * 2;
+        g2.drawString(title, x, y);
+
+        g2.setFont(stardewFont.deriveFont(20F));
+        g2.setColor(Color.WHITE); // Warna teks statistik
+        int lineHeight = gp.tileSize / 2 + 5; // Jarak antar baris statistik
+        x = gp.tileSize; // Posisi X awal untuk teks statistik
+        y += gp.tileSize * 1.5;
+
+        // Tampilkan statistik satu per satu
+        g2.drawString("Total Pendapatan: " + stats.totalIncome + "g", x, y); y += lineHeight; // [cite: 197]
+        g2.drawString("Total Pengeluaran: " + stats.totalExpenditure + "g", x, y); y += lineHeight; // [cite: 198]
+        g2.drawString(String.format("Rata-rata Pendapatan/Musim: %.0fg", stats.getAverageSeasonalIncome()), x, y); y += lineHeight; // [cite: 199]
+        g2.drawString(String.format("Rata-rata Pengeluaran/Musim: %.0fg", stats.getAverageSeasonalExpenditure()), x, y); y += lineHeight; // [cite: 200]
+        g2.drawString("Total Hari Bermain: " + stats.totalDaysPlayed, x, y); y += lineHeight * 1.5; // [cite: 201]
+
+        g2.drawString("Status NPC:", x, y); y += lineHeight; // [cite: 202]
+        // Iterasi melalui NPC (Anda perlu cara untuk mendapatkan daftar NPC atau nama mereka)
+        // Contoh jika Anda memiliki daftar nama NPC di GamePanel atau Player
+        if(gp.npc != null && gp.npc[gp.currentMap] != null) { // Ini hanya untuk NPC di map saat ini, perlu diubah
+                                                            // Idealnya Anda punya list semua nama NPC
+            String[] allNpcNames = {"Mayor Tadi", "Caroline", "Perry", "Dasco", "Emily", "Abigail"}; // Contoh
+            for(String npcName : allNpcNames) {
+                String relationship = stats.npcRelationshipStatuses.getOrDefault(npcName, "Belum Bertemu");
+                int chats = stats.npcChattingFrequency.getOrDefault(npcName, 0);
+                int gifts = stats.npcGiftingFrequency.getOrDefault(npcName, 0);
+                // int visits = stats.npcVisitingFrequency.getOrDefault(npcName, 0); // Jika sudah diimplementasikan
+                g2.drawString("  " + npcName + ": " + relationship + " (Chat: " + chats + ", Hadiah: " + gifts + ")", x + gp.tileSize/2, y); y += lineHeight;
+                // Tambahkan frekuensi visiting jika ada [cite: 203]
+            }
+        }
+        y += lineHeight * 0.5;
+
+        g2.drawString("Total Tanaman Dipanen: " + stats.totalCropsHarvested, x, y); y += lineHeight; // [cite: 203]
+        g2.drawString("Total Ikan Ditangkap: " + stats.totalFishCaught, x, y); y += lineHeight; // [cite: 204]
+        g2.drawString("  Umum: " + stats.fishCaughtByType.getOrDefault("Common", 0), x + gp.tileSize/2, y); y += lineHeight;
+        g2.drawString("  Biasa: " + stats.fishCaughtByType.getOrDefault("Regular", 0), x + gp.tileSize/2, y); y += lineHeight;
+        g2.drawString("  Legendaris: " + stats.fishCaughtByType.getOrDefault("Legendary", 0), x + gp.tileSize/2, y); y += lineHeight * 1.5;
+
+        g2.setFont(stardewFont.deriveFont(22F));
+        g2.drawString("Tekan Enter atau Escape untuk melanjutkan...", getXforCenteredText("Tekan Enter atau Escape untuk melanjutkan..."), y);
+    }
+
 
     public void drawPlayerStatus() {
         int titleFontSize = 26;

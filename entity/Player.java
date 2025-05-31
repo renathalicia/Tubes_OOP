@@ -464,6 +464,10 @@ public void update() {
         currentInteractingNPC = gp.npc[gp.currentMap][i];
         gp.gameState = gp.npcInteractionState; // Langsung ubah state
         gp.ui.commandNum = 0;
+        if (gp.statsManager != null && currentInteractingNPC != null) { // <<< TAMBAHKAN BLOK IF INI
+            gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
+            System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
+        }
         // Jangan reset keyH.enterPressed di sini. Biarkan pemanggil (Player.update) yang melakukannya.
     } else {
         // System.out.println("Player.interactNPC: Tidak ada NPC valid untuk diajak bicara (index: " + i + ")");
@@ -491,11 +495,21 @@ public void update() {
     }
 
     public void changeGold(int amount) {
-        gold += amount;
-        if (gold < 0) {
-            gold = 0; 
+    this.gold += amount;
+    if (this.gold < 0) {
+        this.gold = 0;
+    }
+
+    if (gp != null && gp.statsManager != null) { // Pastikan gp dan statsManager tidak null
+        if (amount > 0) {
+            gp.statsManager.addIncome(amount);
+            // System.out.println("STATISTICS: Income added via Player.changeGold: " + amount);
+        } else if (amount < 0) {
+            gp.statsManager.addExpenditure(Math.abs(amount)); // Pengeluaran dicatat di sini
+            System.out.println("STATISTICS: Expenditure added via Player.changeGold: " + Math.abs(amount));
         }
     }
+}
 
     public void draw(Graphics2D g2) {
         BufferedImage image = null;
@@ -718,7 +732,7 @@ public void update() {
         if (!consumeEnergy(5)) return true;
 
         crop.setLastWateredDay(currentDay);
-        gp.gameStateSystem.advanceTimeByMinutes(5);
+        gp.gameStateSystem.advanceTimeByMinutes(5, gp.statsManager);
 
         gp.ui.currentDialogue = "Tanaman berhasil disiram.";
         gp.gameState = gp.dialogueState;
@@ -738,7 +752,7 @@ public void update() {
         if (!consumeEnergy(5)) return true;
 
         // Tambah waktu menggunakan GameState (biar konsisten)
-        gp.gameStateSystem.advanceTimeByMinutes(15);
+        gp.gameStateSystem.advanceTimeByMinutes(15, gp.statsManager);
 
         gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
         gp.gameState = gp.dialogueState;

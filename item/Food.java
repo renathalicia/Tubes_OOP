@@ -43,7 +43,7 @@ public class Food extends Item {
             this.gp.gameState = gp.dialogueState; 
 
             if (this.gp.player.removeItem(this.getName(), 1)) {
-                this.gp.gameStateSystem.advanceTimeByMinutes(5); 
+                this.gp.gameStateSystem.advanceTimeByMinutes(5, gp.statsManager); 
             } else {
 
             }

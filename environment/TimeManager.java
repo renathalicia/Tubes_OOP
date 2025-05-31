@@ -1,13 +1,28 @@
 package environment;
 
+import main.StatisticsManager;
+
 public class TimeManager {
     private int hour = 6, minute = 0, day = 1;
     private Season season = Season.SPRING;
     private Weather weather = Weather.randomWeather();
 
-    public void advanceToNextMorning() {
+    public void advanceToNextMorning(StatisticsManager statsManager) {
         this.day++; // Maju ke hari berikutnya
+        Season oldSeason = this.season;
         updateSeason(); // Perbarui musim berdasarkan hari yang baru
+        
+        if (oldSeason != this.season) {
+            if (statsManager != null) {
+                statsManager.recordEndOfSeasonStats(); // Panggil jika musim berganti
+                System.out.println("TimeManager: Musim berganti dari " + oldSeason + " ke " + this.season + ". Statistik akhir musim dicatat.");
+            } else {
+                System.err.println("TimeManager: statsManager null di advanceToNextMorning, tidak bisa mencatat statistik musim.");
+            }
+            // Tambahkan logika lain yang perlu dilakukan saat musim berganti (misalnya, tanaman mati)
+            // if (gp != null) gp.tileM.handleSeasonChange(this.season);
+        }
+
         this.weather = Weather.randomWeather(); // Dapatkan cuaca acak untuk hari baru
 
         this.hour = 6; // Set waktu ke 06:00 pagi
@@ -16,7 +31,7 @@ public class TimeManager {
         System.out.println("TimeManager: Advanced to next morning. Day: " + this.day + ", Season: " + this.season + ", Weather: " + this.weather);
     }
 
-    public void advanceTime(int minutes) {
+    public void advanceTime(int minutes, StatisticsManager statsManager) {
         minute += minutes;
         while (minute >= 60) {
             minute -= 60;
@@ -26,7 +41,18 @@ public class TimeManager {
         if (hour >= 24) {
             hour -= 24;
             day++;
+            Season oldSeason = this.season;
             updateSeason();
+
+            if (oldSeason != this.season) {
+                if (statsManager != null) {
+                    statsManager.recordEndOfSeasonStats();
+                    System.out.println("TimeManager: Musim berganti (via advanceTime) dari " + oldSeason + " ke " + this.season + ". Statistik akhir musim dicatat.");
+                } else {
+                    System.err.println("TimeManager: statsManager null di advanceTime, tidak bisa mencatat statistik musim.");
+                }
+                // if (gp != null) gp.tileM.handleSeasonChange(this.season);
+            }
             weather = Weather.randomWeather();
         }
     }
