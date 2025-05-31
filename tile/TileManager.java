@@ -24,10 +24,17 @@ public class TileManager {
 
         getTileImage();
         loadMap(0, "/res/maps/FarmMap.txt");
-        loadMap(1, "/res/maps/WorldMap.txt");
-        loadMap(2, "/res/maps/interiorfarmhouse.txt");
-        loadMap(3, "/res/maps/interiorstore.txt");
-        loadMap(4, "/res/maps/interiornpchouse.txt");
+        loadMap(1, "/res/maps/Ocean.txt");
+        loadMap(2, "/res/maps/InteriorOcean.txt");
+
+        loadMap(3, "/res/maps/MountainLake.txt");
+        loadMap(4, "/res/maps/ForestRiver.txt");
+        loadMap(5, "/res/maps/interiorfarmhouse.txt");
+        loadMap(6, "/res/maps/interiorstore.txt");
+        loadMap(7, "/res/maps/InteriorMountainLake.txt");
+        loadMap(8, "/res/maps/InteriorMountainLake1.txt");
+        loadMap(9, "/res/maps/InteriorForestRiver.txt");
+        loadMap(10, "/res/maps/InteriorForestRiver1.txt");
 
     }
 
@@ -273,8 +280,40 @@ public class TileManager {
         setup(244, "sand01", false);
         setup(245, "sand02", false);
         setup(246, "sand03", false);
-        setup(247, "sea00", false);
-        setup(248, "sea01", false);
+        setup(247, "sea00", true);
+        setup(248, "sea01", true);
+        setup(249, "sea02", true);
+        setup(250, "sea03", true);
+        setup(251, "sea04", true);
+        setup(251, "sinkship00", true);
+        setup(252, "sinkship01", true);
+        setup(253, "sinkship02", true);
+        setup(254, "sinkship03", true);
+        setup(255, "sinkship04", true);
+        setup(256, "sinkship05", true);
+        setup(257, "sinkship06", true);
+        setup(258, "sinkship07", true);
+        setup(259, "lake00", true);
+        setup(260, "lake01", true);
+        setup(261, "lake02", true);
+        setup(262, "lake03", true);
+        setup(263, "lake04", true);
+        setup(264, "lake05", true);
+        setup(265, "lake06", false);
+        setup(266, "lake07", false);
+        setup(267, "river00", false);
+        setup(268, "river01", false);
+        setup(269, "river02", false);
+        setup(270, "river03", false);
+        setup(271, "river04", true);
+        setup(272, "river05", true);
+        setup(273, "river06", true);
+        setup(274, "river07", false);
+        setup(275, "river08", true);
+        setup(276, "river09", true);
+        setup(277, "river10", true);
+
+
 
 
 

@@ -46,7 +46,7 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldRow = 50;
 
     //Map Settings (untuk pindah Map)
-    public final int maxMap = 5; // jumlah map yang ada
+    public final int maxMap = 12; // jumlah map yang ada
     public int currentMap = 0;
 
     // FPS
@@ -224,35 +224,34 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void initializeNPCs() {
-        int mapNum = 0;
 
         // NPC 1 (yang sudah ada)
-        npc[0][0] = new NPC_1_MayorTadi(this);
-        npc[0][0].worldX = tileSize * 21; // Contoh posisi X
-        npc[0][0].worldY = tileSize * 21; // Contoh posisi Y
+        npc[7][0] = new NPC_1_MayorTadi(this);
+        npc[7][0].worldX = tileSize * 19; // Contoh posisi X
+        npc[7][0].worldY = tileSize * 14; // Contoh posisi Y
 
         // NPC 2 (baru)
-        npc[0][1] = new NPC_2_Caroline(this);
-        npc[0][1].worldX = tileSize * 25; // Atur posisi yang berbeda
-        npc[0][1].worldY = tileSize * 21;
+        npc[8][1] = new NPC_2_Caroline(this);
+        npc[8][1].worldX = tileSize * 19; // Atur posisi yang berbeda
+        npc[8][1].worldY = tileSize * 14;
 
         // NPC 3 (baru)
-        npc[0][2] = new NPC_3_Perry(this);
-        npc[0][2].worldX = tileSize * 28;
-        npc[0][2].worldY = tileSize * 21;
+        npc[9][2] = new NPC_3_Perry(this);
+        npc[9][2].worldX = tileSize * 19;
+        npc[9][2].worldY = tileSize * 14;
 
         // NPC 4 (baru)
-        npc[0][3] = new NPC_4_Dasco(this);
-        npc[0][3].worldX = tileSize * 17;
-        npc[0][3].worldY = tileSize * 21;
+        npc[2][3] = new NPC_4_Dasco(this);
+        npc[2][3].worldX = tileSize * 19;
+        npc[2][3].worldY = tileSize * 14;
 
-        npc[3][4] = new NPC_5_Emily(this);
-        npc[3][4].worldX = tileSize * 15;
-        npc[3][4].worldY = tileSize * 10;
+        npc[6][4] = new NPC_5_Emily(this);
+        npc[6][4].worldX = tileSize * 15;
+        npc[6][4].worldY = tileSize * 10;
 
-        npc[0][5] = new NPC_6_Abigail(this);
-        npc[0][5].worldX = tileSize * 23;
-        npc[0][5].worldY = tileSize * 25;
+        npc[10][5] = new NPC_6_Abigail(this);
+        npc[10][5].worldX = tileSize * 19;
+        npc[10][5].worldY = tileSize * 14;
 
     }
 
