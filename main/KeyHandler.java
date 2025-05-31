@@ -246,9 +246,9 @@ public class KeyHandler implements KeyListener {
 
                 int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-                if (tileIndex >= 43 && tileIndex <= 51) {
+                if (tileIndex >= 35 && tileIndex <= 36) {
                     new TillingCommand(gp.player).execute(); 
-                } else if (tileIndex == 55 && gp.tileM.cropMap[col][row] == null) {
+                } else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
                     new PlantCommand(gp.player).execute();  
                 } else if (gp.tileM.cropMap[col][row] != null) {
                     new WaterCommand(gp.player).execute();  

@@ -523,7 +523,7 @@ public class Player extends Entity {
 
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-        if (tileIndex >= 43 && tileIndex <= 51) {
+        if (tileIndex >= 35 && tileIndex <= 36) {
             if (!hasItem("Hoe")) {
                 gp.ui.currentDialogue = "Kamu butuh Hoe untuk membajak tanah!";
                 gp.gameState = gp.dialogueState;
@@ -532,7 +532,7 @@ public class Player extends Entity {
 
             if (!consumeEnergy(5)) return true;
 
-            gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; 
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
             return true;
         }
 
@@ -621,7 +621,7 @@ public class Player extends Entity {
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
         // Pastikan tile dibajak
-        if (tileIndex == 55 && gp.tileM.cropMap[col][row] == null) {
+        if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
             ItemStack seed = getSeedFromInventory();
             if (seed == null) {
                 gp.ui.currentDialogue = "Kamu tidak punya seed!";
