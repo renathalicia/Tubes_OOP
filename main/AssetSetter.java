@@ -1,6 +1,5 @@
 package main;
 
-// Impor kelas objek yang akan Anda tempatkan
 import object.*;
 
 public class AssetSetter {
@@ -12,10 +11,9 @@ public class AssetSetter {
 
     public void setObject() {
         System.out.println("ASSETSETTER: Memulai setObject()...");
-        int mapNum = 0;
-        int i = 0;     
+        int mapNum = 0; // Semua objek akan ditempatkan di map 0 untuk saat ini
+        int i = 0;   
 
-        // 1. Menempatkan OBJEK SHIPPING BIN
         try {
             if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
                 gp.obj[mapNum][i] = new OBJ_ShippingBin(gp);
@@ -57,6 +55,30 @@ public class AssetSetter {
             }
         } catch (Exception e) {
             System.err.println("ASSETSETTER: ERROR saat menempatkan Televisi!");
+            e.printStackTrace();
+        }
+        try {
+            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
+                // Asumsi Anda punya kelas seperti object.OBJ_KitchenStove
+                gp.obj[mapNum][i] = new object.OBJ_Stove(gp); // Pastikan nama kelas ini benar
+                if (gp.obj[mapNum][i] != null) {
+                    // Tentukan koordinat untuk KomporDapur di dalam rumah
+                    int stoveTileX = 23; 
+                    int stoveTileY = 29;
+                    gp.obj[mapNum][i].worldX = stoveTileX * gp.tileSize;
+                    gp.obj[mapNum][i].worldY = stoveTileY * gp.tileSize;
+                    // gp.obj[mapNum][i].name = "KomporDapur"; // Pastikan nama diset di konstruktor objeknya
+                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                                    " pada tile (" + stoveTileX + "," + stoveTileY + ")");
+                } else {
+                    System.err.println("AssetSetter: Gagal membuat instance OBJ_Stove.");
+                }
+                i++;
+            } else {
+                System.err.println("AssetSetter: Indeks map atau objek di luar batas untuk KomporDapur (i=" + i + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("ASSETSETTER: ERROR saat menempatkan KomporDapur!");
             e.printStackTrace();
         }
 

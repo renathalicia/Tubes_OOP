@@ -10,7 +10,8 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import item.ItemStack;
 import item.Item;
-
+import item.Recipe;
+import item.RecipeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -35,6 +36,8 @@ public class UI {
     Color invSlotBg = new Color(253, 238, 202, 230);    
     Color invItemNamePanelBg = new Color(205, 170, 125, 220);
     Color invItemNameTextColor = new Color(56, 32, 13);
+    Color darkerCursorColor = new Color(160, 90, 40);
+    BufferedImage citySeparatorImage;
 
     // modifikasi dialogue
     Color stardewDialogText = new Color(56, 32, 13);
@@ -65,7 +68,10 @@ public class UI {
     public int shopCommandNum = 0; 
     public int CMD_SHOP_EXIT;
     private String currentDialogueMode = "";
-
+    public int CMD_COOKING_BACK_OPTION;
+    public int CMD_COOKING_COOK_OPTION;
+    public int recipeScrollOffset = 0;
+    public final int maxRecipesOnScreen = 5;
     public int currentCreationStep = 0; // 0: Nama, 1: Gender, 2: NamaKebun, 3: ItemFavorit
     public String tempPlayerName = "";
     public int tempGenderSelection = 0; // 0: Male, 1: Female (contoh)
@@ -236,6 +242,7 @@ public class UI {
     public void drawTransition() {
         counter++; 
         g2.setColor(new Color(0, 0, 0, counter*5));
+        g2.setColor(new Color(0, 0, 0, Math.min(255, counter * 5))); 
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
         if (counter == 50) { 
@@ -250,10 +257,9 @@ public class UI {
     }
 
     public boolean isDialogueFromNpcAction() {
-
         return "NPC_GIFT_RESULT".equals(currentDialogueMode) ||
                "NPC_PROPOSE_RESULT".equals(currentDialogueMode) ||
-               "CHAT_NPC".equals(currentDialogueMode);
+               "CHAT_NPC".equals(currentDialogueMode); 
     }
 
     public int getSelectedItemIndex() {
@@ -268,10 +274,23 @@ public class UI {
         arial_40 = new Font("Arial", Font.PLAIN, 40);
         arial_80B = new Font("Arial", Font.BOLD, 80);
 
+    try {
+        InputStream is = getClass().getResourceAsStream("/res/title/StardewValley.ttf"); 
+        if (is == null) {
+            stardewFont = new Font("Arial", Font.PLAIN, 20); 
+        } else {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            stardewFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            ge.registerFont(stardewFont);
+        }
+    } catch (IOException | FontFormatException e) {
+        e.printStackTrace();
+        stardewFont = new Font("Arial", Font.PLAIN, 20); 
+    }
+
         try {
             InputStream is = getClass().getResourceAsStream("/title/background.jpg");
             if (is == null) {
-                System.out.println("❌ background.jpg not found!");
             } else {
                 backgroundImage = ImageIO.read(is);
             }
@@ -282,7 +301,7 @@ public class UI {
         try {
             InputStream fontStream = getClass().getResourceAsStream("/res/title/StardewValley.ttf");
             if (fontStream == null) {
-                System.out.println("❌ Font file not found!");
+                System.out.println(" Font file not found!");
                 stardewFont = new Font("Arial", Font.BOLD, 48); 
             } else {
                 stardewFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(Font.BOLD, 48f);
@@ -324,7 +343,7 @@ public class UI {
             drawShippingBinScreen(); 
         }
 
-        // ENTER NEW GAME STATE
+        // NEW GAME STATE
         else if (gp.gameState == gp.characterCreationState) {
             drawCharacterCreationScreen();
         }
@@ -384,16 +403,76 @@ public class UI {
             drawEndGameStatisticsScreen(gp.statsManager, gp.player); // Kirim instance StatisticsManager
         }
 
+        else if (gp.gameState == gp.cookingState) { 
+            drawCookingScreen();
+            drawPlayerEnergy();
+            drawTime();
+        }
+       
+        // TRANSITION STATE
         else if (gp.gameState == gp.transitionState){
             drawTransition();
         }
+        
+        else if (gp.gameState == gp.cookingState) {
+            List<Recipe> learnedRecipes = new ArrayList<>();
+            for (String recipeId : gp.player.getLearnedRecipeIds()) {
+                Recipe recipe = RecipeRepository.getRecipeById(recipeId);
+                if (recipe != null) {
+                    learnedRecipes.add(recipe);
+                }
+            }
+
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 20F));
+            int x = gp.tileSize * 2;
+            int y = gp.tileSize * 2;
+            g2.drawString("Daftar Resep:", x, y);
+            y += gp.tileSize;
+
+            if (learnedRecipes.isEmpty()) {
+                g2.drawString("Kamu belum tahu resep apa pun!", x, y);
+                return;
+            }
+
+            int startIndex = recipeScrollOffset;
+            int endIndex = Math.min(startIndex + maxRecipesOnScreen, learnedRecipes.size());
+
+            for (int i = startIndex; i < endIndex; i++) {
+                Recipe recipe = learnedRecipes.get(i);
+                String text = (i == commandNum ? "> " : "  ") + recipe.getOutputFoodName();
+                g2.drawString(text, x, y);
+                y += gp.tileSize;
+            }
+            if (recipeScrollOffset > 0) {
+                g2.drawString("↑", x + gp.tileSize * 8, gp.tileSize * 2);
+            }
+            if (endIndex < learnedRecipes.size()) {
+                g2.drawString("↓", x + gp.tileSize * 8, y); 
+            }
+            Recipe selectedRecipe = (commandNum >= 0 && commandNum < learnedRecipes.size()) ? learnedRecipes.get(commandNum) : null;
+            if (selectedRecipe != null) {
+                y += gp.tileSize;
+                g2.drawString("Hasil: " + selectedRecipe.getOutputFoodName() + " x1", x, y);
+                y += gp.tileSize;
+                g2.drawString("Bahan Dibutuhkan:", x, y);
+                y += gp.tileSize;
+                for (Recipe.Ingredient ing : selectedRecipe.getIngredients()) {
+                    String qty = "Punya: " + gp.player.countItemInInventory(ing.itemNameOrCategory, ing.isCategory);
+                    g2.drawString("- " + ing.itemNameOrCategory + " x" + ing.quantityRequired + " (" + qty + ")", x, y);
+                    y += gp.tileSize;
+                }
+                y += gp.tileSize;
+                g2.drawString("Bahan Bakar Tersedia: " + (gp.player.getAvailableFuel() != null ? gp.player.getAvailableFuel() : "None"), x, y);
+            }
+            y += gp.tileSize;
+            g2.drawString("Energi: " + gp.player.getEnergy(), x, y + gp.tileSize);
+        }
     }
 
-        public void drawShippingBinScreen() {
+    public void drawShippingBinScreen() {
         String title = "Pilih item untuk dijual (Enter). ESC untuk selesai.";
         int panelInternalPadding = gp.tileSize / 3;
         int slotGridStrokeThickness = 4;
-        int panelBorderThickness = 5;
         int slotGridWidth = gp.tileSize * inventoryMaxCol;
         int slotGridHeight = gp.tileSize * inventoryMaxRow;
         int titleAreaHeight = gp.tileSize;
@@ -401,6 +480,7 @@ public class UI {
         int frameHeight = slotGridHeight + (panelInternalPadding * 2) + titleAreaHeight;
         int frameX = (gp.screenWidth - frameWidth) / 2;
         int frameY = (gp.screenHeight - frameHeight) / 2;
+        int panelBorderThickness = 3; // atau nilai sesuai kebutuhan
         if (frameY < gp.tileSize / 2) frameY = gp.tileSize / 2;
 
         // Gambar panel utama
@@ -519,10 +599,10 @@ public class UI {
         int windowX = windowPadding;
         int windowY = (gp.screenHeight - windowHeight) / 2; // Tengah vertikal
 
-        // Gambar latar belakang window menggunakan gaya yang sama
+        // Gambar latar belakang window
         g2.setColor(stardewDialogBorder); // Warna border
         g2.setStroke(new BasicStroke(borderThickness));
-        g2.drawRoundRect(windowX, windowY, windowWidth, windowHeight, 25, 25); // Sudut melengkung
+        g2.drawRoundRect(windowX, windowY, windowWidth, windowHeight, 25, 25); 
 
         g2.setColor(invPanelBg); 
         g2.fillRect(windowX + borderThickness, windowY + borderThickness,
@@ -544,7 +624,6 @@ public class UI {
             g2.drawString(fishInfo, textX, currentTextY);
             currentTextY += lineHeight;
         }
-
         if (gp.fishingFeedbackMessage != null && !gp.fishingFeedbackMessage.isEmpty()) {
             for (String line : gp.fishingFeedbackMessage.split("\n")) {
                 g2.drawString(line, textX, currentTextY);
@@ -563,7 +642,6 @@ public class UI {
     }
 
     public void drawPlayerEnergy() {
-         // PENGATURAN POSISI DAN UKURAN DASAR
         int framePadding = 4; 
         int frameThickness = 6;
         int outerFrameX = gp.tileSize / 2;
@@ -627,7 +705,7 @@ public void drawTitleScreen() {
             g2.drawImage(backgroundImage, 0, 0, gp.screenWidth, gp.screenHeight, null);
         } else {
             // Fallback jika backgroundImage null
-            InputStream bgIs = getClass().getResourceAsStream("/res/title/background.jpg"); // Pastikan path ini benar
+            InputStream bgIs = getClass().getResourceAsStream("/res/title/background.png"); // Pastikan path ini benar
             if (bgIs != null) {
                 BufferedImage bg = ImageIO.read(bgIs);
                 g2.drawImage(bg, 0, 0, gp.screenWidth, gp.screenHeight, null);
@@ -921,7 +999,6 @@ public void drawTitleScreen() {
         // GAMBAR SUB-PANEL UNTUK DATA
         int dataSubPanelX = frameX + mainPanelPadding;
         int dataSubPanelY = frameY + titleAreaHeight; 
-        int dataSubPanelWidth = frameWidth - (mainPanelPadding * 2);
         g2.setColor(invSlotBg); 
 
         // GAMBAR DETAIL STATUS (di atas dataSubPanelBg)
@@ -1096,107 +1173,461 @@ public void drawTitleScreen() {
         }
     }
 
-    public void drawShopScreen() {
-        int frameX = gp.tileSize * 2;
-        int frameY = gp.tileSize;
-        int frameWidth = gp.screenWidth - (gp.tileSize * 4); 
-        int frameHeight = gp.screenHeight - (gp.tileSize * 3); 
-        drawSubWindow(frameX, frameY, frameWidth, frameHeight);
+   public void drawCookingScreen() {
+        // --- KONFIGURASI WARNA DAN GAYA ---
+        int panelInternalPadding = gp.tileSize / 3;
+        int panelBorderThickness = 5;
+        int descBoxInternalPadding = 10;
+        int descBoxBorderThickness = 3;
 
-        g2.setFont(stardewFont.deriveFont(Font.BOLD, 32f)); 
-        g2.setColor(Color.white);
-        String title = "Toko Kelontong Emily";
-        int titleX = getXforCenteredText(title, frameX, frameWidth); 
-        int titleY = frameY + gp.tileSize;
-        g2.drawString(title, titleX, titleY);
+        // --- DIMENSI COOKING WINDOW ---
+        int horizontalScreenMargin = gp.tileSize * 3;
+        int verticalScreenMargin = gp.tileSize * 2;
+        final int frameWidth = gp.screenWidth - (horizontalScreenMargin * 2);
+        final int frameHeight = gp.screenHeight - (verticalScreenMargin * 2);
+        final int frameX = horizontalScreenMargin;
+        final int frameY = verticalScreenMargin;
 
-        final int listStartX = frameX + gp.tileSize;
-        final int listStartY = frameY + gp.tileSize * 2;
-        final int lineHeight = (int)(gp.tileSize * 0.8); 
-        int currentY = listStartY;
-
-        List<Item> itemsToDisplay = gp.emilyStore.getItemsForSale(); 
-
-        g2.setFont(stardewFont.deriveFont( 24f));
-        int visibleListTopY = listStartY - lineHeight / 2;
-        int visibleListBottomY = frameY + frameHeight - gp.tileSize * 2;
-        int maxItemsToShow = (visibleListBottomY - visibleListTopY) / lineHeight;
-        int topItemIndex = 0; 
-
-        if (shopCommandNum >= topItemIndex + maxItemsToShow) {
-            topItemIndex = shopCommandNum - maxItemsToShow + 1;
-        }
-        if (shopCommandNum < topItemIndex) {
-            topItemIndex = shopCommandNum;
+        // Pastikan frame tidak menjadi negatif
+        if (frameWidth <= 0 || frameHeight <= 0) {
+            System.out.println("Peringatan: Ukuran frame memasak terlalu kecil. Periksa resolusi layar & tileSize.");
+            return;
         }
 
-        for (int i = 0; i < itemsToDisplay.size(); i++) {
-            if (i < topItemIndex || i >= topItemIndex + maxItemsToShow) {
-                continue; 
-            }
+        // --- GAMBAR COOKING WINDOW UTAMA ---
+        g2.setColor(invPanelBg);
+        g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setColor(invPanelBorder);
+        g2.setStroke(new BasicStroke(panelBorderThickness));
+        g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setStroke(new BasicStroke(1));
 
-            Item item = itemsToDisplay.get(i);
-            if (item == null || item.getBuyPrice() <= 0 && !(item.getName().equals("Resep XYZ"))) { 
-                continue;
-            }
-
-            String itemName = item.getName();
-            String itemPrice = String.valueOf(item.getBuyPrice()) + "g";
-
-            g2.setColor(Color.white);
-            if (i == shopCommandNum) { 
-                g2.setColor(Color.yellow);
-                g2.drawString(">", listStartX - gp.tileSize / 2, currentY);
-            }
-            g2.drawString(itemName, listStartX, currentY);
-
-            int priceX = frameX + frameWidth - gp.tileSize - getXforAlignToRightText(itemPrice, frameX + frameWidth - gp.tileSize);
-            g2.drawString(itemPrice, priceX, currentY);
-
-            currentY += lineHeight;
+        // --- JUDUL ---
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 30f));
+        g2.setColor(invItemNameTextColor);
+        String title = gp.isCookingInProgress ? "Sedang Memasak..." : "Biarkan Dia Memasak!";
+        FontMetrics fmTitle = g2.getFontMetrics();
+        int titleTextWidth = fmTitle.stringWidth(title);
+        int titleActualY = frameY + panelInternalPadding + fmTitle.getAscent();
+        if (titleActualY > frameY + gp.tileSize && frameY + gp.tileSize < frameY + frameHeight / 2) {
+            titleActualY = frameY + gp.tileSize;
         }
-        String exitText = "Keluar";
-        int exitOptionIndex = itemsToDisplay.size(); 
+        g2.drawString(title, frameX + (frameWidth - titleTextWidth) / 2, titleActualY);
 
-        if (exitOptionIndex >= topItemIndex && exitOptionIndex < topItemIndex + maxItemsToShow) { 
-            g2.setColor(stardewText);
-            if (shopCommandNum == exitOptionIndex) { 
-                g2.setColor(Color.yellow);
-                g2.drawString(">", listStartX - gp.tileSize / 2, currentY);
-            }
-            g2.drawString(exitText, listStartX, currentY);
+        // --- GAMBAR PEMISAH KOTA ---
+        int separatorY = titleActualY + fmTitle.getDescent() + (gp.tileSize / 4);
+        if (citySeparatorImage != null) {
+            int separatorWidth = gp.tileSize * 4;
+            int separatorHeight = gp.tileSize / 2;
+            if (separatorWidth > frameWidth * 0.8) separatorWidth = (int)(frameWidth * 0.8);
+            if (separatorHeight > frameHeight * 0.1) separatorHeight = (int)(frameHeight * 0.1);
+            if (separatorHeight <= 0) separatorHeight = gp.tileSize / 3;
+            int separatorX = frameX + (frameWidth - separatorWidth) / 2;
+            g2.drawImage(citySeparatorImage, separatorX, separatorY, separatorWidth, separatorHeight, null);
+            separatorY += separatorHeight + (gp.tileSize / 4);
+        } else {
+            separatorY += (gp.tileSize / 3);
         }
-        CMD_SHOP_EXIT = exitOptionIndex;
-        currentY += lineHeight; 
-        if (shopCommandNum >= 0 && shopCommandNum < itemsToDisplay.size()) {
-            Item selectedItemToDescribe = itemsToDisplay.get(shopCommandNum);
-            if (selectedItemToDescribe != null) {
-                g2.setColor(Color.white);
-                g2.setFont(stardewFont.deriveFont( 20f));
 
-                int descBoxX = frameX + gp.tileSize / 2;
-                int descBoxY = frameY + frameHeight - (int)(gp.tileSize * 2.5);
-                int descBoxWidth = frameWidth - gp.tileSize;
-                int descBoxHeight = (int)(gp.tileSize * 1.5);
-                drawSubWindow(descBoxX, descBoxY, descBoxWidth, descBoxHeight); 
+        // --- JIKA SEDANG MEMASAK ---
+        if (gp.isCookingInProgress) {
+            g2.setFont(stardewFont.deriveFont(22f));
+            g2.setColor(invItemNameTextColor);
+            int progressTextX = frameX + panelInternalPadding + gp.tileSize / 2;
+            int progressTextY = separatorY;
+            long elapsed = System.currentTimeMillis() - gp.cookingStartTime;
+            double progress = Math.min(1.0, (double) elapsed / gp.cookingDuration);
+            g2.drawString("Memasak: " + gp.cookingRecipe.getOutputFoodName(), progressTextX, progressTextY);
+            progressTextY += gp.tileSize * 0.8;
+            int progressBarWidth = frameWidth - (panelInternalPadding * 2) - gp.tileSize;
+            int progressBarHeight = gp.tileSize / 2;
+            int progressBarX = frameX + (frameWidth - progressBarWidth) / 2;
+            int progressBarY = progressTextY;
+            g2.setColor(stardewWoodFrameDark);
+            g2.fillRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+            g2.setColor(stardewEnergyGreen);
+            g2.fillRect(progressBarX, progressBarY, (int) (progressBarWidth * progress), progressBarHeight);
+            g2.setColor(invPanelBorder);
+            g2.drawRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+            progressTextY += progressBarHeight + gp.tileSize * 0.6;
+            g2.setColor(invItemNameTextColor);
+            g2.drawString("Progres: " + (int) (progress * 100) + "%", progressTextX, progressTextY);
+            progressTextY += gp.tileSize * 0.8;
+            g2.drawString("Tekan ESC untuk membatalkan.", progressTextX, progressTextY);
+            return;
+        }
 
-                String[] descLines = getWrappedText(selectedItemToDescribe.description, descBoxWidth - 20, g2.getFontMetrics());
-                int descTextY = descBoxY + 30;
-                for (String line : descLines) {
-                    if (descTextY + g2.getFontMetrics().getHeight() < descBoxY + descBoxHeight) {
-                        g2.drawString(line, descBoxX + 10, descTextY);
-                        descTextY += g2.getFontMetrics().getHeight();
-                    } else break;
+        // --- AREA DAFTAR RESEP ---
+        List<Recipe> knownRecipes = new ArrayList<>();
+        for (String recipeId : gp.player.getLearnedRecipeIds()) {
+            Recipe r = RecipeRepository.getRecipeById(recipeId);
+            if (r != null) knownRecipes.add(r);
+        }
+        int totalOptions = knownRecipes.size() + 1; // Tambah opsi "Kembali"
+        CMD_COOKING_BACK_OPTION = knownRecipes.size();
+        final int listItemsAreaX = frameX + panelInternalPadding + (gp.tileSize / 2);
+        final int listItemsAreaY_Start = separatorY;
+        final int listItemsAreaY_End = frameY + frameHeight - (gp.tileSize * 2) - (gp.tileSize / 2);
+        float itemMenuFontSize = 20f;
+        g2.setFont(stardewFont.deriveFont(itemMenuFontSize));
+        FontMetrics fmItemText = g2.getFontMetrics();
+        final int lineHeight = (int) (fmItemText.getHeight() * 1.5);
+        int maxVisibleItems = lineHeight > 0 ? (listItemsAreaY_End - listItemsAreaY_Start) / lineHeight : 1;
+        if (maxVisibleItems <= 0) maxVisibleItems = 1;
+        int startItemIndex = 0;
+        if (totalOptions > maxVisibleItems) {
+            if (commandNum > (maxVisibleItems / 2) - 1) {
+                startItemIndex = commandNum - (maxVisibleItems / 2);
+            }
+            if (startItemIndex > totalOptions - maxVisibleItems) {
+                startItemIndex = totalOptions - maxVisibleItems;
+            }
+            if (startItemIndex < 0) {
+                startItemIndex = 0;
+            }
+        }
+        for (int i = 0; i < maxVisibleItems; i++) {
+            int logicalItemIndex = startItemIndex + i;
+            if (logicalItemIndex >= totalOptions) break;
+            int currentItemSlotTopY = listItemsAreaY_Start + (i * lineHeight);
+            if (currentItemSlotTopY + lineHeight > listItemsAreaY_End + (lineHeight / 2) && i > 0) break;
+            int currentTextBaselineY = currentItemSlotTopY + fmItemText.getAscent() + ((lineHeight - fmItemText.getHeight()) / 2);
+            String optionName;
+            boolean isActualRecipe = logicalItemIndex < knownRecipes.size();
+            if (isActualRecipe) {
+                Recipe recipe = knownRecipes.get(logicalItemIndex);
+                optionName = recipe.getOutputFoodName();
+            } else {
+                optionName = "Kembali";
+            }
+            if (logicalItemIndex == commandNum) {
+                g2.setColor(darkerCursorColor);
+                g2.drawString(">", listItemsAreaX - gp.tileSize / 2, currentTextBaselineY);
+                g2.setColor(invItemNameTextColor);
+            } else {
+                g2.setColor(invItemNameTextColor);
+            }
+            g2.drawString(optionName, listItemsAreaX, currentTextBaselineY);
+        }
+
+        // --- KOTAK DESKRIPSI RESEP (KOTAK KECIL) ---
+        int descriptionBoxYPosition = listItemsAreaY_Start + (maxVisibleItems * lineHeight) + (gp.tileSize / 4);
+        if (descriptionBoxYPosition > listItemsAreaY_End) descriptionBoxYPosition = listItemsAreaY_End + (gp.tileSize / 4);
+        int statusDisplayHeight = gp.tileSize; // Hanya untuk gold
+        if (commandNum >= 0 && commandNum < knownRecipes.size()) {
+            Recipe selectedRecipe = knownRecipes.get(commandNum);
+            if (selectedRecipe != null) {
+                int descBoxWidth = frameWidth - (panelInternalPadding * 2) - (gp.tileSize / 2);
+                int descBoxAvailableHeight = frameY + frameHeight - statusDisplayHeight - descriptionBoxYPosition - panelInternalPadding;
+                // Dinamis: tinggi berdasarkan jumlah bahan
+                int numIngredients = selectedRecipe.getIngredients().size();
+                int descBoxHeight = (int) (gp.tileSize * 3 + (numIngredients * gp.tileSize * 0.5));
+                if (descBoxHeight > descBoxAvailableHeight) descBoxHeight = descBoxAvailableHeight;
+                if (descBoxHeight < gp.tileSize * 3) descBoxHeight = (int) (gp.tileSize * 3);
+                if (descBoxHeight > gp.tileSize * 0.75 && descBoxWidth > gp.tileSize) {
+                    int descBoxX = frameX + (frameWidth - descBoxWidth) / 2;
+                    int descBoxY = descriptionBoxYPosition;
+                    if (descBoxY + descBoxHeight > frameY + frameHeight - statusDisplayHeight - panelInternalPadding) {
+                        descBoxY = frameY + frameHeight - statusDisplayHeight - panelInternalPadding - descBoxHeight;
+                    }
+                    // Solid background untuk menyembunyikan teks menu
+                    g2.setColor(new Color(invItemNamePanelBg.getRed(), invItemNamePanelBg.getGreen(), invItemNamePanelBg.getBlue(), 255));
+                    g2.fillRect(descBoxX, descBoxY, descBoxWidth, descBoxHeight);
+                    g2.setColor(invPanelBorder);
+                    g2.setStroke(new BasicStroke(descBoxBorderThickness));
+                    g2.drawRect(descBoxX, descBoxY, descBoxWidth, descBoxHeight);
+                    g2.setStroke(new BasicStroke(1));
+                    g2.setColor(invItemNameTextColor);
+                    g2.setFont(stardewFont.deriveFont(18f));
+                    FontMetrics fmDesc = g2.getFontMetrics();
+                    int descTextX = descBoxX + descBoxInternalPadding;
+                    int descTextCurrentY = descBoxY + descBoxInternalPadding + fmDesc.getAscent();
+                    int descLineHeightText = fmDesc.getHeight();
+                    // Judul Bahan Dibutuhkan
+                    String bahanText = "Bahan Dibutuhkan:";
+                    String[] bahanLines = getWrappedText(bahanText, descBoxWidth - (descBoxInternalPadding * 2), fmDesc);
+                    for (String line : bahanLines) {
+                        if (descTextCurrentY + fmDesc.getDescent() <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                            g2.drawString(line, descTextX, descTextCurrentY);
+                            descTextCurrentY += descLineHeightText;
+                        } else {
+                            break;
+                        }
+                    }
+                    // Daftar Bahan dalam format x/y
+                    for (Recipe.Ingredient ing : selectedRecipe.getIngredients()) {
+                        if (descTextCurrentY + descLineHeightText > descBoxY + descBoxHeight - descBoxInternalPadding) break;
+                        int qtyInInventory = gp.player.countItemInInventory(ing.itemNameOrCategory, ing.isCategory);
+                        boolean hasEnough = qtyInInventory >= ing.quantityRequired;
+                        g2.setColor(hasEnough ? new Color(0, 100, 0) : new Color(139, 0, 0));
+                        String ingredientText = ing.itemNameOrCategory + " " + qtyInInventory + "/" + ing.quantityRequired;
+                        String[] wrappedIngredient = getWrappedText(ingredientText, descBoxWidth - (descBoxInternalPadding * 2), fmDesc);
+                        for (String line : wrappedIngredient) {
+                            if (descTextCurrentY + fmDesc.getDescent() <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                                g2.drawString(line, descTextX, descTextCurrentY);
+                                descTextCurrentY += descLineHeightText;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    g2.setColor(invItemNameTextColor);
+                    // Hasil
+                    if (descTextCurrentY + descLineHeightText <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                        String hasilText = "Hasil: " + selectedRecipe.getOutputFoodName() + " x" + selectedRecipe.getOutputFoodQuantity();
+                        String[] hasilLines = getWrappedText(hasilText, descBoxWidth - (descBoxInternalPadding * 2), fmDesc);
+                        for (String line : hasilLines) {
+                            if (descTextCurrentY + fmDesc.getDescent() <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                                g2.drawString(line, descTextX, descTextCurrentY);
+                                descTextCurrentY += descLineHeightText;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    // Bahan Bakar
+                    if (descTextCurrentY + descLineHeightText <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                        String fuelString = gp.player.getAvailableFuel() != null ? gp.player.getAvailableFuel() : "Tidak ada";
+                        if (gp.player.getAvailableFuel() == null) g2.setColor(new Color(139, 0, 0));
+                        g2.drawString("Bahan Bakar: " + fuelString, descTextX, descTextCurrentY);
+                    }
                 }
             }
         }
 
-        g2.setFont(stardewFont.deriveFont(24f));
-        g2.setColor(Color.white);
+        // --- TAMPILAN GOLD PEMAIN ---
+        g2.setFont(stardewFont.deriveFont(22f));
+        g2.setColor(invItemNameTextColor);
         String goldText = "Gold: " + gp.player.gold + "g";
-        int goldTextX = frameX + frameWidth - gp.tileSize - getXforAlignToRightText(goldText, frameX + frameWidth - gp.tileSize);
-        int goldTextY = frameY + frameHeight - gp.tileSize / 2;
+        int goldTextX = frameX + panelInternalPadding + 3;
+        int goldTextY = 650;
         g2.drawString(goldText, goldTextX, goldTextY);
+
+        g2.setFont(arial_40);
+    }
+
+   public void drawShopScreen() {
+        // --- KONFIGURASI WARNA DAN GAYA ---
+        int panelInternalPadding = gp.tileSize / 3;
+        int panelBorderThickness = 5;
+
+        // --- DIMENSI SHOP WINDOW (DISESUAIKAN AGAR LEBIH KECIL KE TENGAH) ---
+        // Margin horizontal dari tepi layar (kiri dan kanan)
+        int horizontalScreenMargin = gp.tileSize * 3; // Sebelumnya gp.tileSize * 2
+        // Margin vertikal dari tepi layar (atas dan bawah)
+        int verticalScreenMargin = gp.tileSize * 2;   // Sebelumnya atas: gp.tileSize * 1, bawah: ~gp.tileSize * 1.5
+
+        // Kalkulasi ulang dimensi dan posisi frame utama toko
+        int newFrameWidth = gp.screenWidth - (horizontalScreenMargin * 2);
+        int newFrameHeight = gp.screenHeight - (verticalScreenMargin * 2);
+        int newFrameX = horizontalScreenMargin;
+        int newFrameY = verticalScreenMargin;
+
+        // Ganti penggunaan frameX, frameY, frameWidth, frameHeight lama dengan yang baru
+        // Contoh:
+        // int frameX = gp.tileSize * 2; // LAMA
+        // int frameY = gp.tileSize; // LAMA
+        // int frameWidth = gp.screenWidth - (gp.tileSize * 4); // LAMA
+        // int frameHeight = gp.screenHeight - (gp.tileSize * 2) - (gp.tileSize / 2); // LAMA
+
+        // Gunakan nilai baru di seluruh metode ini
+        final int frameX = newFrameX;
+        final int frameY = newFrameY;
+        final int frameWidth = newFrameWidth;
+        final int frameHeight = newFrameHeight;
+
+        // Pastikan frame tidak menjadi negatif jika layar terlalu kecil
+        if (frameWidth <= 0 || frameHeight <= 0) {
+            // Handle kasus ini, mungkin dengan tidak menggambar atau menggunakan ukuran minimum
+            System.out.println("Peringatan: Ukuran frame toko terlalu kecil atau negatif. Periksa resolusi layar & tileSize.");
+            return;
+        }
+
+        // --- GAMBAR SHOP WINDOW UTAMA (Gaya Inventory) ---
+        g2.setColor(invPanelBg);
+        g2.fillRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setColor(invPanelBorder);
+        g2.setStroke(new BasicStroke(panelBorderThickness));
+        g2.drawRect(frameX, frameY, frameWidth, frameHeight);
+        g2.setStroke(new BasicStroke(1));
+
+        // --- JUDUL ---
+        g2.setFont(stardewFont.deriveFont(Font.BOLD, 30f));
+        g2.setColor(invItemNameTextColor); // Warna judul lebih gelap
+        String title = "Toko Kelontong Emily";
+        FontMetrics fmTitle = g2.getFontMetrics();
+        int titleTextWidth = fmTitle.stringWidth(title);
+        // Posisi Y judul dengan padding dari atas frame yang baru
+        int titleActualY = frameY + panelInternalPadding + fmTitle.getAscent();
+        // Batasi agar judul tidak terlalu rendah jika panelInternalPadding + ascent besar
+        if (titleActualY > frameY + gp.tileSize && frameY + gp.tileSize < frameY + frameHeight / 2) {
+            titleActualY = frameY + gp.tileSize;
+        }
+        g2.drawString(title, frameX + (frameWidth - titleTextWidth) / 2, titleActualY);
+
+        // --- GAMBAR PEMISAH KOTA ---
+        int separatorY = titleActualY + fmTitle.getDescent() + (gp.tileSize / 4);
+        if (citySeparatorImage != null) {
+            int separatorWidth = gp.tileSize * 4;
+            int separatorHeight = gp.tileSize / 2;
+            // Coba buat separator lebih kecil jika frameWidth mengecil drastis
+            if (separatorWidth > frameWidth * 0.8) separatorWidth = (int)(frameWidth * 0.8);
+            if (separatorHeight > frameHeight * 0.1) separatorHeight = (int)(frameHeight * 0.1);
+            if (separatorHeight <=0) separatorHeight = gp.tileSize /3; // minimum height
+
+            int separatorX = frameX + (frameWidth - separatorWidth) / 2;
+            g2.drawImage(citySeparatorImage, separatorX, separatorY, separatorWidth, separatorHeight, null);
+            separatorY += separatorHeight + (gp.tileSize / 4);
+        } else {
+            separatorY += (gp.tileSize / 3);
+        }
+
+        // --- AREA DAFTAR ITEM ---
+        List<Item> itemsForSale = gp.emilyStore.getItemsForSale();
+        int totalOptions = itemsForSale.size() + 1;
+        CMD_SHOP_EXIT = itemsForSale.size();
+
+        final int listItemsAreaX = frameX + panelInternalPadding + (gp.tileSize / 2);
+        final int listItemsAreaY_Start = separatorY;
+        // Area akhir Y untuk daftar item juga perlu mempertimbangkan tinggi frame baru
+        final int listItemsAreaY_End = frameY + frameHeight - (gp.tileSize * 2) - (gp.tileSize / 2);
+
+        float itemMenuFontSize = 20f;
+        g2.setFont(stardewFont.deriveFont(itemMenuFontSize));
+        FontMetrics fmItemText = g2.getFontMetrics();
+        final int lineHeight = (int) (fmItemText.getHeight() * 1.5);
+
+        int maxVisibleItems = 0;
+        if (lineHeight > 0) { // Hindari pembagian dengan nol
+            maxVisibleItems = (listItemsAreaY_End - listItemsAreaY_Start) / lineHeight;
+        }
+        if (maxVisibleItems <= 0) maxVisibleItems = 1;
+
+        int startItemIndex = 0;
+        if (totalOptions > maxVisibleItems) {
+            if (shopCommandNum > (maxVisibleItems / 2) -1 ) {
+                startItemIndex = shopCommandNum - (maxVisibleItems / 2);
+            }
+            if (startItemIndex > totalOptions - maxVisibleItems) {
+                startItemIndex = totalOptions - maxVisibleItems;
+            }
+            if (startItemIndex < 0) {
+                startItemIndex = 0;
+            }
+        }
+        
+        for (int i = 0; i < maxVisibleItems; i++) {
+            int logicalItemIndex = startItemIndex + i;
+
+            if (logicalItemIndex >= totalOptions) {
+                break;
+            }
+            
+            int currentItemSlotTopY = listItemsAreaY_Start + (i * lineHeight);
+            // Pastikan currentItemSlotTopY tidak melebihi batas bawah sebelum menggambar
+            if (currentItemSlotTopY + lineHeight > listItemsAreaY_End + (lineHeight/2) && i > 0) { // i > 0 agar setidaknya 1 item coba digambar
+                break;
+            }
+
+            int currentTextBaselineY = currentItemSlotTopY + fmItemText.getAscent() + ((lineHeight - fmItemText.getHeight()) / 2);
+
+            String optionName;
+            String optionPrice = "";
+            boolean isActualItem = logicalItemIndex < itemsForSale.size();
+
+            if (isActualItem) {
+                Item item = itemsForSale.get(logicalItemIndex);
+                if (item == null || (item.getBuyPrice() <= 0 && !(item.getName().equals("Resep XYZ")))) {
+                    continue;
+                }
+                optionName = item.getName();
+                optionPrice = String.valueOf(item.getBuyPrice()) + "g";
+            } else {
+                optionName = "Keluar";
+            }
+
+            if (logicalItemIndex == shopCommandNum) {
+                g2.setColor(darkerCursorColor);
+                g2.drawString(">", listItemsAreaX - gp.tileSize / 2, currentTextBaselineY);
+                g2.setColor(invItemNameTextColor);
+            } else {
+                g2.setColor(invItemNameTextColor);
+            }
+            g2.drawString(optionName, listItemsAreaX, currentTextBaselineY);
+
+            if (isActualItem && !optionPrice.isEmpty()) {
+                g2.setColor(invItemNameTextColor);
+                int priceTextWidth = fmItemText.stringWidth(optionPrice);
+                int priceX = frameX + frameWidth - panelInternalPadding - (gp.tileSize/2) - priceTextWidth;
+                g2.drawString(optionPrice, priceX, currentTextBaselineY);
+            }
+        }
+
+        // --- KOTAK DESKRIPSI ITEM ---
+        int descriptionBoxYPosition = listItemsAreaY_Start + (maxVisibleItems * lineHeight) + (gp.tileSize / 4);
+        if (descriptionBoxYPosition > listItemsAreaY_End) descriptionBoxYPosition = listItemsAreaY_End + (gp.tileSize /4); // Jaga agar tidak terlalu ke bawah
+        
+        int goldDisplayHeight = gp.tileSize;
+
+        if (shopCommandNum >= 0 && shopCommandNum < itemsForSale.size()) {
+            Item selectedItemToDescribe = itemsForSale.get(shopCommandNum);
+            if (selectedItemToDescribe != null && selectedItemToDescribe.description != null && !selectedItemToDescribe.description.trim().isEmpty()) {
+                int descBoxInternalPadding = 10;
+                int descBoxBorderThickness = 3;
+                int descBoxWidth = frameWidth - (panelInternalPadding * 2) - (gp.tileSize / 2);
+                
+                int descBoxAvailableHeight = frameY + frameHeight - goldDisplayHeight - descriptionBoxYPosition - panelInternalPadding;
+                int descBoxHeight = (int) (gp.tileSize * 1.7);
+                if (descBoxHeight > descBoxAvailableHeight) descBoxHeight = descBoxAvailableHeight;
+
+                if (descBoxHeight > gp.tileSize * 0.75 && descBoxWidth > gp.tileSize) { // Hanya gambar jika ada cukup ruang
+                    int descBoxX = frameX + (frameWidth - descBoxWidth) / 2;
+                    int descBoxY = descriptionBoxYPosition;
+                    // Pastikan tidak overlap dengan gold display
+                    if (descBoxY + descBoxHeight > frameY + frameHeight - goldDisplayHeight - panelInternalPadding) {
+                        descBoxY = frameY + frameHeight - goldDisplayHeight - panelInternalPadding - descBoxHeight;
+                    }
+
+
+                    g2.setColor(invItemNamePanelBg);
+                    g2.fillRect(descBoxX, descBoxY, descBoxWidth, descBoxHeight);
+                    g2.setColor(invPanelBorder);
+                    g2.setStroke(new BasicStroke(descBoxBorderThickness));
+                    g2.drawRect(descBoxX, descBoxY, descBoxWidth, descBoxHeight);
+                    g2.setStroke(new BasicStroke(1));
+
+                    g2.setColor(invItemNameTextColor);
+                    g2.setFont(stardewFont.deriveFont(18f));
+                    FontMetrics fmDesc = g2.getFontMetrics();
+
+                    String[] descLines = getWrappedText(selectedItemToDescribe.description, descBoxWidth - (descBoxInternalPadding * 2), fmDesc);
+                    int descTextX = descBoxX + descBoxInternalPadding;
+                    int descTextCurrentY = descBoxY + descBoxInternalPadding + fmDesc.getAscent();
+                    int descLineHeightText = fmDesc.getHeight();
+
+                    for (String line : descLines) {
+                        if (descTextCurrentY + fmDesc.getDescent() <= descBoxY + descBoxHeight - descBoxInternalPadding) {
+                            g2.drawString(line, descTextX, descTextCurrentY);
+                            descTextCurrentY += descLineHeightText;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- TAMPILAN GOLD PEMAIN ---
+        g2.setFont(stardewFont.deriveFont(22f));
+        g2.setColor(invItemNameTextColor);
+        String goldText = "Gold: " + gp.player.gold + "g";
+        FontMetrics fmGold = g2.getFontMetrics();
+        int goldTextWidth = fmGold.stringWidth(goldText);
+        int goldTextX = frameX + frameWidth - panelInternalPadding - goldTextWidth - (gp.tileSize/4);
+        int goldTextY = frameY + frameHeight - panelInternalPadding - fmGold.getDescent(); // Di bagian paling bawah frame
+        g2.drawString(goldText, goldTextX, goldTextY);
+
+        g2.setFont(arial_40);
     }
 
     public int getXforCenteredText(String text) {

@@ -36,7 +36,7 @@ public class Food extends Item {
     @Override
     public void use() {
         if (this.gp != null && this.gp.player != null) {
-            this.gp.player.gainEnergy(getEnergyValue());
+            this.gp.player.gainEnergy(this.energiYangDiberikan);
             
             this.gp.ui.currentDialogue = "Anda memakan " + getName() + ".\nEnergi pulih +" + getEnergyValue() + "!";
 

@@ -6,6 +6,7 @@ import item.Crop;
 import item.Equipment;
 import item.Fish;
 import item.Food;
+import item.Item;
 import item.Misc;
 import item.Seed;
 import main.GamePanel;
@@ -48,6 +49,7 @@ public class ItemRepository {
     public static Equipment ProposalRing;
     public static Misc Coal;
     public static Misc Firewood;
+    public static Misc Egg;
     public static Seed Parsnip_Seeds;
     public static Seed Cauliflower_Seeds;
     public static Seed Potato_Seeds;
@@ -79,6 +81,7 @@ public class ItemRepository {
     public static Fish Angler;
     public static Fish Crimsonfish;
     public static Fish Glacierfish;
+    private static List<Item> allGameItems = new ArrayList<>();
 
     public static List<Fish> getAllFishInstances(GamePanel gp) {
     // Pastikan initFish sudah dipanggil sebelumnya (biasanya di initializeAllItems)
@@ -123,6 +126,7 @@ public class ItemRepository {
                 Set.of("Any"), // Weather
                 Set.of("Mountain Lake"), 
                 "Common");
+                allGameItems.add(Bullhead);
 
         Carp = new Fish("Carp", gp, "Ikan air tawar yang umum di danau dan kolam.", "/res/item/fish/common/carp",
                 Set.of("Any"),
@@ -321,6 +325,13 @@ public class ItemRepository {
                 gp,
                 "Potongan kayu bakar, cocok untuk api unggun atau memasak sederhana.",
                 "/res/item/misc/firewood"); 
+
+        Egg = new Misc("Egg", 
+                10,
+                5, 
+                gp, 
+                "Bahan memasak", 
+                "/res/item//misc/egg");
     }
     public static void initEquipment(GamePanel gp) {
         Hoe = new Equipment("Hoe",
@@ -346,7 +357,7 @@ public class ItemRepository {
                 "/res/item/equipment/fishingrod"); 
         
         ProposalRing = new Equipment("Proposal Ring",
-                1000, 500, gp,
+                3000, 500, gp,
                 "Cincin lamaran untuk KAWIN.",
                 "/res/item/equipment/proposalring");
     }
@@ -447,12 +458,35 @@ public class ItemRepository {
                 "/res/item/crops/grape");
     }
 
+
     public static void initializeAllItems(GamePanel gp) {
         initCrops(gp);
         initFood(gp);
         initEquipment(gp);
         initSeeds(gp);
+        initMisc(gp);
         initFish(gp);
         initMisc(gp);
+    }
+     public static Item getItemByName(String name) {
+        if (name == null) return null;
+        try {
+                if ("Baguette".equalsIgnoreCase(name)) return Baguette;
+                if ("Fish n' Chips".equalsIgnoreCase(name)) return Fish_n_Chips;
+                if ("Sashimi".equalsIgnoreCase(name)) return Sashimi;
+                if ("Fugu".equalsIgnoreCase(name)) return Fugu;
+                if ("Wine".equalsIgnoreCase(name)) return Wine;
+                if ("Pumpkin Pie".equalsIgnoreCase(name)) return Pumpkin_Pie;
+                if ("Veggie Soup".equalsIgnoreCase(name)) return Veggie_Soup;
+                if ("Fish Stew".equalsIgnoreCase(name)) return Fish_Stew;
+                if ("Spakbor Salad".equalsIgnoreCase(name)) return Spakbor_Salad;
+                if ("Fish Sandwich".equalsIgnoreCase(name)) return Fish_Sandwich;
+                if ("The Legends of Spakbor".equalsIgnoreCase(name)) return The_Legends_of_Spakbor;
+                return null;
+                
+        } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+        }
     }
 }

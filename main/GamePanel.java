@@ -19,6 +19,9 @@ import item.Item;
 import item.ItemRepository;
 import environment.EnvironmentManager;
 import item.Store;
+import item.Recipe;
+import item.RecipeRepository;
+
 
 import main.StatisticsManager;
 
@@ -34,9 +37,13 @@ public class GamePanel extends JPanel implements Runnable{
     private boolean musicIsPlaying = false;
     private boolean pendingSleep = false;
     private String sleepTriggerMessage = "";
-    public boolean isSelectingItemForGift = false; 
+    public boolean isSelectingItemForGift = false;
     public Entity npcForGifting = null;  
-    private java.util.Scanner sharedScanner;
+    public java.util.Scanner sharedScanner;
+    public boolean isCookingInProgress = false;
+    public Recipe cookingRecipe = null;
+    public long cookingStartTime = 0;
+    public final long cookingDuration = 60*1000;
 
     // shipping bin
     public ArrayList<ItemStack> itemsToShip = new ArrayList<>();
@@ -87,16 +94,16 @@ public class GamePanel extends JPanel implements Runnable{
     public final int pauseState = 2; 
     public final int dialogueState = 3;
     public final int sleepState = 4; 
-    public final int transitionState = 5; //untuk transisi pindah map yang lebih halus
+    public final int transitionState = 5;
     public final int inventoryState = 6;
     public final int npcInteractionState = 7;
-    
+    public final int helpState = 8;
     public final int shoppingState = 9; 
-    public final int helpState = 8; 
     public final int fishingState = 10;
     public final int shippingBinState = 11;
     public final int characterCreationState = 12;
     public final int endGameStatisticsState = 13;
+    public final int cookingState = 14; 
 
     // fishing
     public Fish fishBeingFished = null;
@@ -130,6 +137,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setUpGame() {
         ItemRepository.initializeAllItems(this);
+        RecipeRepository.initializeRecipes();
         aSetter.setObject();
         initializeNPCs();
         if (statsManager != null && npc != null) {
@@ -352,7 +360,6 @@ public class GamePanel extends JPanel implements Runnable{
         fishingMaxRange = 0;
         currentFishingGuess = "";
         fishingFeedbackMessage = ""; 
-
     }
 
     public void finalizeAndExitShippingBin() {
@@ -540,7 +547,25 @@ public class GamePanel extends JPanel implements Runnable{
                                         System.out.println("GAMEPANEL: Masuk shippingBinState. Waktu dihentikan.");
                                     }
                                     interactionHandled = true;
-                                } else {
+                                } 
+                                else if ("Stove".equals(interactedObject.name) || "KomporDapur".equals(interactedObject.name)) { // <<<---- INTEGRASI STOVE DI SINI
+                                    // Anda bisa menggunakan "Stove" atau "KomporDapur", sesuaikan dengan nama objek Anda
+                                    System.out.println("GAMEPANEL (playState): Berinteraksi dengan '" + interactedObject.name + "'. Memulai sesi memasak.");
+                                    
+                                    // Sesuai spesifikasi, memulai memasak butuh -10 energi (Source 217)
+                                    if (player.consumeEnergy(10)) { // Anda perlu metode consumeEnergy(int cost) di Player
+                                        gameState = cookingState; // Ganti ke cookingState
+                                        ui.commandNum = 0; // Reset pilihan menu resep di UI (jika menggunakan commandNum)
+                                                        // atau ui.cookingCommandNum = 0; jika Anda punya variabel terpisah untuk UI masak
+                                        System.out.println("GAMEPANEL (playState): Masuk cookingState. Energi terkonsumsi.");
+                                    } else {
+                                        ui.showMessage("Tidak cukup energi untuk mulai memasak (-10 energi dibutuhkan)."); // Tampilkan pesan ke UI
+                                        System.out.println("GAMEPANEL (playState): Gagal memasak, energi tidak cukup.");
+                                    }
+                                    interactionHandled = true;
+                                }
+                                
+                                else {
                                     System.out.println("GAMEPANEL: Objek BUKAN 'Televisi' ataupun 'Shipping Bin'. Nama objek: '" + interactedObject.name + "'");
              
                                 }
@@ -582,24 +607,19 @@ public class GamePanel extends JPanel implements Runnable{
                 System.out.println("                        Pending Sleep: " + pendingSleep);
                 System.out.println("                        TV Confirm: " + tvInteractionPendingConfirmation);
 
-
                 if (tvInteractionPendingConfirmation) {
 
                 }
                 else if (player.currentInteractingNPC != null && "CHAT_NPC".equals(ui.getCurrentDialogueMode())) {
-                    System.out.println("GAMEPANEL (dialogueState): Melanjutkan mode CHAT_NPC dengan " + player.currentInteractingNPC.name);
                     String nextLine = player.currentInteractingNPC.getNextChatLine();
 
                     if (nextLine != null) {
                         ui.setDialogue(nextLine, "CHAT_NPC"); 
-                        System.out.println("GAMEPANEL (dialogueState): Menampilkan baris chat berikutnya: '" + nextLine + "'");
                     } else {
-                        System.out.println("GAMEPANEL (dialogueState): Tidak ada baris chat berikutnya dari " + player.currentInteractingNPC.name + ". Chat selesai.");
                         ui.clearDialogueMode();
                         ui.currentDialogue = ""; 
                         gameState = playState;  
                         player.currentInteractingNPC = null; 
-                        System.out.println("GAMEPANEL (dialogueState): Kembali ke playState. currentInteractingNPC direset.");
                     }
                 }
                 else if (pendingSleep) {
@@ -627,27 +647,20 @@ public class GamePanel extends JPanel implements Runnable{
                         }
                     }
                 } else {
-                    System.out.println("GAMEPANEL (dialogueState): Menangani dialog biasa/sistem lainnya.");
                     if (player.currentInteractingNPC != null && ui.isDialogueFromNpcAction()){ 
-                        System.out.println("GAMEPANEL: Dialog hasil aksi NPC, kembali ke npcInteractionState.");
                         gameState = npcInteractionState;
                         ui.clearDialogueMode();
                         ui.commandNum = 0; 
                     } else {
-                        System.out.println("GAMEPANEL: Dialog umum selesai, kembali ke playState.");
                         gameState = playState;
                         ui.clearDialogueMode();
                         if (player.currentInteractingNPC != null && !"CHAT_NPC".equals(ui.getCurrentDialogueMode())) {
-                            System.out.println("GAMEPANEL: Interaksi dengan NPC berakhir, reset currentInteractingNPC.");
                             player.currentInteractingNPC = null; 
                         }
                     }
                 }
             }
         } else if (gameState == inventoryState) {
-            System.out.println("GAMEPANEL: Masuk inventoryState. Nilai enterIsCurrentlyPressed SAAT MASUK BLOK: " + enterIsCurrentlyPressed +
-                            ", isSelectingItemForGift: " + isSelectingItemForGift);
-
             if (keyH.enterPressed) {
                 keyH.enterPressed = false;
                 System.out.println("GAMEPANEL (inventoryState): Enter DITEKAN.");
@@ -665,7 +678,7 @@ public class GamePanel extends JPanel implements Runnable{
                         ItemStack stack = player.inventory.get(selectedItemIndex);
                         if (stack != null && stack.getItem() != null) {
                             Item selectedItem = stack.getItem();
-                            System.out.println("GAMEPANEL (inventoryState): Item dipilih: " + selectedItem.getName());
+                            System.out.println("INVENTORY - ENTER: Item dipilih: " + selectedItem.getName() + ", Kategori: " + selectedItem.getCategory()); // DEBUG
 
         
                             if (selectedItem.getCategory().equals("Fish") ||
@@ -691,25 +704,23 @@ public class GamePanel extends JPanel implements Runnable{
                                 ui.showMessage(selectedItem.getName() + " tidak bisa dimakan.");
 
                             }
+                        } else {
+                            System.out.println("INVENTORY - ENTER: ItemStack atau Item di dalamnya null pada indeks " + selectedItemIndex); // DEBUG
+                            ui.showMessage("Slot yang dipilih kosong atau item bermasalah.");
                         }
                     } else {
-                        System.out.println("GAMEPANEL (inventoryState): Tidak ada item valid di slot terpilih.");
+                        ui.showMessage("Tidak ada item yang dipilih.");
+                        System.out.println("INVENTORY - ENTER: selectedItemIndex tidak valid: " + selectedItemIndex); // DEBUG
                     }
                 }
             }
             if (enterIsCurrentlyPressed) {
-                System.out.println("GAMEPANEL (inventoryState): BLOK if (enterIsCurrentlyPressed) TERPANGGIL!");
                 keyH.enterPressed = false; 
-
                 if (isSelectingItemForGift && npcForGifting != null) {
-                    System.out.println("GAMEPANEL (inventoryState): Mode GIFTING AKTIF. Memproses hadiah");
                     int selectedItemIndex = ui.getSelectedItemIndex();
-                    System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex);
-
                     if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
                         ItemStack itemToGift = player.inventory.get(selectedItemIndex);
                         if (itemToGift != null && itemToGift.getItem() != null) {
-                            System.out.println("GAMEPANEL (inventoryState): Akan memberi hadiah '" + itemToGift.getItem().getName() + "' kepada " + npcForGifting.name);
                             if (player.consumeEnergy(5)) {
                                 statsManager.incrementGiftingFrequency(npcForGifting.name);
                                 int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
@@ -726,7 +737,6 @@ public class GamePanel extends JPanel implements Runnable{
                                 ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
                             }
                             gameState = dialogueState;
-                            System.out.println("GAMEPANEL (inventoryState): Pindah ke dialogueState ("+dialogueState+") untuk hasil gifting.");
                         } else {
                             System.err.println("GAMEPANEL (inventoryState): Item yang dipilih di slot " + selectedItemIndex + " adalah null atau itemnya null.");
                         }
@@ -741,8 +751,8 @@ public class GamePanel extends JPanel implements Runnable{
             
 
         } else if (gameState == characterCreationState) {
-    if (keyH.enterPressed) { // Flag ini sekarang HANYA true jika Enter ditekan pada tombol "Selesai"
-        keyH.enterPressed = false; // Selalu konsumsi flag setelah diproses
+    if (keyH.enterPressed) { 
+        keyH.enterPressed = false; 
 
         System.out.println("GamePanel: Finalizing character creation.");
 
@@ -750,8 +760,8 @@ public class GamePanel extends JPanel implements Runnable{
         player.name = ui.tempPlayerName.isEmpty() ? "Petani" : ui.tempPlayerName;
         player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; // Asumsi 0=Laki, 1=Perempuan
         player.farmName = ui.tempFarmName.isEmpty() ? "Kebunku" : ui.tempFarmName;
-        if (player.favoriteItem != null) { // Pastikan field favoriteItem ada di Player
-            player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; // Beri default jika kosong
+        if (player.favoriteItem != null) { 
+            player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; 
         }
 
         System.out.println("Pembuatan Karakter Selesai:");
@@ -762,14 +772,11 @@ public class GamePanel extends JPanel implements Runnable{
             System.out.println("Item Favorit: " + player.favoriteItem);
         }
 
-        ui.activeInputField = 0; // Reset fokus untuk penggunaan berikutnya jika ada
-        gameState = playState; // Pindah ke playState
-        // playMusic(0); // Mainkan musik game utama
+        ui.activeInputField = 0; 
     }
-    // Tidak ada 'else if (keyH.enterPressed)' lagi di sini, karena navigasi field ditangani KeyHandler
+    
 } else if (gameState == npcInteractionState) { 
             Entity currentNpc = player.currentInteractingNPC;
-
             if (keyH.enterPressed) {
                 if (currentNpc != null) {
                     int selectedOption = ui.commandNum; 
@@ -779,7 +786,6 @@ public class GamePanel extends JPanel implements Runnable{
                             gameState = shoppingState; 
                         }
                         else if (selectedOption == 1) { // "Beri Hadiah"
-                            System.out.println("NPC Interaction: Memilih 'Beri Hadiah'.");
                             if (player.inventory.isEmpty()) {
                                 ui.currentDialogue = "Inventory kosong. Tidak ada yang bisa diberikan.";
                                 gameState = dialogueState; 
@@ -789,7 +795,6 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = inventoryState;   
                                 ui.slotCol = 0; 
                                 ui.slotRow = 0;
-                                System.out.println("NPC Interaction: Pindah ke inventoryState untuk memilih hadiah. Target: " + npcForGifting.name);
                             }
                         } else if (selectedOption == 2) { // Propose/Marry
                             boolean hasProposalRing = false;
@@ -806,7 +811,6 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             } else {
                                 if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-
                                     if (player.consumeEnergy(80)) { 
                                         currentNpc.isMarriedTo = true;
                                         player.partner = currentNpc.name;
@@ -851,12 +855,10 @@ public class GamePanel extends JPanel implements Runnable{
                                     gameState = dialogueState;
                                 }
                             }
-                        } else if (selectedOption == 3) { 
-                            System.out.println("GAMEPANEL: Memulai Chat dengan " + currentNpc.name);
+                        } else if (selectedOption == 3) { // "Chat"
                             if (player.consumeEnergy(10)) { 
                                 gameStateSystem.advanceTimeByMinutes(10, this.statsManager); 
                                 currentNpc.updateHeartPoints(10); 
-
                                 currentNpc.startChat();
                                 statsManager.incrementChatFrequency(currentNpc.name);
                                 String firstChatLine = currentNpc.getNextChatLine();
@@ -888,7 +890,6 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = inventoryState;   
                                 ui.slotCol = 0; 
                                 ui.slotRow = 0;
-                                System.out.println("NPC Interaction: Pindah ke inventoryState untuk memilih hadiah. Target: " + npcForGifting.name);
                             }
                         } else if (selectedOption == 1) { 
                             boolean hasProposalRing = false;
@@ -905,7 +906,6 @@ public class GamePanel extends JPanel implements Runnable{
                                 gameState = dialogueState;
                             } else {
                                 if (currentNpc.isProposedTo && !currentNpc.isMarriedTo) {
-
                                     if (player.consumeEnergy(80)) { 
                                         currentNpc.isMarriedTo = true;
                                         player.partner = currentNpc.name;
@@ -1041,60 +1041,121 @@ public class GamePanel extends JPanel implements Runnable{
             }
         } else if (gameState == shoppingState) {
             if (keyH.enterPressed) {
-            keyH.enterPressed = false; 
+                keyH.enterPressed = false; // Konsumsi input Enter
 
-            int currentSelectionInShop = ui.getShopSelectedItemIndex(); 
-            int numberOfItemsForSale = emilyStore.getItemsForSale().size();
-
-            System.out.println("SHOPPING STATE - Enter Pressed. currentSelectionInShop: " + currentSelectionInShop +
-                            ", numberOfItemsForSale: " + numberOfItemsForSale +
-                            ", ui.CMD_SHOP_EXIT: " + ui.CMD_SHOP_EXIT);
-
-            if (currentSelectionInShop == ui.CMD_SHOP_EXIT || currentSelectionInShop == numberOfItemsForSale) {
-                System.out.println("SHOPPING STATE - Memilih KELUAR dari toko.");
-                gameState = npcInteractionState; 
-                ui.commandNum = 0;    
-                ui.shopCommandNum = 0;  
-            }
-            else if (currentSelectionInShop < numberOfItemsForSale && currentSelectionInShop >= 0) {
-                System.out.println("SHOPPING STATE - Memilih item di indeks: " + currentSelectionInShop);
-                int quantityToBuy = ui.getShopSelectedQuantity();
-
-                if (quantityToBuy > 0) {
-                    emilyStore.processPurchase(player, currentSelectionInShop + 1, quantityToBuy);
+                int currentSelectionInShop = ui.getShopSelectedItemIndex(); 
+                int numberOfItemsForSale = emilyStore.getItemsForSale().size();
+                if (currentSelectionInShop == ui.CMD_SHOP_EXIT || currentSelectionInShop == numberOfItemsForSale) {
+                    gameState = npcInteractionState; 
+                    ui.commandNum = 0;    
+                    ui.shopCommandNum = 0;  
                 }
-            } else {
-                System.out.println("SHOPPING STATE - Pilihan tidak dikenali: " + currentSelectionInShop);
-            }
+                else if (currentSelectionInShop < numberOfItemsForSale && currentSelectionInShop >= 0) {
+                    int quantityToBuy = ui.getShopSelectedQuantity();
+                    if (quantityToBuy < 1) {
+                        ui.currentDialogue = "Jumlah pembelian harus lebih dari 0.";
+                        return;
+                    }
+                    if (quantityToBuy > 0) {
+                        emilyStore.processPurchase(player, currentSelectionInShop + 1, quantityToBuy);
+                    }
+                }
 
-        } else if (keyH.escapePressed) {
-            keyH.escapePressed = false;
-            System.out.println("SHOPPING STATE - Escape Pressed. Kembali ke menu interaksi Emily.");
-            gameState = npcInteractionState;
-            ui.commandNum = 0;
-            ui.shopCommandNum = 0;
-        }
+            } else if (keyH.escapePressed) {
+                keyH.escapePressed = false;
+                gameState = npcInteractionState;
+                ui.commandNum = 0;
+                ui.shopCommandNum = 0;
+            }
         }
         
+        else if (gameState == cookingState) {
+            if (isCookingInProgress) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - cookingStartTime >= cookingDuration) {
+                    Item foodResult = ItemRepository.getItemByName(cookingRecipe.getOutputFoodName());
+                    if (foodResult != null) {
+                        player.addItemToInventory(foodResult, cookingRecipe.getOutputFoodQuantity());
+                        ui.showMessage(cookingRecipe.getOutputFoodName() + " berhasil dimasak!");
+                        gameStateSystem.advanceTimeByMinutes(60, statsManager); // Advance time by 1 hour
+                        System.out.println("COOKING - " + cookingRecipe.getOutputFoodName() + " selesai dimasak!");
+                    } else {
+                        ui.showMessage("Error: Makanan hasil resep tidak ditemukan!");
+                        System.err.println("COOKING ERROR: Output food '" + cookingRecipe.getOutputFoodName() + "' not found.");
+                    }
+                    isCookingInProgress = false;
+                    cookingRecipe = null;
+                    gameState = playState;
+                } else {
+                    // Show progress in UI
+                    double progress = (double) (currentTime - cookingStartTime) / cookingDuration;
+                    ui.showMessage("Memasak " + cookingRecipe.getOutputFoodName() + "... (" + (int) (progress * 100) + "%)");
+                }
+            } else if (keyH.enterPressed) {
+                keyH.enterPressed = false;
+
+                List<Recipe> knownRecipes = new ArrayList<>();
+                for (String recipeId : player.getLearnedRecipeIds()) {
+                    Recipe r = RecipeRepository.getRecipeById(recipeId);
+                    if (r != null) knownRecipes.add(r);
+                }
+
+                int selectedOption = ui.commandNum;
+                if (knownRecipes.isEmpty()) {
+                    if (selectedOption == 0) { 
+                        gameState = playState;
+                        System.out.println("COOKING - Kembali ke playState (tidak ada resep).");
+                    }
+                } else {
+                    if (selectedOption < knownRecipes.size()) { // Pilih resep
+                        Recipe recipeToCook = knownRecipes.get(selectedOption);
+                        System.out.println("COOKING - Mencoba memasak: " + recipeToCook.getOutputFoodName());
+                        String ingredientCheckMessage = player.checkEnoughIngredients(recipeToCook);
+                        if (ingredientCheckMessage != null) {
+                            ui.showMessage(ingredientCheckMessage);
+                        } else {
+                            String availableFuel = player.getAvailableFuel();
+                            if (availableFuel == null) {
+                                ui.showMessage("Tidak ada bahan bakar (Kayu/Arang)!");
+                            } else {
+                                // Start cooking
+                                player.consumeIngredients(recipeToCook);
+                                player.consumeFuel(availableFuel);
+                                isCookingInProgress = true;
+                                cookingRecipe = recipeToCook;
+                                cookingStartTime = System.currentTimeMillis();
+                                ui.showMessage("Memulai memasak " + recipeToCook.getOutputFoodName() + "...");
+                                System.out.println("COOKING - Memulai memasak: " + recipeToCook.getOutputFoodName());
+                            }
+                        }
+                    } else if (selectedOption == knownRecipes.size()) { // Kembali
+                        gameState = playState;
+                        System.out.println("COOKING - Kembali ke playState.");
+                    }
+                }
+            } else if (keyH.escapePressed) {
+                keyH.escapePressed = false;
+                if (isCookingInProgress) {
+                    ui.showMessage("Memasak dibatalkan!");
+                    isCookingInProgress = false;
+                    cookingRecipe = null;
+                }
+                gameState = playState;
+                ui.commandNum = 0;
+                System.out.println("COOKING - Escape, kembali ke playState.");
+            }
+}
+
         else if (gameState == inventoryState) {
             if (keyH.enterPressed) {
                 keyH.enterPressed = false; 
-                System.out.println("GAMEPANEL (inventoryState): Enter DITEKAN.");
 
                 int selectedItemIndex = ui.getSelectedItemIndex(); 
                 if (isSelectingItemForGift && npcForGifting != null) {
-                    System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF untuk NPC: " + npcForGifting.name);
-           
-                    System.out.println("GAMEPANEL (inventoryState): selectedItemIndex dari UI: " + selectedItemIndex +
-                                    ", Ukuran inventory: " + player.inventory.size());
-
                     if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) { 
                         ItemStack itemToGift = player.inventory.get(selectedItemIndex); 
                         if (itemToGift != null && itemToGift.getItem() != null) {
-                            System.out.println("GAMEPANEL (inventoryState): Akan memberi hadiah '" + itemToGift.getItem().getName() + "' kepada " + npcForGifting.name);
-
                             if (player.consumeEnergy(5)) {
-                                System.out.println("GAMEPANEL (inventoryState): Energi cukup. Player energy: " + player.energy);
                                 int heartPointsChange = npcForGifting.processGift(itemToGift.getItem().getName());
                                 npcForGifting.updateHeartPoints(heartPointsChange);
                                 player.removeItem(itemToGift.getItem().getName(), 1);
@@ -1106,57 +1167,33 @@ public class GamePanel extends JPanel implements Runnable{
                                 else if (heartPointsChange == 0) reaction = " menerimanya.";
                                 else reaction = " terlihat tidak senang.";
                                 ui.currentDialogue = npcForGifting.name + reaction + "\n(Hati: " + npcForGifting.heartPoints + "/" + npcForGifting.maxHeartPoints + ")";
-                                System.out.println("GAMEPANEL (inventoryState): Hasil Gifting -> " + ui.currentDialogue);
                             } else {
                                 ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
-                                System.out.println("GAMEPANEL (inventoryState): Gifting gagal, energi tidak cukup.");
                             }
                             gameState = dialogueState;
-                            System.out.println("GAMEPANEL (inventoryState): Pindah ke dialogueState ("+dialogueState+") untuk menampilkan hasil gifting.");
-                        } else {
-                            System.err.println("GAMEPANEL (inventoryState): Item yang dipilih di slot " + selectedItemIndex + " adalah null atau itemnya null.");
-                        }
-                    } else {
-                        System.out.println("GAMEPANEL (inventoryState): Tidak ada item dipilih di slot atau indeks tidak valid (" + selectedItemIndex + ").");
+                        } 
                     }
-                } else {
-                    System.out.println("GAMEPANEL (inventoryState): Enter ditekan untuk penggunaan item biasa. selectedItemIndex: " + selectedItemIndex + " (belum diimplementasikan).");
-                }
+                } 
             }
-     
         } else if (gameState == fishingState) {
-
             if (keyH.enterPressed) {
-                keyH.enterPressed = false;
-
-                if (fishBeingFished == null) { 
-                    System.err.println("GAMEPANEL (fishingState): Error - fishBeingFished adalah null!");
-                    endFishingMinigame(false, "Terjadi kesalahan saat memancing."); 
+                keyH.enterPressed = false; 
+                if (fishBeingFished == null) {
+                    endFishingMinigame(false, "Terjadi kesalahan saat memancing."); // Keluar dari minigame
                     return;
                 }
-
                 if (currentFishingGuess.isEmpty()) {
                     fishingFeedbackMessage = "Masukkan tebakanmu dulu!";
-                    System.out.println("FISHING_MINIGAME: Input tebakan kosong.");
                 } else {
                     try {
                         int guess = Integer.parseInt(currentFishingGuess);
                         fishingAttemptsLeft--;
-                        System.out.println("FISHING_MINIGAME: Pemain menebak: " + guess +
-                                        ". Target: " + fishingTargetNumber +
-                                        ". Sisa percobaan: " + fishingAttemptsLeft);
-
                         if (guess == fishingTargetNumber) {
                             fishingFeedbackMessage = "BERHASIL! Kamu menangkap " + fishBeingFished.name + "!";
-                            System.out.println("FISHING_MINIGAME: Berhasil menangkap " + fishBeingFished.name);
-                   
                             player.inventory.add(new ItemStack(fishBeingFished, 1)); 
-                         
                             endFishingMinigame(true, fishingFeedbackMessage);
                         } else if (fishingAttemptsLeft <= 0) {
                             fishingFeedbackMessage = "GAGAL! Kesempatan habis. Angka sebenarnya: " + fishingTargetNumber + ".";
-                            System.out.println("FISHING_MINIGAME: Gagal, kesempatan habis.");
-                 
                             endFishingMinigame(false, fishingFeedbackMessage);
                         } else {
                             if (guess < fishingTargetNumber) {
@@ -1164,16 +1201,105 @@ public class GamePanel extends JPanel implements Runnable{
                             } else {
                                 fishingFeedbackMessage = "Terlalu TINGGI! Sisa percobaan: " + fishingAttemptsLeft;
                             }
-                            System.out.println("FISHING_MINIGAME: Feedback: " + fishingFeedbackMessage);
                         }
                     } catch (NumberFormatException e) {
                         fishingFeedbackMessage = "Input angka tidak valid! Coba lagi.";
-                        System.err.println("FISHING_MINIGAME: NumberFormatException untuk input: " + currentFishingGuess);
                     }
-                    currentFishingGuess = "";
+                    currentFishingGuess = ""; 
+                }
+            }
+        }
+        
+        else if (gameState == cookingState) {
+            List<Recipe> learnedRecipes = new ArrayList<>();
+            for (String recipeId : player.getLearnedRecipeIds()) {
+                Recipe recipe = RecipeRepository.getRecipeById(recipeId);
+                if (recipe != null) {
+                    learnedRecipes.add(recipe);
                 }
             }
 
+            ui.slotCol = 0;
+            final int maxRowsOnScreen = 5; 
+            int totalRows = learnedRecipes.size();
+
+            if (keyH.upPressed) {
+                keyH.upPressed = false;
+                ui.slotRow--;
+                if (ui.slotRow < 0) {
+                    ui.slotRow = 0;
+                }
+                if (ui.slotRow < ui.recipeScrollOffset) {
+                    ui.recipeScrollOffset = ui.slotRow;
+                }
+                System.out.println("COOKING: Pilih resep ke atas, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+            }
+            if (keyH.downPressed) {
+                keyH.downPressed = false;
+                ui.slotRow++;
+                if (ui.slotRow >= totalRows) {
+                    ui.slotRow = totalRows - 1;
+                }
+                if (ui.slotRow >= ui.recipeScrollOffset + maxRowsOnScreen) {
+                    ui.recipeScrollOffset = ui.slotRow - maxRowsOnScreen + 1;
+                }
+                System.out.println("COOKING: Pilih resep ke bawah, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+            }
+            if (keyH.enterPressed) {
+                keyH.enterPressed = false;
+                if (learnedRecipes.isEmpty()) {
+                    ui.currentDialogue = "Kamu belum tahu resep apa pun!";
+                    gameState = dialogueState;
+                    System.out.println("COOKING: Tidak ada resep yang dipelajari.");
+                    return;
+                }
+
+                int selectedIndex = ui.slotRow;
+                if (selectedIndex >= 0 && selectedIndex < learnedRecipes.size()) {
+                    Recipe selectedRecipe = learnedRecipes.get(selectedIndex);
+                    System.out.println("COOKING: Resep dipilih: " + selectedRecipe.getOutputFoodName());
+
+                    String ingredientCheck = player.checkEnoughIngredients(selectedRecipe);
+                    if (ingredientCheck != null) {
+                        ui.currentDialogue = ingredientCheck;
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Bahan tidak cukup - " + ingredientCheck);
+                        return;
+                    }
+                    String fuelAvailable = player.getAvailableFuel();
+                    if (!player.canCookWithCurrentFuel()) {
+                        ui.currentDialogue = "Kamu tidak punya bahan bakar (Firewood atau Coal)!";
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Tidak ada bahan bakar.");
+                        return;
+                    }
+                    if (!player.consumeEnergy(10)) {
+                        ui.currentDialogue = "Energi tidak cukup untuk memasak!";
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Energi tidak cukup.");
+                        return;
+                    }
+                    player.consumeIngredients(selectedRecipe);
+                    player.consumeFuel(fuelAvailable);
+                    Item cookedItem = ItemRepository.getItemByName(selectedRecipe.getOutputFoodName());
+                    if (cookedItem != null) {
+                        player.addItemToInventory(cookedItem, 1);
+                        ui.currentDialogue = "Kamu memasak " + selectedRecipe.getOutputFoodName() + "!";
+                        System.out.println("COOKING: Berhasil memasak: " + selectedRecipe.getOutputFoodName());
+                    } else {
+                        ui.currentDialogue = "Error: Item masakan tidak ditemukan!";
+                        System.out.println("COOKING: Error - Item masakan tidak ditemukan: " + selectedRecipe.getOutputFoodName());
+                    }
+                    gameState = dialogueState;
+                }
+            }
+            if (keyH.escapePressed) {
+                keyH.escapePressed = false;
+                gameState = playState;
+                ui.slotRow = 0;
+                ui.recipeScrollOffset = 0;
+                System.out.println("COOKING: Keluar dari cookingState, kembali ke playState.");
+            }
         }
 
         if (gameState == playState) {
@@ -1232,8 +1358,6 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void executeSleepSequence() {
-        System.out.println("GAMEPANEL: executeSleepSequence() dipanggil.");
-        //  (logika pemulihan energi) 
         int currentEnergy = player.energy;
         int maxEnergy = player.maxEnergy;
         int restoredEnergy;
@@ -1241,7 +1365,6 @@ public class GamePanel extends JPanel implements Runnable{
         else { restoredEnergy = maxEnergy; }
         player.energy = restoredEnergy;
         if (player.energy > maxEnergy) player.energy = maxEnergy;
-
 
         // --- PROSES PENJUALAN DARI SHIPPING BIN --- 
         int goldEarnedToday = 0;
@@ -1306,14 +1429,9 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
         tileM.draw(g2); // tile
-
-        if (currentMap >= 0 && currentMap < obj.length && obj[currentMap] != null) {
-            // HANYA iterasi objek di dalam currentMap
-            for (int i = 0; i < obj[currentMap].length; i++) {
-                // Jika ada objek di indeks ini, gambar!
-                if (obj[currentMap][i] != null) {
-                    obj[currentMap][i].draw(g2, this);
-                }
+        for(int i = 0; i < obj[currentMap].length; i++){
+            if(obj[currentMap][i] != null){
+                obj[currentMap][i].draw(g2, this);
             }
         }
 
@@ -1349,7 +1467,7 @@ public class GamePanel extends JPanel implements Runnable{
         // ui
         ui.draw(g2);
 
-        //DEBUG
+        // DEBUG
         if (keyH.showDebugText == true){
             long drawEnd = System.nanoTime();
             long passed = drawEnd - drawStart;
@@ -1368,12 +1486,11 @@ public class GamePanel extends JPanel implements Runnable{
         if (musicIsPlaying) {
             music.stop();
         }
-
         music.setFile(i);
         music.play();
         music.loop();
         currentlyPlayingMusicIndex = i;
-        musicIsPlaying = true; 
+        musicIsPlaying = true;
     }
 
     public void stopMusic() {
@@ -1383,9 +1500,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void playSE(int i) {
-
         se.setFile(i);
         se.play();
     }
-
 }
