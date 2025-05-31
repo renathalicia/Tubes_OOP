@@ -82,7 +82,7 @@ public class TileManager {
         setup(53, "stone02", true);
         setup(54, "stone03", true);
         setup(55, "floor04", false);
-//        setup(56, "wall00", true);
+        setup(56, "tilled", false);
 //        setup(57, "wall01", true);
 //        setup(58, "wall02", true);
         setup(59, "blank", true);
