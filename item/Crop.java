@@ -1,5 +1,6 @@
 package item; // Pastikan ini sesuai dengan struktur package Anda
-
+import java.util.ArrayList;
+import java.util.List;
 import main.GamePanel;
 // import main.Player; // Anda mungkin perlu mengimpor Player jika belum
 

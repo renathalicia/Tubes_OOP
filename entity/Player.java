@@ -1,21 +1,21 @@
 package entity;
 
 import java.util.ArrayList;
-
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import item.*;
 import main.AssetSetter;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
 import javax.imageio.ImageIO;
-
 import environment.GameState;
 import environment.Weather;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
 import object.CropObject;
 import object.SuperObject;
 
@@ -36,8 +36,18 @@ public class Player extends Entity {
     public int gold;
     public ArrayList<ItemStack> inventory = new ArrayList<>();
     public final int inventorySize = 99; 
-
+    private Set<String> learnedRecipeIds = new HashSet<>();
     public Entity currentInteractingNPC = null; 
+    private String currentFuel = null; // Fuel yang sedang digunakan
+    private int fuelCapacityRemaining = 0; // Kapasitas bahan bakar yang tersisa
+    private boolean hasHarvestedBefore = false; // Status panen pertama
+    private int totalFishCaught = 0; // Total ikan yang ditangkap
+    private boolean hasCaughtPufferfish = false; // Apakah sudah menangkap Pufferfish
+    private boolean hasCaughtLegendFish = false; // Apakah sudah menangkap Legend Fish
+    private boolean hasHarvestedAnyCrop = false; // Apakah sudah memanen tanaman apa pun
+    private boolean hasHarvestedPumpkin = false; // Apakah sudah memanen Pumpkin
+    private boolean hasObtainedHotPepper = false; // Apakah sudah mendapatkan Hot Pepper
+    private List<String> purchasedRecipes = new ArrayList<>(); // Resep yang dibeli dari toko
 
     public boolean isFacingWaterTile() {
         int pWorldX = this.worldX; // Gunakan this untuk merujuk field Player
@@ -150,7 +160,7 @@ public class Player extends Entity {
         return false;
     }
 
-    public void interactWithObject(int objIndex) {
+   public void interactWithObject(int objIndex) {
         if (objIndex == 999) { // Jika tidak ada objek yang terdeteksi
             return;
         }
@@ -174,20 +184,29 @@ public class Player extends Entity {
                     gp.ui.slotRow = 0;
                     System.out.println("PLAYER: Masuk shippingBinState. Waktu dihentikan.");
                 }
-                // gp.interactionHandled = true; // Variabel ini lokal untuk GamePanel, mungkin tidak diperlukan di sini
-                                            // atau perlu cara lain untuk menandakan interaksi sudah ditangani jika diperlukan.
             }
-            // Logika untuk TELEVISI (menggunakan metode watchTV() yang sudah ada jika sesuai)
+            // Logika untuk TELEVISI
             else if ("Television".equals(objectName)) {
-                // Anda bisa memanggil metode watchTV() yang sudah ada di Player.java
-                // atau memindahkan logika konfirmasi TV ke sini jika perlu.
-                // Untuk sekarang, asumsikan watchTV() sudah menangani interaksi TV:
                 watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
             }
-            // Tambahkan else if untuk objek lain di sini
-            // else if ("Bed".equals(objectName)) {
-            // gp.gameState = gp.sleepState;
-            // }
+            // Logika untuk STOVE
+            else if ("Stove".equals(objectName)) { 
+                System.out.println("PLAYER: Berinteraksi dengan Stove, memulai cookingState.");
+                // if (gp.currentMap != 1) { // Asumsi mapID 1 adalah rumah
+                //     gp.ui.setDialogue("Kamu hanya bisa memasak di dalam rumah!", "SYSTEM_MESSAGE");
+                //     gp.gameState = gp.dialogueState;
+                //     System.out.println("PLAYER: Tidak di rumah, tidak bisa memasak.");
+                // } 
+                if (consumeEnergy(10)) {
+                    gp.gameState = gp.cookingState; // Alihkan ke state memasak
+                    gp.ui.commandNum = 0; // Reset pilihan UI untuk layar memasak
+                    System.out.println("PLAYER: Energi saat ini: " + energy + ", memulai cookingState.");
+                } else {
+                    gp.ui.setDialogue("Energi tidak cukup! Butuh 10 energi.", "SYSTEM_MESSAGE");
+                    gp.gameState = gp.dialogueState;
+                    System.out.println("PLAYER: Energi kurang, tidak memulai cookingState.");
+                }
+            }
             else {
                 System.out.println("PLAYER: Objek '" + objectName + "' belum memiliki interaksi khusus di Player.java.");
             }
@@ -239,6 +258,248 @@ public class Player extends Entity {
         setDefaultValues();
         getPlayerImage();
         setInitialInventoryItems();
+        learnDefaultRecipes();
+    }
+
+    public void learnDefaultRecipes() {
+        learnedRecipeIds.add("recipe_1");
+        learnedRecipeIds.add("recipe_2"); // Baguette
+        learnedRecipeIds.add("recipe_3");
+        learnedRecipeIds.add("recipe_4");
+        learnedRecipeIds.add("recipe_5"); // Wine
+        learnedRecipeIds.add("recipe_6"); // Pumpkin Pie
+        learnedRecipeIds.add("recipe_7");
+        learnedRecipeIds.add("recipe_8");
+        learnedRecipeIds.add("recipe_9"); // Spakbor Salad
+        learnedRecipeIds.add("recipe_10");
+        learnedRecipeIds.add("recipe_11");
+    }
+
+    public void unlockRecipe(String recipeId) {
+        if (!learnedRecipeIds.contains(recipeId)) {
+            learnedRecipeIds.add(recipeId);
+            gp.ui.showMessage("Resep baru dipelajari: " + RecipeRepository.getRecipeById(recipeId).getOutputFoodName());
+        }
+    }
+
+    public int countFishCaught() {
+        return totalFishCaught; // Ganti dengan logika aktual jika ada sistem penangkapan ikan
+    }
+
+    public void checkFishingUnlocks() {
+        int fishCaught = countFishCaught(); //
+        if (fishCaught >= 10 && !learnedRecipeIds.contains("recipe_3")) {
+            unlockRecipe("recipe_3"); 
+        }
+    }
+
+    public boolean hasLearnedRecipe(String recipeId) {
+        return learnedRecipeIds.contains(recipeId);
+    }
+
+    public boolean harvestCrop() {
+        int centerX = worldX + solidArea.x + (solidArea.width / 2);
+        int centerY = worldY + solidArea.y + (solidArea.height / 2);
+        int col = centerX / gp.tileSize;
+        int row = centerY / gp.tileSize;
+
+        CropObject crop = gp.tileM.cropMap[col][row];
+        if (crop == null) {
+            gp.ui.currentDialogue = "Tidak ada tanaman untuk dipanen di sini!";
+            gp.gameState = gp.dialogueState;
+            return false;
+        }
+
+        int currentDay = gp.gameStateSystem.getTimeManager().getDay();
+        if (!crop.canBeHarvested(currentDay)) {
+            gp.ui.currentDialogue = "Tanaman belum siap dipanen!";
+            gp.gameState = gp.dialogueState;
+            return false;
+        }
+
+        if (!consumeEnergy(5)) return true;
+
+        String cropName = crop.getCropName().replace(" Seeds", ""); // Misalnya, "Parsnip Seeds" -> "Parsnip"
+        Item harvestedItem = ItemRepository.getItemByName(cropName);
+        if (harvestedItem != null) {
+            addItemToInventory(harvestedItem, 1); // Tambahkan hasil panen ke inventori
+            gp.ui.currentDialogue = "Kamu memanen " + cropName + "!";
+            gp.gameState = gp.dialogueState;
+            gp.tileM.cropMap[col][row] = null; // Hapus tanaman setelah dipanen
+            gp.tileM.mapTileNum[gp.currentMap][col][row] = 55; // Kembalikan tile ke tanah yang dibajak
+
+            // Panggil onHarvest untuk cek unlock resep
+            onHarvest(cropName);
+            return true;
+        } else {
+            gp.ui.currentDialogue = "Error: Item panen tidak ditemukan!";
+            gp.gameState = gp.dialogueState;
+            return false;
+        }
+    }
+
+    public Set<String> getLearnedRecipeIds() {
+        return new HashSet<>(learnedRecipeIds); // Kembalikan salinan
+    }
+
+    public void onFishCaught(String fishName) {
+        addFishCaught(fishName);
+        checkFishingUnlocks();
+    }
+
+    public int getEnergy() {
+        return energy; // Mengembalikan nilai energi saat ini
+    }
+
+    public void onHarvest(String cropName) {
+        if (!hasHarvestedAnyCrop) {
+            hasHarvestedAnyCrop = true;
+            unlockRecipe("recipe_7");
+        }
+
+        // Unlock recipe_14: Pumpkin Soup (setelah memanen Pumpkin untuk pertama kalinya)
+        if (cropName.equals("Pumpkin") && !hasHarvestedPumpkin) {
+            hasHarvestedPumpkin = true;
+            unlockRecipe("recipe_14");
+        }
+
+        // Unlock recipe_8: Fish Stew (setelah mendapatkan Hot Pepper)
+        if (cropName.equals("Hot Pepper") && !hasObtainedHotPepper) {
+            hasObtainedHotPepper = true;
+            unlockRecipe("recipe_8");
+        }
+    }
+
+    public void onObtainItem(String itemName) {
+        if (itemName.equals("Hot Pepper") && !hasObtainedHotPepper) {
+            hasObtainedHotPepper = true;
+            unlockRecipe("recipe_8");
+        }
+    }
+    public void onPurchase(String recipeId) {
+        if ("recipe_1".equals(recipeId) || "recipe_10".equals(recipeId)) {
+            unlockRecipe(recipeId); 
+        }
+    }
+    public int countItemInInventory(String nameOrCategory, boolean isCategory) {
+        int total = 0;
+        if (isCategory) {
+            for (ItemStack stack : inventory) {
+                if (stack.getItem() != null && nameOrCategory.equals(stack.getItem().getCategory())) {
+                    total += stack.getQuantity();
+                }
+            }
+        } else {
+            for (ItemStack stack : inventory) {
+                if (stack.getItem() != null && nameOrCategory.equals(stack.getItem().getName())) {
+                    total += stack.getQuantity();
+                }
+            }
+        }
+        return total;
+    }
+
+    public String checkEnoughIngredients(Recipe recipe) {
+        for (Recipe.Ingredient ing : recipe.getIngredients()) {
+            int qtyInInventory = countItemInInventory(ing.itemNameOrCategory, ing.isCategory);
+            if (qtyInInventory < ing.quantityRequired) {
+                return "Kamu kekurangan " + ing.itemNameOrCategory + " (Butuh: " + ing.quantityRequired + ", Punya: " + qtyInInventory + ")";
+            }
+        }
+        return null;
+    }
+
+    public void consumeIngredients(Recipe recipe) {
+        for (Recipe.Ingredient ing : recipe.getIngredients()) {
+            int qtyNeeded = ing.quantityRequired;
+            for (int i = inventory.size() - 1; i >= 0 && qtyNeeded > 0; i--) {
+                ItemStack stack = inventory.get(i);
+                if (stack.getItem() != null && 
+                    (ing.isCategory ? ing.itemNameOrCategory.equals(stack.getItem().getCategory()) : 
+                                    ing.itemNameOrCategory.equals(stack.getItem().getName()))) {
+                    int qtyToRemove = Math.min(qtyNeeded, stack.getQuantity());
+                    stack.setQuantity(stack.getQuantity() - qtyToRemove);
+                    qtyNeeded -= qtyToRemove;
+                    if (stack.getQuantity() <= 0) {
+                        inventory.remove(i);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Memeriksa apakah pemain memiliki bahan bakar (Firewood atau Coal).
+     * @return Nama bahan bakar yang valid ("Firewood", "Coal"), atau null jika tidak ada.
+     */
+    public String getAvailableFuel() {
+        for (ItemStack stack : inventory) {
+            if (stack.getItem() != null && ("Firewood".equals(stack.getItem().getName()) || "Coal".equals(stack.getItem().getName()))) {
+                currentFuel = stack.getItem().getName();
+                if ("Firewood".equals(currentFuel)) {
+                    fuelCapacityRemaining = 1; // 1 Firewood = 1 makanan
+                } else if ("Coal".equals(currentFuel)) {
+                    fuelCapacityRemaining = 2; // 1 Coal = 2 makanan
+                }
+                return currentFuel;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Mengonsumsi satu unit bahan bakar yang tersedia.
+     * @param fuelName Nama bahan bakar yang akan dikonsumsi ("Firewood" atau "Coal").
+     */
+    public void consumeFuel(String fuelName) {
+        if (fuelCapacityRemaining > 0) {
+            fuelCapacityRemaining--;
+            if (fuelCapacityRemaining == 0) {
+                // Kurangi bahan bakar dari inventory hanya jika kapasitas habis
+                for (int i = 0; i < inventory.size(); i++) {
+                    ItemStack stack = inventory.get(i);
+                    if (stack.getItem() != null && fuelName.equals(stack.getItem().getName())) {
+                        stack.setQuantity(stack.getQuantity() - 1);
+                        if (stack.getQuantity() <= 0) {
+                            inventory.remove(i);
+                        }
+                        break;
+                    }
+                }
+                currentFuel = null; // Reset fuel setelah kapasitas habis
+            }
+        }
+    }
+
+    public boolean canCookWithCurrentFuel() {
+        return fuelCapacityRemaining > 0 || getAvailableFuel() != null;
+    }
+
+    public void addFishCaught(String fishName) {
+        totalFishCaught++;
+        System.out.println("PLAYER: Ikan ditangkap (" + fishName + "), total: " + totalFishCaught);
+
+        // Unlock recipe_13: Grilled Fish (setelah memancing 5 ikan)
+        if (totalFishCaught >= 5 && !learnedRecipeIds.contains("recipe_13")) {
+            unlockRecipe("recipe_13");
+        }
+
+        // Unlock recipe_3: Sashimi (setelah memancing 10 ikan)
+        if (totalFishCaught >= 10 && !learnedRecipeIds.contains("recipe_3")) {
+            unlockRecipe("recipe_3");
+        }
+
+        // Unlock recipe_4: Fugu (setelah menangkap Pufferfish)
+        if ("Pufferfish".equals(fishName) && !hasCaughtPufferfish) {
+            hasCaughtPufferfish = true;
+            unlockRecipe("recipe_4");
+        }
+
+        // Unlock recipe_11: The Legends of Spakbor (setelah menangkap Legend Fish)
+        if ("Legend Fish".equals(fishName) && !hasCaughtLegendFish) {
+            hasCaughtLegendFish = true;
+            unlockRecipe("recipe_11");
+        }
     }
 
     public void setDefaultValues() {
@@ -263,16 +524,28 @@ public class Player extends Entity {
     }
 
     public void setInitialInventoryItems() {
-        if(ItemRepository.Parsnip_Seeds != null ) {
+        if (ItemRepository.Parsnip_Seeds != null) {
             inventory.add(new ItemStack(ItemRepository.Parsnip_Seeds, 15));
-        } 
-        if (ItemRepository.Hoe != null && ItemRepository.Watering_Can != null && ItemRepository.Pickaxe != null && ItemRepository.Fishing_Rod != null) {
+        }
+        if (ItemRepository.Pumpkin != null) {
+            inventory.add(new ItemStack(ItemRepository.Pumpkin, 5)); // Untuk menguji Pumpkin Soup
+        }
+        if (ItemRepository.Hot_Pepper != null) {
+            inventory.add(new ItemStack(ItemRepository.Hot_Pepper, 1)); // Untuk menguji Fish Stew
+        }
+        if (ItemRepository.Firewood != null) {
+            inventory.add(new ItemStack(ItemRepository.Firewood, 5)); // Untuk memasak
+        }
+        if (ItemRepository.Coal != null) {
+            inventory.add(new ItemStack(ItemRepository.Coal, 3)); // Untuk memasak
+        }
+        if (ItemRepository.Hoe != null && ItemRepository.Watering_Can != null && 
+            ItemRepository.Pickaxe != null && ItemRepository.Fishing_Rod != null) {
             inventory.add(new ItemStack(ItemRepository.Hoe, 1));
             inventory.add(new ItemStack(ItemRepository.Watering_Can, 1));
             inventory.add(new ItemStack(ItemRepository.Pickaxe, 1));
             inventory.add(new ItemStack(ItemRepository.Fishing_Rod, 1));
-        } 
-        else {
+        } else {
             System.out.println("Item tidak ditemukan di ItemRepository.");
         }
     }
@@ -448,30 +721,30 @@ public class Player extends Entity {
     }
 
     public void pickUpObject(int i) {
-    if (i != 999 && gp.obj[gp.currentMap][i] != null) {
-        String objectName = gp.obj[gp.currentMap][i].name;
+        if (i != 999 && gp.obj[gp.currentMap][i] != null) {
+            String objectName = gp.obj[gp.currentMap][i].name;
 
-        if (objectName.equals("Television")) {
-            watchTV();
+            if (objectName.equals("Television")) {
+                watchTV();
+            }
         }
-    }
     }
 
     public void interactNPC(int i) {
-    if (gp.keyH.enterPressed) { 
-        if (i != 999) { 
-            currentInteractingNPC = gp.npc[gp.currentMap][i];
+        if (gp.keyH.enterPressed) { 
+            if (i != 999) { 
+                currentInteractingNPC = gp.npc[gp.currentMap][i];
 
-            gp.gameState = gp.npcInteractionState; 
-            gp.ui.commandNum = 0; 
+                gp.gameState = gp.npcInteractionState; 
+                gp.ui.commandNum = 0; 
 
-            gp.keyH.enterPressed = false;
-        }
-        else {
-            gp.keyH.enterPressed = false;
+                gp.keyH.enterPressed = false;
+            }
+            else {
+                gp.keyH.enterPressed = false;
+            }
         }
     }
-}
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){

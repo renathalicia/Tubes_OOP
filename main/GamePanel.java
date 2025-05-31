@@ -19,6 +19,9 @@ import item.Item;
 import item.ItemRepository;
 import environment.EnvironmentManager;
 import item.Store;
+import item.Recipe;
+import item.RecipeRepository;
+
 
 public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
@@ -34,7 +37,11 @@ public class GamePanel extends JPanel implements Runnable{
     private String sleepTriggerMessage = "";
     public boolean isSelectingItemForGift = false;
     public Entity npcForGifting = null;  
-    private java.util.Scanner sharedScanner;
+    public java.util.Scanner sharedScanner;
+    public boolean isCookingInProgress = false;
+    public Recipe cookingRecipe = null;
+    public long cookingStartTime = 0;
+    public final long cookingDuration = 60*1000;
 
     // shipping bin
     public ArrayList<ItemStack> itemsToShip = new ArrayList<>();
@@ -91,13 +98,9 @@ public class GamePanel extends JPanel implements Runnable{
     public final int npcInteractionState = 7;
     public final int helpState = 8;
     public final int shoppingState = 9; 
-<<<<<<< HEAD
-    public final int fishingState = 10;
-=======
-    public final int helpState = 8; // untuk help
     public final int fishingState = 10;
     public final int shippingBinState = 11;
->>>>>>> 806c841f9e151960acf846ddfda9d3307c1247e3
+    public final int cookingState = 12;
 
     // fishing
     public Fish fishBeingFished = null;
@@ -127,6 +130,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void setUpGame() {
         ItemRepository.initializeAllItems(this);
+        RecipeRepository.initializeRecipes();
         aSetter.setObject();
         initializeNPCs();
         playMusic(0);
@@ -446,7 +450,25 @@ public class GamePanel extends JPanel implements Runnable{
                                         System.out.println("GAMEPANEL: Masuk shippingBinState. Waktu dihentikan.");
                                     }
                                     interactionHandled = true;
-                                } else {
+                                } 
+                                else if ("Stove".equals(interactedObject.name) || "KomporDapur".equals(interactedObject.name)) { // <<<---- INTEGRASI STOVE DI SINI
+                                    // Anda bisa menggunakan "Stove" atau "KomporDapur", sesuaikan dengan nama objek Anda
+                                    System.out.println("GAMEPANEL (playState): Berinteraksi dengan '" + interactedObject.name + "'. Memulai sesi memasak.");
+                                    
+                                    // Sesuai spesifikasi, memulai memasak butuh -10 energi (Source 217)
+                                    if (player.consumeEnergy(10)) { // Anda perlu metode consumeEnergy(int cost) di Player
+                                        gameState = cookingState; // Ganti ke cookingState
+                                        ui.commandNum = 0; // Reset pilihan menu resep di UI (jika menggunakan commandNum)
+                                                        // atau ui.cookingCommandNum = 0; jika Anda punya variabel terpisah untuk UI masak
+                                        System.out.println("GAMEPANEL (playState): Masuk cookingState. Energi terkonsumsi.");
+                                    } else {
+                                        ui.showMessage("Tidak cukup energi untuk mulai memasak (-10 energi dibutuhkan)."); // Tampilkan pesan ke UI
+                                        System.out.println("GAMEPANEL (playState): Gagal memasak, energi tidak cukup.");
+                                    }
+                                    interactionHandled = true;
+                                }
+                                
+                                else {
                                     System.out.println("GAMEPANEL: Objek BUKAN 'Televisi' ataupun 'Shipping Bin'. Nama objek: '" + interactedObject.name + "'");
                                     // Logika untuk interaksi objek lain jika ada
                                 }
@@ -874,7 +896,86 @@ public class GamePanel extends JPanel implements Runnable{
                 ui.commandNum = 0;
                 ui.shopCommandNum = 0;
             }
-        } else if (gameState == inventoryState) {
+        }
+        
+        else if (gameState == cookingState) {
+            if (isCookingInProgress) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - cookingStartTime >= cookingDuration) {
+                    Item foodResult = ItemRepository.getItemByName(cookingRecipe.getOutputFoodName());
+                    if (foodResult != null) {
+                        player.addItemToInventory(foodResult, cookingRecipe.getOutputFoodQuantity());
+                        ui.showMessage(cookingRecipe.getOutputFoodName() + " berhasil dimasak!");
+                        gameStateSystem.advanceTimeByMinutes(60); // Advance time by 1 hour
+                        System.out.println("COOKING - " + cookingRecipe.getOutputFoodName() + " selesai dimasak!");
+                    } else {
+                        ui.showMessage("Error: Makanan hasil resep tidak ditemukan!");
+                        System.err.println("COOKING ERROR: Output food '" + cookingRecipe.getOutputFoodName() + "' not found.");
+                    }
+                    isCookingInProgress = false;
+                    cookingRecipe = null;
+                    gameState = playState;
+                } else {
+                    // Show progress in UI
+                    double progress = (double) (currentTime - cookingStartTime) / cookingDuration;
+                    ui.showMessage("Memasak " + cookingRecipe.getOutputFoodName() + "... (" + (int) (progress * 100) + "%)");
+                }
+            } else if (keyH.enterPressed) {
+                keyH.enterPressed = false;
+
+                List<Recipe> knownRecipes = new ArrayList<>();
+                for (String recipeId : player.getLearnedRecipeIds()) {
+                    Recipe r = RecipeRepository.getRecipeById(recipeId);
+                    if (r != null) knownRecipes.add(r);
+                }
+
+                int selectedOption = ui.commandNum;
+                if (knownRecipes.isEmpty()) {
+                    if (selectedOption == 0) { 
+                        gameState = playState;
+                        System.out.println("COOKING - Kembali ke playState (tidak ada resep).");
+                    }
+                } else {
+                    if (selectedOption < knownRecipes.size()) { // Pilih resep
+                        Recipe recipeToCook = knownRecipes.get(selectedOption);
+                        System.out.println("COOKING - Mencoba memasak: " + recipeToCook.getOutputFoodName());
+                        String ingredientCheckMessage = player.checkEnoughIngredients(recipeToCook);
+                        if (ingredientCheckMessage != null) {
+                            ui.showMessage(ingredientCheckMessage);
+                        } else {
+                            String availableFuel = player.getAvailableFuel();
+                            if (availableFuel == null) {
+                                ui.showMessage("Tidak ada bahan bakar (Kayu/Arang)!");
+                            } else {
+                                // Start cooking
+                                player.consumeIngredients(recipeToCook);
+                                player.consumeFuel(availableFuel);
+                                isCookingInProgress = true;
+                                cookingRecipe = recipeToCook;
+                                cookingStartTime = System.currentTimeMillis();
+                                ui.showMessage("Memulai memasak " + recipeToCook.getOutputFoodName() + "...");
+                                System.out.println("COOKING - Memulai memasak: " + recipeToCook.getOutputFoodName());
+                            }
+                        }
+                    } else if (selectedOption == knownRecipes.size()) { // Kembali
+                        gameState = playState;
+                        System.out.println("COOKING - Kembali ke playState.");
+                    }
+                }
+            } else if (keyH.escapePressed) {
+                keyH.escapePressed = false;
+                if (isCookingInProgress) {
+                    ui.showMessage("Memasak dibatalkan!");
+                    isCookingInProgress = false;
+                    cookingRecipe = null;
+                }
+                gameState = playState;
+                ui.commandNum = 0;
+                System.out.println("COOKING - Escape, kembali ke playState.");
+            }
+}
+
+        else if (gameState == inventoryState) {
             if (keyH.enterPressed) {
                 keyH.enterPressed = false; 
 
@@ -936,6 +1037,98 @@ public class GamePanel extends JPanel implements Runnable{
                     }
                     currentFishingGuess = ""; 
                 }
+            }
+        }
+        
+        else if (gameState == cookingState) {
+            List<Recipe> learnedRecipes = new ArrayList<>();
+            for (String recipeId : player.getLearnedRecipeIds()) {
+                Recipe recipe = RecipeRepository.getRecipeById(recipeId);
+                if (recipe != null) {
+                    learnedRecipes.add(recipe);
+                }
+            }
+
+            ui.slotCol = 0;
+            final int maxRowsOnScreen = 5; 
+            int totalRows = learnedRecipes.size();
+
+            if (keyH.upPressed) {
+                keyH.upPressed = false;
+                ui.slotRow--;
+                if (ui.slotRow < 0) {
+                    ui.slotRow = 0;
+                }
+                if (ui.slotRow < ui.recipeScrollOffset) {
+                    ui.recipeScrollOffset = ui.slotRow;
+                }
+                System.out.println("COOKING: Pilih resep ke atas, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+            }
+            if (keyH.downPressed) {
+                keyH.downPressed = false;
+                ui.slotRow++;
+                if (ui.slotRow >= totalRows) {
+                    ui.slotRow = totalRows - 1;
+                }
+                if (ui.slotRow >= ui.recipeScrollOffset + maxRowsOnScreen) {
+                    ui.recipeScrollOffset = ui.slotRow - maxRowsOnScreen + 1;
+                }
+                System.out.println("COOKING: Pilih resep ke bawah, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+            }
+            if (keyH.enterPressed) {
+                keyH.enterPressed = false;
+                if (learnedRecipes.isEmpty()) {
+                    ui.currentDialogue = "Kamu belum tahu resep apa pun!";
+                    gameState = dialogueState;
+                    System.out.println("COOKING: Tidak ada resep yang dipelajari.");
+                    return;
+                }
+
+                int selectedIndex = ui.slotRow;
+                if (selectedIndex >= 0 && selectedIndex < learnedRecipes.size()) {
+                    Recipe selectedRecipe = learnedRecipes.get(selectedIndex);
+                    System.out.println("COOKING: Resep dipilih: " + selectedRecipe.getOutputFoodName());
+
+                    String ingredientCheck = player.checkEnoughIngredients(selectedRecipe);
+                    if (ingredientCheck != null) {
+                        ui.currentDialogue = ingredientCheck;
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Bahan tidak cukup - " + ingredientCheck);
+                        return;
+                    }
+                    String fuelAvailable = player.getAvailableFuel();
+                    if (!player.canCookWithCurrentFuel()) {
+                        ui.currentDialogue = "Kamu tidak punya bahan bakar (Firewood atau Coal)!";
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Tidak ada bahan bakar.");
+                        return;
+                    }
+                    if (!player.consumeEnergy(10)) {
+                        ui.currentDialogue = "Energi tidak cukup untuk memasak!";
+                        gameState = dialogueState;
+                        System.out.println("COOKING: Energi tidak cukup.");
+                        return;
+                    }
+                    player.consumeIngredients(selectedRecipe);
+                    player.consumeFuel(fuelAvailable);
+                    Item cookedItem = ItemRepository.getItemByName(selectedRecipe.getOutputFoodName());
+                    if (cookedItem != null) {
+                        player.addItemToInventory(cookedItem, 1);
+                        ui.currentDialogue = "Kamu memasak " + selectedRecipe.getOutputFoodName() + "!";
+                        System.out.println("COOKING: Berhasil memasak: " + selectedRecipe.getOutputFoodName());
+                    } else {
+                        ui.currentDialogue = "Error: Item masakan tidak ditemukan!";
+                        System.out.println("COOKING: Error - Item masakan tidak ditemukan: " + selectedRecipe.getOutputFoodName());
+                    }
+                    gameState = dialogueState;
+                }
+            }
+            if (keyH.escapePressed) {
+                keyH.escapePressed = false;
+                gameState = playState;
+                ui.slotRow = 0;
+                ui.recipeScrollOffset = 0;
+                System.out.println("COOKING: Keluar dari cookingState, kembali ke playState.");
             }
         }
 

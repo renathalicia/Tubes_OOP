@@ -3,7 +3,6 @@ package item; // Atau package yang sesuai
 import item.Item;
 import item.ItemStack;
 import main.GamePanel;
-import item.ItemRepository; // Kunci untuk mendapatkan item dan harga belinya
 import entity.Player;
 
 import java.util.ArrayList;
@@ -58,10 +57,11 @@ public class Store {
             // Item Misc yang bisa dibeli
             if (ItemRepository.Coal != null && ItemRepository.Coal.getBuyPrice() > 0) itemsForSale.add(ItemRepository.Coal);
             if (ItemRepository.Firewood != null && ItemRepository.Firewood.getBuyPrice() > 0) itemsForSale.add(ItemRepository.Firewood);
+            if (ItemRepository.Egg != null && ItemRepository.Egg.getBuyPrice() > 0) itemsForSale.add(ItemRepository.Egg);
 
             // Proposal ring
-            if (item.ItemRepository.ProposalRing != null && item.ItemRepository.ProposalRing.getBuyPrice() > 0) {
-                itemsForSale.add(item.ItemRepository.ProposalRing);
+            if (ItemRepository.ProposalRing != null && ItemRepository.ProposalRing.getBuyPrice() > 0) {
+                itemsForSale.add(ItemRepository.ProposalRing);
             }
     }
 
@@ -161,9 +161,9 @@ public class Store {
                 int quantityToBuy = -1;
                  if (scanner.hasNextInt()) {
                     quantityToBuy = scanner.nextInt();
-                    scanner.nextLine(); // Konsumsi newline
+                    scanner.nextLine(); 
                 } else {
-                    scanner.nextLine(); // Bersihkan input salah
+                    scanner.nextLine();
                     gp.ui.showMessage("Input jumlah tidak valid.");
                     continue;
                 }

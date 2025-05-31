@@ -1,10 +1,10 @@
 // Di dalam file AssetSetter.java
 package main;
 
-// Impor kelas objek yang akan Anda tempatkan
 import object.OBJ_ShippingBin;
-import object.OBJ_Television; // Pastikan ini nama kelas TV Anda
-import object.OBJ_Key;      // Contoh objek lain
+import object.OBJ_Television; 
+import object.OBJ_Key;  
+import object.OBJ_Stove; 
 
 public class AssetSetter {
     GamePanel gp;
@@ -16,9 +16,8 @@ public class AssetSetter {
     public void setObject() {
         System.out.println("ASSETSETTER: Memulai setObject()...");
         int mapNum = 0; // Semua objek akan ditempatkan di map 0 untuk saat ini
-        int i = 0;      // Indeks untuk array objek gp.obj[mapNum]
+        int i = 0;      
 
-        // 1. Menempatkan OBJEK SHIPPING BIN
         try {
             if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
                 gp.obj[mapNum][i] = new OBJ_ShippingBin(gp);
@@ -42,15 +41,12 @@ public class AssetSetter {
             System.err.println("ASSETSETTER: ERROR saat menempatkan Shipping Bin!");
             e.printStackTrace();
         }
-
-        // 2. Menempatkan OBJEK TELEVISI
         try {
             if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
                 gp.obj[mapNum][i] = new OBJ_Television(gp); // Pastikan nama kelas ini benar
                 if (gp.obj[mapNum][i] != null) {
-                    // Tentukan koordinat X dan Y (DALAM SATUAN TILE) untuk TV
-                    int tvTileX = 23; // GANTI DENGAN KOORDINAT X TV YANG DIINGINKAN (CONTOH)
-                    int tvTileY = 27; // GANTI DENGAN KOORDINAT Y TV YANG DIINGINKAN (CONTOH)
+                    int tvTileX = 23; 
+                    int tvTileY = 27; 
                     gp.obj[mapNum][i].worldX = tvTileX * gp.tileSize;
                     gp.obj[mapNum][i].worldY = tvTileY * gp.tileSize;
                     System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
@@ -58,12 +54,36 @@ public class AssetSetter {
                 } else {
                     System.err.println("AssetSetter: Gagal membuat instance OBJ_Television.");
                 }
-                i++; // Naikkan indeks untuk objek berikutnya
+                i++; 
             } else {
                 System.err.println("AssetSetter: Indeks map atau objek di luar batas untuk Televisi (i=" + i + ")");
             }
         } catch (Exception e) {
             System.err.println("ASSETSETTER: ERROR saat menempatkan Televisi!");
+            e.printStackTrace();
+        }
+        try {
+            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
+                // Asumsi Anda punya kelas seperti object.OBJ_KitchenStove
+                gp.obj[mapNum][i] = new object.OBJ_Stove(gp); // Pastikan nama kelas ini benar
+                if (gp.obj[mapNum][i] != null) {
+                    // Tentukan koordinat untuk KomporDapur di dalam rumah
+                    int stoveTileX = 23; 
+                    int stoveTileY = 29;
+                    gp.obj[mapNum][i].worldX = stoveTileX * gp.tileSize;
+                    gp.obj[mapNum][i].worldY = stoveTileY * gp.tileSize;
+                    // gp.obj[mapNum][i].name = "KomporDapur"; // Pastikan nama diset di konstruktor objeknya
+                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                                    " pada tile (" + stoveTileX + "," + stoveTileY + ")");
+                } else {
+                    System.err.println("AssetSetter: Gagal membuat instance OBJ_Stove.");
+                }
+                i++;
+            } else {
+                System.err.println("AssetSetter: Indeks map atau objek di luar batas untuk KomporDapur (i=" + i + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("ASSETSETTER: ERROR saat menempatkan KomporDapur!");
             e.printStackTrace();
         }
 
