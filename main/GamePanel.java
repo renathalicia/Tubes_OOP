@@ -1119,13 +1119,12 @@ public class GamePanel extends JPanel implements Runnable{
 
         tileM.draw(g2); // tile
 
-        for (int i = 0; i < obj.length; i++) {
-            if (obj[i][0] != null) { // Jika Anda menggunakan obj[mapNum][objectIndex]
-                // Iterasi melalui obj[currentMapNum]
-                for (int j = 0; j < obj[i].length; j++) {
-                    if (obj[i][j] != null) {
-                        obj[i][j].draw(g2, this); // Panggil metode draw objek
-                    }
+        if (currentMap >= 0 && currentMap < obj.length && obj[currentMap] != null) {
+            // HANYA iterasi objek di dalam currentMap
+            for (int i = 0; i < obj[currentMap].length; i++) {
+                // Jika ada objek di indeks ini, gambar!
+                if (obj[currentMap][i] != null) {
+                    obj[currentMap][i].draw(g2, this);
                 }
             }
         }

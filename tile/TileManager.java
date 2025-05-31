@@ -18,7 +18,7 @@ public class TileManager {
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
-        tile = new Tile[271];
+        tile = new Tile[300];
         mapTileNum = new int[gp.maxMap][gp.maxWorldCol][gp.maxWorldRow];
         cropMap = new CropObject[gp.maxWorldCol][gp.maxWorldRow];
 
@@ -269,6 +269,14 @@ public class TileManager {
         setup(240, "npchouse74", false);
         setup(241, "npchouse75", false);
         setup(242, "npchouse76", true);
+        setup(243, "sand00", false);
+        setup(244, "sand01", false);
+        setup(245, "sand02", false);
+        setup(246, "sand03", false);
+        setup(247, "sea00", false);
+        setup(248, "sea01", false);
+
+
 
     }
 
