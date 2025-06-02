@@ -542,8 +542,7 @@ public class GamePanel extends JPanel implements Runnable{
                                     }
                                     interactionHandled = true;
                                 } 
-                                else if ("Stove".equals(interactedObject.name) || "KomporDapur".equals(interactedObject.name)) { // <<<---- INTEGRASI STOVE DI SINI
-                                    // Anda bisa menggunakan "Stove" atau "KomporDapur", sesuaikan dengan nama objek Anda
+                                else if ("Stove".equals(interactedObject.name) || "KomporDapur".equals(interactedObject.name)) { // <<<---- 
                                     System.out.println("GAMEPANEL (playState): Berinteraksi dengan '" + interactedObject.name + "'. Memulai sesi memasak.");
                                     
                                     // Sesuai spesifikasi, memulai memasak butuh -10 energi (Source 217)
