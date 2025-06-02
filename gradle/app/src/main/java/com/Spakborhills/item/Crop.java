@@ -42,7 +42,7 @@ public class Crop extends Item {
 
     @Override
     public String getCategory() {
-        return "Crops";
+        return "Crop";
     }
 
     @Override

@@ -788,27 +788,29 @@ public void update() {
     }
     // action tilling
     public boolean tileLand() {
+        if (!hasEquippedItem("Hoe")) {
+            gp.ui.currentDialogue = "Kamu harus equip Hoe terlebih dahulu untuk membajak tanah!";
+            gp.gameState = gp.dialogueState;
+            return false;
+        }
+
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
         int centerY = worldY + solidArea.y + (solidArea.height / 2);
-
         int col = centerX / gp.tileSize;
         int row = centerY / gp.tileSize;
-
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
         if (tileIndex >= 35 && tileIndex <= 36) {
-            if (!hasEquippedItem("Hoe")) {
-                gp.ui.currentDialogue = "Kamu harus equip Hoe terlebih dahulu untuk membajak tanah!";
-                gp.gameState = gp.dialogueState;
-                return true;
-            }
-
-            if (!consumeEnergy(5)) return true;
-
+            if (!consumeEnergy(5)) return false;
+            
             gp.tileM.mapTileNum[gp.currentMap][col][row] = 56;
+            gp.ui.currentDialogue = "Tanah berhasil dibajak!";
+            gp.gameState = gp.dialogueState;
             return true;
         }
-
+        
+        gp.ui.currentDialogue = "Tidak bisa membajak tanah di sini!";
+        gp.gameState = gp.dialogueState;
         return false;
     }
 
@@ -932,6 +934,12 @@ public void update() {
     }
     // watering 
     public boolean waterTile() {
+        if (!hasEquippedItem("Watering Can")) {
+            gp.ui.currentDialogue = "Kamu harus equip Watering Can terlebih dahulu untuk menyiram!";
+            gp.gameState = gp.dialogueState;
+            return false;
+        }
+        
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
         int centerY = worldY + solidArea.y + (solidArea.height / 2);
         int col = centerX / gp.tileSize;
@@ -960,8 +968,6 @@ public void update() {
             gp.gameState = gp.dialogueState;
             return true;
         }
-
-        // HAPUS: Cek watering can sudah dilakukan di handleSmartFarmingAction()
 
         // Cek energi cukup
         if (!consumeEnergy(5)) return true;
@@ -1112,7 +1118,7 @@ public void update() {
         return false;
     }
 
-    // TAMBAHAN: Method untuk unequip item
+    // Method untuk unequip item
     public void unequipItem() {
         if (equippedItem != null) {
             gp.ui.showMessage("Unequipped: " + equippedItem.getItem().getName());
@@ -1120,7 +1126,7 @@ public void update() {
         }
     }
 
-    // TAMBAHAN: Check apakah item tertentu sedang di-equip
+    // Check apakah item tertentu sedang di-equip
     public boolean hasEquippedItem(String itemName) {
         return equippedItem != null && 
                equippedItem.getItem() != null && 

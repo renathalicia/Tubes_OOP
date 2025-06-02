@@ -665,41 +665,49 @@ public class GamePanel extends JPanel implements Runnable{
                     System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF.");
 
                 } else {
-             
-                    System.out.println("GAMEPANEL (inventoryState): Enter untuk penggunaan item biasa. Indeks: " + selectedItemIndex);
+                    System.out.println("GAMEPANEL (inventoryState): Enter untuk equip/use item. Indeks: " + selectedItemIndex);
 
                     if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
                         ItemStack stack = player.inventory.get(selectedItemIndex);
                         if (stack != null && stack.getItem() != null) {
                             Item selectedItem = stack.getItem();
-                            System.out.println("INVENTORY - ENTER: Item dipilih: " + selectedItem.getName() + ", Kategori: " + selectedItem.getCategory()); // DEBUG
+                            System.out.println("INVENTORY - ENTER: Item dipilih: " + selectedItem.getName() + ", Kategori: " + selectedItem.getCategory());
 
-        
-                            if (selectedItem.getCategory().equals("Fish") ||
-                                selectedItem.getCategory().equals("Crop") || 
-                                selectedItem.getCategory().equals("Food")) { 
+                            // PRIORITAS 1: Coba equip item jika bisa di-equip
+                            if (canBeEquipped(selectedItem)) {
+                                boolean equipSuccess = player.equipItem(stack);
+                                if (equipSuccess) {
+                                    ui.showMessage("Equipped: " + selectedItem.getName());
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' berhasil di-equip.");
+                                } else {
+                                    ui.showMessage("Gagal equip " + selectedItem.getName());
+                                }
+                            }
+                            // PRIORITAS 2: Jika tidak bisa di-equip, coba konsumsi (untuk makanan)
+                            else if (selectedItem.getCategory().equalsIgnoreCase("Fish") ||
+                                     selectedItem.getCategory().equalsIgnoreCase("Crop") || 
+                                     selectedItem.getCategory().equalsIgnoreCase("Food")) { 
 
                                 int energyGain = selectedItem.getEnergyValue(); 
-
                                 if (energyGain > 0) { 
-                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' bisa dimakan. Energi: +" + energyGain);
-
-                                    selectedItem.use(); 
-
-
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' dimakan. Energi: +" + energyGain);
+                                    
+                                    // Konsumsi item
+                                    player.gainEnergy(energyGain);
+                                    player.removeItem(selectedItem.getName(), 1);
+                                    
+                                    ui.showMessage("Memakan " + selectedItem.getName() + " (+"+energyGain+" energi)");
+                                    
                                 } else {
-                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' adalah edible tapi tidak memberi energi (getEnergyValue() = 0). Tidak dimakan.");
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak memberi energi.");
                                     ui.showMessage("Kamu tidak bisa memakan " + selectedItem.getName() + " saat ini.");
-                      
                                 }
                             } else {
-                           
-                                System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa dimakan atau digunakan dengan Enter dari sini.");
-                                ui.showMessage(selectedItem.getName() + " tidak bisa dimakan.");
-
+                                System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa di-equip atau dimakan.");
+                                ui.showMessage(selectedItem.getName() + " tidak bisa digunakan.");
                             }
                         } else {
-                            System.out.println("INVENTORY - ENTER: ItemStack atau Item di dalamnya null pada indeks " + selectedItemIndex); // DEBUG
+                            System.out.println("INVENTORY - ENTER: ItemStack atau Item di dalamnya null pada indeks " + selectedItemIndex);
                             ui.showMessage("Slot yang dipilih kosong atau item bermasalah.");
                         }
                     } else {
@@ -745,31 +753,36 @@ public class GamePanel extends JPanel implements Runnable{
             
 
         } else if (gameState == characterCreationState) {
-    if (keyH.enterPressed) { 
-        keyH.enterPressed = false; 
-
-        System.out.println("GamePanel: Finalizing character creation.");
-
-        // Terapkan data yang dikumpulkan dari UI ke objek player
-        player.name = ui.tempPlayerName.isEmpty() ? "Petani" : ui.tempPlayerName;
-        player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; // Asumsi 0=Laki, 1=Perempuan
-        player.farmName = ui.tempFarmName.isEmpty() ? "Kebunku" : ui.tempFarmName;
-        if (player.favoriteItem != null) { 
-            player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; 
-        }
-
-        System.out.println("Pembuatan Karakter Selesai:");
-        System.out.println("Nama: " + player.name);
-        System.out.println("Gender: " + player.gender);
-        System.out.println("Nama Kebun: " + player.farmName);
-        if (player.favoriteItem != null) {
-            System.out.println("Item Favorit: " + player.favoriteItem);
-        }
-
-        ui.activeInputField = 0; 
-    }
-    
-} else if (gameState == npcInteractionState) { 
+            if (keyH.enterPressed) { 
+                keyH.enterPressed = false; 
+        
+                System.out.println("GamePanel: Finalizing character creation.");
+        
+                // Terapkan data yang dikumpulkan dari UI ke objek player
+                player.name = ui.tempPlayerName.isEmpty() ? "Petani" : ui.tempPlayerName;
+                player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; // Asumsi 0=Laki, 1=Perempuan
+                player.farmName = ui.tempFarmName.isEmpty() ? "Kebunku" : ui.tempFarmName;
+                if (player.favoriteItem != null) { 
+                    player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; 
+                }
+        
+                System.out.println("Pembuatan Karakter Selesai:");
+                System.out.println("Nama: " + player.name);
+                System.out.println("Gender: " + player.gender);
+                System.out.println("Nama Kebun: " + player.farmName);
+                if (player.favoriteItem != null) {
+                    System.out.println("Item Favorit: " + player.favoriteItem);
+                }
+                
+                // Reset UI dan pindah ke playState
+                ui.activeInputField = 0; 
+                ui.resetInputFields(); // Reset field input untuk mencegah data lama muncul
+                gameState = playState; // Pindah ke playState
+                System.out.println("GamePanel: Berpindah ke playState.");
+        
+                ui.activeInputField = 0; 
+            }
+        } else if (gameState == npcInteractionState) { 
             Entity currentNpc = player.currentInteractingNPC;
             if (keyH.enterPressed) {
                 if (currentNpc != null) {
@@ -1496,5 +1509,32 @@ public class GamePanel extends JPanel implements Runnable{
     public void playSE(int i) {
         se.setFile(i);
         se.play();
+    }
+
+    /**
+     * Menentukan apakah item bisa di-equip berdasarkan kategorinya
+     */
+    private boolean canBeEquipped(Item item) {
+        if (item == null) return false;
+        
+        String category = item.getCategory();
+        String name = item.getName();
+        
+        // Tools yang bisa di-equip
+        if ("Tool".equals(category)) {
+            return true;
+        }
+        
+        // Seeds yang bisa di-equip
+        if ("Seed".equals(category)) {
+            return true;
+        }
+        
+        // Atau berdasarkan nama spesifik
+        return name.equals("Hoe") || 
+               name.equals("Watering Can") || 
+               name.equals("Pickaxe") || 
+               name.equals("Fishing Rod") ||
+               name.contains("Seeds");
     }
 }
