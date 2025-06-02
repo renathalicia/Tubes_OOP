@@ -982,8 +982,8 @@ public void update() {
     // watching
     public boolean watchTV() {
         Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
-        // Cek apakah berada di dalam rumah (misalnya currentMap 1 = House)
-        if (gp.currentMap != 2) {
+        // Cek apakah berada di dalam rumah
+        if (gp.currentMap != 5) {
             gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
             gp.gameState = gp.dialogueState;
             return true;
