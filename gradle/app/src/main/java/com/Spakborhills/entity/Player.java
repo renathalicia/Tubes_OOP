@@ -647,20 +647,20 @@ public void update() {
     }
 
     public void interactNPC(int i) {
-    if (i != 999 && gp.npc[gp.currentMap][i] != null) { 
-        System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
-        currentInteractingNPC = gp.npc[gp.currentMap][i];
-        gp.gameState = gp.npcInteractionState; 
-        gp.ui.commandNum = 0;
-        if (gp.statsManager != null && currentInteractingNPC != null) { 
-            gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
-            System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
+        if (i != 999 && gp.npc[gp.currentMap][i] != null) { 
+            System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
+            currentInteractingNPC = gp.npc[gp.currentMap][i];
+            gp.gameState = gp.npcInteractionState; 
+            gp.ui.commandNum = 0;
+            if (gp.statsManager != null && currentInteractingNPC != null) { 
+                gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
+                System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
+            }
+            
+        } else {
+            //jika tidak ada npc, tidak melakukan apa-apa
         }
-        
-    } else {
-        //jika tidak ada npc, tidak melakukan apa-apa
     }
-}
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){
@@ -920,7 +920,8 @@ public void update() {
     // Watching
     public boolean watchTV() {
         Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
-        if (gp.currentMap != 2) {
+        // Cek apakah berada di dalam rumah
+        if (gp.currentMap != 5) {
             gp.ui.currentDialogue = "Kamu hanya bisa menonton TV di dalam rumah!";
             gp.gameState = gp.dialogueState;
             return true;

@@ -11,18 +11,17 @@ public class AssetSetter {
 
     public void setObject() {
         System.out.println("ASSETSETTER: Memulai setObject()...");
-        int mapNum = 0; // Semua objek akan ditempatkan di map 0 untuk saat ini
         int i = 0;   
 
         try {
-            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
-                gp.obj[mapNum][i] = new OBJ_ShippingBin(gp);
-                if (gp.obj[mapNum][i] != null) {
+            if (0 < gp.obj.length && i < gp.obj[0].length) {
+                gp.obj[0][i] = new OBJ_ShippingBin(gp);
+                if (gp.obj[0][i] != null) {
                     int binTileX = 36;
                     int binTileY = 22;
-                    gp.obj[mapNum][i].worldX = binTileX * gp.tileSize;
-                    gp.obj[mapNum][i].worldY = binTileY * gp.tileSize;
-                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                    gp.obj[0][i].worldX = binTileX * gp.tileSize;
+                    gp.obj[0][i].worldY = binTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[0][i].name + " ditempatkan di map " + 0 + " index " + i +
                                        " pada tile (" + binTileX + "," + binTileY + ")");
                 } else {
                     System.err.println("AssetSetter: Gagal membuat instance OBJ_ShippingBin.");
@@ -37,14 +36,14 @@ public class AssetSetter {
         }
 
         try {
-            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
-                gp.obj[mapNum][i] = new OBJ_House(gp);
-                if (gp.obj[mapNum][i] != null) {
+            if (0 < gp.obj.length && i < gp.obj[0].length) {
+                gp.obj[0][i] = new OBJ_House(gp);
+                if (gp.obj[0][i] != null) {
                     int houseTileX = 29;
                     int houseTileY = 22;
-                    gp.obj[mapNum][i].worldX = houseTileX * gp.tileSize;
-                    gp.obj[mapNum][i].worldY = houseTileY * gp.tileSize;
-                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                    gp.obj[0][i].worldX = houseTileX * gp.tileSize;
+                    gp.obj[0][i].worldY = houseTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[0][i].name + " ditempatkan di map " + 0 + " index " + i +
                             " pada tile (" + houseTileX + "," + houseTileY + ")");
                 } else {
                     System.err.println("AssetSetter: Gagal membuat instance OBJ_Television.");
@@ -57,15 +56,16 @@ public class AssetSetter {
             System.err.println("ASSETSETTER: ERROR saat menempatkan Televisi!");
             e.printStackTrace();
         }
+
         try {
-            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
-                gp.obj[mapNum][i] = new OBJ_Stove(gp); 
-                if (gp.obj[mapNum][i] != null) {
-                    int stoveTileX = 23; 
-                    int stoveTileY = 29;
-                    gp.obj[mapNum][i].worldX = stoveTileX * gp.tileSize;
-                    gp.obj[mapNum][i].worldY = stoveTileY * gp.tileSize;
-                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+            if (0 < gp.obj.length && i < gp.obj[0].length) {
+                gp.obj[5][i] = new OBJ_Stove(gp); 
+                if (gp.obj[5][i] != null) {
+                    int stoveTileX = 14; 
+                    int stoveTileY = 5;
+                    gp.obj[5][i].worldX = stoveTileX * gp.tileSize;
+                    gp.obj[5][i].worldY = stoveTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[5][i].name + " ditempatkan di map " + 5 + " index " + i +
                                     " pada tile (" + stoveTileX + "," + stoveTileY + ")");
                 } else {
                     System.err.println("AssetSetter: Gagal membuat instance OBJ_Stove.");
@@ -80,14 +80,14 @@ public class AssetSetter {
         }
 
         try {
-            if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
-                gp.obj[mapNum][i] = new OBJ_Pond(gp);
-                if (gp.obj[mapNum][i] != null) {
+            if (0 < gp.obj.length && i < gp.obj[0].length) {
+                gp.obj[0][i] = new OBJ_Pond(gp);
+                if (gp.obj[0][i] != null) {
                     int pondTileX = 20;
                     int pondTileY = 34;
-                    gp.obj[mapNum][i].worldX = pondTileX * gp.tileSize;
-                    gp.obj[mapNum][i].worldY = pondTileY * gp.tileSize;
-                    System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
+                    gp.obj[0][i].worldX = pondTileX * gp.tileSize;
+                    gp.obj[0][i].worldY = pondTileY * gp.tileSize;
+                    System.out.println("AssetSetter: " + gp.obj[0][i].name + " ditempatkan di map " + 0 + " index " + i +
                             " pada tile (" + pondTileX + "," + pondTileY + ")");
                 } else {
                     System.err.println("AssetSetter: Gagal membuat instance OBJ_Television.");
@@ -102,7 +102,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[1][i] = new OBJ_HouseOcean(gp);
                 if (gp.obj[1][i] != null) {
                     int houseOceanTileX = 25;
@@ -124,7 +124,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[3][i] = new OBJ_HouseLake00(gp);
                 if (gp.obj[3][i] != null) {
                     int houseLake00X = 13;
@@ -146,7 +146,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[3][i] = new OBJ_HouseLake01(gp);
                 if (gp.obj[3][i] != null) {
                     int houseLake01X = 42;
@@ -168,7 +168,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[4][i] = new OBJ_HouseRiver00(gp);
                 if (gp.obj[4][i] != null) {
                     int houseRiver00X = 13;
@@ -190,7 +190,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[4][i] = new OBJ_HouseRiver01(gp);
                 if (gp.obj[4][i] != null) {
                     int houseRiver01X = 42;
@@ -212,7 +212,7 @@ public class AssetSetter {
         }
 
         try {
-            if (1 < gp.obj.length && i < gp.obj[mapNum].length) {
+            if (1 < gp.obj.length && i < gp.obj[0].length) {
                 gp.obj[1][i] = new OBJ_StoreOcean(gp);
                 if (gp.obj[1][i] != null) {
                     int storeOceanX = 30;
@@ -233,6 +233,6 @@ public class AssetSetter {
             e.printStackTrace();
         }
 
-        System.out.println("ASSETSETTER: Selesai setObject(). Total slot objek yang coba diisi di map " + mapNum + ": " + i);
+        System.out.println("ASSETSETTER: Selesai setObject(). Total slot objek yang coba diisi di map " + 0 + ": " + i);
     }
 }

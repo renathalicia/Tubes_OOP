@@ -159,7 +159,14 @@ public class EventHandler {
         tempCol = col;
         tempRow = row;
         canTouchEvent = false;
-////        gp.playSE(13); untuk play sound, klo mau
+        // Kurangi energi player
+        if (gp.player != null) {
+            gp.player.consumeEnergy(10); // Kurangi 10 energi
+        }
+        // Kurangi waktu 15 menit
+        if (gp.gameStateSystem != null && gp.statsManager != null) {
+            gp.gameStateSystem.advanceTimeByMinutes(15, gp.statsManager);
+        }
     }
 }
 

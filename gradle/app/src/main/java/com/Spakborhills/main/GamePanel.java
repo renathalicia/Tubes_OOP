@@ -443,9 +443,12 @@ public class GamePanel extends JPanel implements Runnable{
             if (player.energy <= -20) {
                 autoSleepMessage = "Kamu pingsan karena kelelahan!";
                 autoSleepConditionMet = true;
+                player.energy = player.maxEnergy/2;
+                gameStateSystem.getTimeManager().advanceToNextMorning(this.statsManager);
             } else if (gameStateSystem.getTimeManager().getHour() == 2) {
                 autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur";
                 autoSleepConditionMet = true;
+                gameStateSystem.getTimeManager().advanceToNextMorning(this.statsManager);
             }
             if (autoSleepConditionMet) {
                 System.out.println("GAMEPANEL: Kondisi tidur otomatis. Pesan: " + autoSleepMessage);
