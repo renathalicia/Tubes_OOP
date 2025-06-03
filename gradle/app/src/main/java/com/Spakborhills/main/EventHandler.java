@@ -149,8 +149,6 @@ public class EventHandler {
                     previousEventY = gp.player.worldY;
                 }
             }
-            // TIDAK PERLU MERESET gp.player.solidArea.x/y dan eventRect[map][col][row].x/y di sini
-            // karena kita menggunakan objek Rectangle sementara yang baru dibuat setiap kali.
         }
         return hit;
     }

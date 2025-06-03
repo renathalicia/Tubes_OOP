@@ -18,7 +18,6 @@ public class Store {
         
     }
 
-    // Mengisi daftar item yang dijual di toko.
     private void populateStoreWithPricedItems() {
             if (ItemRepository.Parsnip_Seeds != null) itemsForSale.add(ItemRepository.Parsnip_Seeds);
             if (ItemRepository.Cauliflower_Seeds != null) itemsForSale.add(ItemRepository.Cauliflower_Seeds);
@@ -64,9 +63,6 @@ public class Store {
             }
     }
 
-    /**
-     * Menampilkan item yang dijual (Harga diambil dari item.getBuyPrice()).
-     */
     public void displayItemsForSale() {
         gp.ui.showMessage("Selamat datang di Toko! Lihat-lihat dulu barangnya:");
         System.out.println("===== BARANG TOKO =====");
@@ -76,10 +72,10 @@ public class Store {
         }
         for (int i = 0; i < itemsForSale.size(); i++) {
             Item item = itemsForSale.get(i);
-            System.out.printf("%d. %s - Harga: %dg [%s]%n", // Menampilkan harga beli item
+            System.out.printf("%d. %s - Harga: %dg [%s]%n", 
                     i + 1,
                     item.getName(),
-                    item.getBuyPrice(), // Harga diambil langsung dari atribut item
+                    item.getBuyPrice(), 
                     item.getCategory());
         }
         System.out.println("0. Keluar");
@@ -89,12 +85,7 @@ public class Store {
     public List<Item> getItemsForSale() {
         return itemsForSale;
     }
-    /**
-     * Memproses pembelian. Harga diambil dari item.getBuyPrice().
-     * @param player Pemain yang melakukan pembelian.
-     * @param itemChoiceNomor Nomor urut item dari daftar yang ditampilkan (mulai dari 1).
-     * @param quantity Jumlah yang ingin dibeli.
-     */
+
     public void processPurchase(Player player, int itemChoiceNomor, int quantity) {
         if (itemChoiceNomor < 1 || itemChoiceNomor > itemsForSale.size()) {
             gp.ui.showMessage("Pilihan tidak ada dalam daftar.");
@@ -106,25 +97,21 @@ public class Store {
         }
 
         Item selectedItem = itemsForSale.get(itemChoiceNomor - 1);
-        int pricePerUnit = selectedItem.getBuyPrice(); // Harga per unit adalah buyPrice dari item
+        int pricePerUnit = selectedItem.getBuyPrice(); 
         int totalCost = pricePerUnit * quantity;
 
         if (player.gold < totalCost) {
-            // gp.ui.showMessage("Maaf, gold Anda (" + player.gold + "g) tidak cukup. Butuh " + totalCost + "g.");
             return;
         }
 
-        // Lakukan transaksi
-        player.changeGold(-totalCost); // Kurangi gold pemain
+        player.changeGold(-totalCost); 
 
-        // Tambahkan item ke inventory pemain (asumsi Player.addItemToInventory sudah ada)
         boolean successfullyAdded = player.addItemToInventory(selectedItem, quantity);
 
         if (successfullyAdded) {
             gp.ui.showMessage("Anda membeli " + quantity + " " + selectedItem.getName() + " seharga " + totalCost + "g.");
             System.out.println("Transaksi berhasil: " + quantity + "x " + selectedItem.getName() + " (-" + totalCost + "g)");
         } else {
-            // Jika gagal menambah ke inventory (misal penuh), kembalikan gold
             player.changeGold(totalCost);
             gp.ui.showMessage("Gagal menambahkan " + selectedItem.getName() + " ke inventory (mungkin penuh?). Transaksi dibatalkan.");
             System.out.println("Transaksi gagal (inventory penuh?). Gold dikembalikan.");

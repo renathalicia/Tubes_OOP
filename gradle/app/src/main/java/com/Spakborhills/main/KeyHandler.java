@@ -8,6 +8,7 @@ import com.Spakborhills.item.Item;
 import com.Spakborhills.command.PlantCommand;
 import com.Spakborhills.command.TillingCommand;
 import com.Spakborhills.command.WaterCommand;
+import com.Spakborhills.object.CropObject;
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
@@ -177,9 +178,7 @@ public class KeyHandler implements KeyListener {
         // END GAME STATE
         else if (gp.gameState == gp.endGameStatisticsState) {
             if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_ESCAPE) {
-                enterPressed = true; // Sinyalkan GamePanel untuk keluar dari state ini
-                                    // Atau Anda bisa langsung ubah gameState di sini jika mau:
-                                    // gp.gameState = gp.playState;
+                enterPressed = true; 
             }
         }
 
@@ -217,34 +216,32 @@ public class KeyHandler implements KeyListener {
         // NEW GAME INPUT STATE
         else if (gp.gameState == gp.characterCreationState) {
     int currentActiveField = gp.ui.activeInputField;
-    int totalFields = gp.ui.TOTAL_CREATION_FIELDS; // Ambil dari UI
+    int totalFields = gp.ui.TOTAL_CREATION_FIELDS; 
     int selesaiButtonIndex = totalFields - 1;
 
     if (code == KeyEvent.VK_ENTER) {
         System.out.println("Enter pressed in Creation. Active field: " + currentActiveField + ", Selesai button index: " + selesaiButtonIndex);
-        if (currentActiveField == selesaiButtonIndex) { // Jika fokus ada di tombol "Selesai"
+        if (currentActiveField == selesaiButtonIndex) { 
             System.out.println("KeyHandler: Enter on Selesai button. Setting enterPressed = true.");
-            enterPressed = true; // Sinyal ke GamePanel untuk menyelesaikan pembuatan karakter
+            enterPressed = true; 
         } else {
-            // Jika Enter ditekan BUKAN di tombol Selesai, pindahkan fokus ke field berikutnya
             System.out.println("KeyHandler: Enter on input field. Moving focus.");
-            gp.ui.activeInputField = (currentActiveField + 1) % totalFields; // % totalFields untuk wrap around
+            gp.ui.activeInputField = (currentActiveField + 1) % totalFields; 
         }
-    } else if (code == KeyEvent.VK_TAB) { // Tab juga untuk navigasi maju
+    } else if (code == KeyEvent.VK_TAB) { 
         gp.ui.activeInputField = (currentActiveField + 1) % totalFields;
     } else if (code == KeyEvent.VK_UP) {
         gp.ui.activeInputField--;
         if (gp.ui.activeInputField < 0) {
-            gp.ui.activeInputField = selesaiButtonIndex; // Pindah ke tombol Selesai (dari atas)
+            gp.ui.activeInputField = selesaiButtonIndex; 
         }
     } else if (code == KeyEvent.VK_DOWN) {
         gp.ui.activeInputField++;
         if (gp.ui.activeInputField >= totalFields) {
-            gp.ui.activeInputField = 0; // Pindah ke field Nama (dari bawah)
+            gp.ui.activeInputField = 0; 
         }
     } else if (code == KeyEvent.VK_BACK_SPACE) {
         System.out.println("Backspace pressed. Active field: " + currentActiveField);
-        // Backspace hanya berlaku untuk field teks (Nama, Kebun, Item Favorit)
         String oldText = "";
         switch (currentActiveField) {
             case 0: // Nama Pemain
@@ -268,16 +265,14 @@ public class KeyHandler implements KeyListener {
                     System.out.println("Item Favorit: " + oldText + " -> " + gp.ui.tempFavoriteItem);
                 }
                 break;
-            // Tidak ada aksi backspace untuk Gender (field 1) atau Tombol Selesai (field 4)
         }
-    } else if (currentActiveField == 1) { // Input untuk Gender (field ke-1, menggunakan kiri/kanan)
+    } else if (currentActiveField == 1) { 
         if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A) {
-            gp.ui.tempGenderSelection = (gp.ui.tempGenderSelection == 0) ? 1 : 0; // Toggle
+            gp.ui.tempGenderSelection = (gp.ui.tempGenderSelection == 0) ? 1 : 0; 
         } else if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
-            gp.ui.tempGenderSelection = (gp.ui.tempGenderSelection == 0) ? 1 : 0; // Toggle
+            gp.ui.tempGenderSelection = (gp.ui.tempGenderSelection == 0) ? 1 : 0;
         }
     }
-    // Hanya proses input karakter jika field aktif adalah field teks
     else if (currentActiveField == 0 || currentActiveField == 2 || currentActiveField == 3) {
         char keyChar = e.getKeyChar();
         if (Character.isLetterOrDigit(keyChar) || keyChar == ' ' || Character.isWhitespace(keyChar) && keyChar != '\t' && keyChar != '\n') { // Izinkan spasi
@@ -317,12 +312,11 @@ public class KeyHandler implements KeyListener {
             }
         }
 
-        // tilling and planting
+        // tilling, planting, watering, harvesting, recovering
         if (code == KeyEvent.VK_SPACE) {
             if (gp.gameState == gp.dialogueState) {
                 gp.gameState = gp.playState;
             } else if (gp.gameState == gp.playState) {
-
                 // Ambil posisi tile yang sedang diinjak
                 int centerX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
                 int centerY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
@@ -331,12 +325,57 @@ public class KeyHandler implements KeyListener {
 
                 int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-                if (tileIndex >= 35 && tileIndex <= 36) {
-                    new TillingCommand(gp.player).execute(); 
-                } else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
-                    new PlantCommand(gp.player).execute();  
-                } else if (gp.tileM.cropMap[col][row] != null) {
-                    new WaterCommand(gp.player).execute();  
+                String equippedItemName = "";
+                if (gp.player.equippedItem != null && gp.player.equippedItem.getItem() != null) {
+                    equippedItemName = gp.player.equippedItem.getItem().getName();
+                }
+
+                if ("Pickaxe".equals(equippedItemName) && tileIndex == 56) {
+                    // RECOVERING 
+                    gp.player.recoverLand();
+                }
+                else if (gp.tileM.cropMap[col][row] != null) {
+                    CropObject crop = gp.tileM.cropMap[col][row];
+                    int currentDay = gp.gameStateSystem.getTimeManager().getDay();
+                    
+                    if (crop.isReadyToHarvest(currentDay)) {
+                        // HARVESTING 
+                        gp.player.harvestCrop();
+                    } else if (crop.canBeWateredToday(currentDay)) {
+                        // WATERING 
+                        if (gp.player.hasEquippedItem("Watering Can")) {
+                            new WaterCommand(gp.player).execute();
+                        } else {
+                            gp.ui.currentDialogue = "Equip Watering Can terlebih dahulu untuk menyiram!";
+                            gp.gameState = gp.dialogueState;
+                        }
+                    } else {
+                        gp.ui.currentDialogue = "Tanaman ini sudah disiram hari ini.";
+                        gp.gameState = gp.dialogueState;
+                    }
+                }
+                // Tilling 
+                else if (tileIndex >= 35 && tileIndex <= 36) {
+                    if (gp.player.hasEquippedItem("Hoe")) {
+                        new TillingCommand(gp.player).execute();
+                    } else {
+                        gp.ui.currentDialogue = "Equip Hoe terlebih dahulu untuk membajak!";
+                        gp.gameState = gp.dialogueState;
+                    }
+                } 
+                // Planting 
+                else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
+                    if (gp.player.equippedItem != null && 
+                        gp.player.equippedItem.getItem() instanceof com.Spakborhills.item.Seed) {
+                        new PlantCommand(gp.player).execute();
+                    } else {
+                        gp.ui.currentDialogue = "Equip seed terlebih dahulu untuk menanam!";
+                        gp.gameState = gp.dialogueState;
+                    }
+                }
+                else {
+                    gp.ui.currentDialogue = "Tidak ada aksi yang bisa dilakukan di sini.";
+                    gp.gameState = gp.dialogueState;
                 }
             }
         }

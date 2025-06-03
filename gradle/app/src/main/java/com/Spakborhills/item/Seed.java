@@ -6,21 +6,8 @@ public class Seed extends Item {
 
     private int daysToHarvest;
     private String cropResultName; 
-    private String plantingSeason; // ("Spring", "Summer", "Fall", "Any")
-
-    /**
-     * Konstruktor untuk Seed.
-     *
-     * @param name Nama bibit (e.g., "Parsnip Seeds").
-     * @param buyPrice Harga beli bibit di toko.
-     * @param sellPrice Harga jual bibit (biasanya setengah harga beli).
-     * @param gp GamePanel instance.
-     * @param description Deskripsi bibit.
-     * @param daysToHarvest Jumlah hari hingga bibit siap panen.
-     * @param cropResultName Nama Crop yang dihasilkan (e.g., "Parsnip").
-     * @param plantingSeason Musim tanam yang sesuai untuk bibit ini.
-     * @param imagePath Path ke gambar bibit (misalnya, "/items/seeds/parsnip_seeds").
-     */
+    private String plantingSeason;
+    
     public Seed(String name, int buyPrice, int sellPrice, GamePanel gp, String description,
                 int daysToHarvest, String cropResultName, String plantingSeason, String imagePath) {
         super(name, buyPrice, sellPrice, gp); 

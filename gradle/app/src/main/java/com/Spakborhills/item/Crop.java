@@ -5,18 +5,7 @@ public class Crop extends Item {
 
     private int jumlahPerPanen;
     private int energiYangDiberikan;
-
-    /**
-     * Konstruktor untuk Crop.
-     *
-     * @param name 
-     * @param buyPrice 
-     * @param sellPrice 
-     * @param gp 
-     * @param description 
-     * @param jumlahPerPanen
-     * @param imagePath 
-     */
+    
     public Crop(String name, int buyPrice, int sellPrice, GamePanel gp, String description, int jumlahPerPanen, String imagePath) {
         super(name, buyPrice, sellPrice, gp); 
         this.description = description;

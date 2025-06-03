@@ -59,15 +59,12 @@ public class AssetSetter {
         }
         try {
             if (mapNum < gp.obj.length && i < gp.obj[mapNum].length) {
-                // Asumsi Anda punya kelas seperti object.OBJ_KitchenStove
-                gp.obj[mapNum][i] = new OBJ_Stove(gp); // Pastikan nama kelas ini benar
+                gp.obj[mapNum][i] = new OBJ_Stove(gp); 
                 if (gp.obj[mapNum][i] != null) {
-                    // Tentukan koordinat untuk KomporDapur di dalam rumah
                     int stoveTileX = 23; 
                     int stoveTileY = 29;
                     gp.obj[mapNum][i].worldX = stoveTileX * gp.tileSize;
                     gp.obj[mapNum][i].worldY = stoveTileY * gp.tileSize;
-                    // gp.obj[mapNum][i].name = "KomporDapur"; // Pastikan nama diset di konstruktor objeknya
                     System.out.println("AssetSetter: " + gp.obj[mapNum][i].name + " ditempatkan di map " + mapNum + " index " + i +
                                     " pada tile (" + stoveTileX + "," + stoveTileY + ")");
                 } else {
