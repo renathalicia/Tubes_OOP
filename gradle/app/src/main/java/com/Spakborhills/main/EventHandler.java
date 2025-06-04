@@ -50,15 +50,12 @@ public class EventHandler {
             //dari FarmHouse[0] ke InteriorFarmHouse[2]
             if (hit(0, 30, 27, "any")) {
                 visiting(5, 12, 20);
-                eventRect[0][30][27].eventDone = true; 
             } else if (hit(5, 12, 20, "any")){
                 visiting(0, 30, 27);
-                eventRect[2][12][20].eventDone = true;
 
             //dari FarmMap[0] ke Ocean[1]
             } else if (hit(0, 40, 39, "any")) {
                 visiting(1, 21, 39);
-                eventRect[1][12][13].eventDone = true; 
             } else if (hit(1, 21, 39, "any")){
                 visiting(0, 40, 39);
             }
@@ -92,7 +89,7 @@ public class EventHandler {
                 visiting(3, 43,41);
             }
             //dari FarmMap[0] ke ForestRiver[4]
-            else if (hit(0,9,10, "any")){
+            else if (hit(0, 9,10, "any")){
                 visiting(4, 22, 41);
             }else if (hit(4, 22, 41, "any")){
                 visiting(0, 9, 10);
