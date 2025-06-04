@@ -8,6 +8,7 @@ import com.Spakborhills.command.PlantCommand;
 import com.Spakborhills.command.TillingCommand;
 import com.Spakborhills.command.WaterCommand;
 import com.Spakborhills.item.Item;
+import com.Spakborhills.object.CropObject;
 
 public class KeyHandler implements KeyListener {
     GamePanel gp;
@@ -331,12 +332,11 @@ public class KeyHandler implements KeyListener {
             }
         }
 
-        // tilling and planting
+        // tilling, planting, watering, harvesting, recovering
         if (code == KeyEvent.VK_SPACE) {
             if (gp.gameState == gp.dialogueState) {
                 gp.gameState = gp.playState;
             } else if (gp.gameState == gp.playState) {
-
                 // Ambil posisi tile yang sedang diinjak
                 int centerX = gp.player.worldX + gp.player.solidArea.x + (gp.player.solidArea.width / 2);
                 int centerY = gp.player.worldY + gp.player.solidArea.y + (gp.player.solidArea.height / 2);
@@ -345,12 +345,57 @@ public class KeyHandler implements KeyListener {
 
                 int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-                if (tileIndex >= 35 && tileIndex <= 36) {
-                    new TillingCommand(gp.player).execute(); 
-                } else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
-                    new PlantCommand(gp.player).execute();  
-                } else if (gp.tileM.cropMap[col][row] != null) {
-                    new WaterCommand(gp.player).execute();  
+                String equippedItemName = "";
+                if (gp.player.equippedItem != null && gp.player.equippedItem.getItem() != null) {
+                    equippedItemName = gp.player.equippedItem.getItem().getName();
+                }
+
+                if ("Pickaxe".equals(equippedItemName) && tileIndex == 56) {
+                    // RECOVERING 
+                    gp.player.recoverLand();
+                }
+                else if (gp.tileM.cropMap[col][row] != null) {
+                    CropObject crop = gp.tileM.cropMap[col][row];
+                    int currentDay = gp.gameStateSystem.getTimeManager().getDay();
+                    
+                    if (crop.isReadyToHarvest(currentDay)) {
+                        // HARVESTING 
+                        gp.player.harvestCrop();
+                    } else if (crop.canBeWateredToday(currentDay)) {
+                        // WATERING 
+                        if (gp.player.hasEquippedItem("Watering Can")) {
+                            new WaterCommand(gp.player).execute();
+                        } else {
+                            gp.ui.currentDialogue = "Equip Watering Can terlebih dahulu untuk menyiram!";
+                            gp.gameState = gp.dialogueState;
+                        }
+                    } else {
+                        gp.ui.currentDialogue = "Tanaman ini sudah disiram hari ini.";
+                        gp.gameState = gp.dialogueState;
+                    }
+                }
+                // Tilling 
+                else if (tileIndex >= 35 && tileIndex <= 36) {
+                    if (gp.player.hasEquippedItem("Hoe")) {
+                        new TillingCommand(gp.player).execute();
+                    } else {
+                        gp.ui.currentDialogue = "Equip Hoe terlebih dahulu untuk membajak!";
+                        gp.gameState = gp.dialogueState;
+                    }
+                } 
+                // Planting 
+                else if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
+                    if (gp.player.equippedItem != null && 
+                        gp.player.equippedItem.getItem() instanceof com.Spakborhills.item.Seed) {
+                        new PlantCommand(gp.player).execute();
+                    } else {
+                        gp.ui.currentDialogue = "Equip seed terlebih dahulu untuk menanam!";
+                        gp.gameState = gp.dialogueState;
+                    }
+                }
+                else {
+                    gp.ui.currentDialogue = "Tidak ada aksi yang bisa dilakukan di sini.";
+                    gp.gameState = gp.dialogueState;
                 }
             }
         }

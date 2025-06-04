@@ -126,11 +126,11 @@ public class Player extends Entity {
     int tileCol = worldX / gp.tileSize;
     int tileRow = worldY / gp.tileSize;
 
-    // Pengecekan batas peta (sudah ada dan benar)
+    // Pengecekan batas peta 
     if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
         return false;
     }
-    // Pengecekan batas array mapTileNum (sudah ada dan benar)
+    // Pengecekan batas array mapTileNum
     if (gp.currentMap < 0 || gp.currentMap >= gp.tileM.mapTileNum.length ||
         tileCol < 0 || tileCol >= gp.tileM.mapTileNum[gp.currentMap].length ||
         tileRow < 0 || tileRow >= gp.tileM.mapTileNum[gp.currentMap][tileCol].length) {
@@ -139,12 +139,12 @@ public class Player extends Entity {
     }
     int tileNum = gp.tileM.mapTileNum[gp.currentMap][tileCol][tileRow];
 
-    // Pengecekan batas array tile properties (sudah ada dan benar)
+    // Pengecekan batas array tile properties
     if (tileNum < 0 || tileNum >= gp.tileM.tile.length || gp.tileM.tile[tileNum] == null) {
         System.err.println("checkSpecificTileIsWater: tileNum (" + tileNum + ") tidak valid atau tile properties null.");
         return false;
     }
-    return false; // Karena pengecekan spesifik (59, 249, OBJ_Pond) ada di GamePanel
+    return false; 
 }
 
     public int getTileInFront() {
@@ -158,20 +158,20 @@ public class Player extends Entity {
 
         switch (this.direction) {
             case "up":
-                tileInFrontY = checkY - tileSize; // Satu tile di atas
+                tileInFrontY = checkY - tileSize;
                 break;
             case "down":
-                tileInFrontY = checkY + tileSize; // Satu tile di bawah
+                tileInFrontY = checkY + tileSize; 
                 break;
             case "left":
-                tileInFrontX = checkX - tileSize; // Satu tile di kiri
+                tileInFrontX = checkX - tileSize;
                 break;
             case "right":
-                tileInFrontX = checkX + tileSize; // Satu tile di kanan
+                tileInFrontX = checkX + tileSize;
                 break;
             default:
                 System.err.println("Player.getTileInFront(): Arah tidak valid: " + this.direction);
-                return -1; // Arah tidak valid
+                return -1;
         }
 
         int tileCol = tileInFrontX / tileSize;
@@ -179,7 +179,6 @@ public class Player extends Entity {
 
         // Pengecekan batas peta dunia
         if (tileCol < 0 || tileCol >= gp.maxWorldCol || tileRow < 0 || tileRow >= gp.maxWorldRow) {
-            // System.out.println("Player.getTileInFront(): Di luar batas peta dunia (" + tileCol + "," + tileRow + ")");
             return -1;
         }
 
@@ -349,7 +348,7 @@ public class Player extends Entity {
     }
 
     public int getEnergy() {
-        return energy; // Mengembalikan nilai energi saat ini
+        return energy;
     }
 
     public void onHarvest(String cropName) {
@@ -429,10 +428,6 @@ public class Player extends Entity {
         }
     }
 
-    /**
-     * Memeriksa apakah pemain memiliki bahan bakar (Firewood atau Coal).
-     * @return Nama bahan bakar yang valid ("Firewood", "Coal"), atau null jika tidak ada.
-     */
     public String getAvailableFuel() {
         for (ItemStack stack : inventory) {
             if (stack.getItem() != null && ("Firewood".equals(stack.getItem().getName()) || "Coal".equals(stack.getItem().getName()))) {
@@ -448,10 +443,6 @@ public class Player extends Entity {
         return null;
     }
 
-    /**
-     * Mengonsumsi satu unit bahan bakar yang tersedia.
-     * @param fuelName Nama bahan bakar yang akan dikonsumsi ("Firewood" atau "Coal").
-     */
     public void consumeFuel(String fuelName) {
         if (fuelCapacityRemaining > 0) {
             fuelCapacityRemaining--;
@@ -504,19 +495,16 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-//        worldX = gp.tileSize * 23;
-//        worldY = gp.tileSize * 21;
-        //untuk interior
         worldX = gp.tileSize * 27;
         worldY = gp.tileSize * 15;
         speed = 3;
         direction = "down";
 
-        name = "Bujanginam";
+        name = "Farmer";
         gender = "Male";
         energy = maxEnergy;
-        gold = 70000000;
-        farmName = "Tanah Batak";
+        gold = 3000;
+        farmName = "Spakbor Farm";
         partner = "None";
         favoriteItem = "None";
 
@@ -528,18 +516,6 @@ public class Player extends Entity {
     public void setInitialInventoryItems() {
         if (ItemRepository.Parsnip_Seeds != null) {
             inventory.add(new ItemStack(ItemRepository.Parsnip_Seeds, 15));
-        }
-        if (ItemRepository.Pumpkin != null) {
-            inventory.add(new ItemStack(ItemRepository.Pumpkin, 5)); // Untuk menguji Pumpkin Soup
-        }
-        if (ItemRepository.Hot_Pepper != null) {
-            inventory.add(new ItemStack(ItemRepository.Hot_Pepper, 1)); // Untuk menguji Fish Stew
-        }
-        if (ItemRepository.Firewood != null) {
-            inventory.add(new ItemStack(ItemRepository.Firewood, 5)); // Untuk memasak
-        }
-        if (ItemRepository.Coal != null) {
-            inventory.add(new ItemStack(ItemRepository.Coal, 3)); // Untuk memasak
         }
         if (ItemRepository.Hoe != null && ItemRepository.Watering_Can != null && 
             ItemRepository.Pickaxe != null && ItemRepository.Fishing_Rod != null) {
@@ -683,26 +659,29 @@ public class Player extends Entity {
     }
 
     public void interactNPC(int i) {
-        if (i != 999 && gp.npc[gp.currentMap][i] != null) { // Tambahkan null check untuk NPC
+        if (i != 999 && gp.npc[gp.currentMap][i] != null) { 
             System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
             currentInteractingNPC = gp.npc[gp.currentMap][i];
-            gp.gameState = gp.npcInteractionState; // Langsung ubah state
+            gp.gameState = gp.npcInteractionState; 
             gp.ui.commandNum = 0;
-            if (gp.statsManager != null && currentInteractingNPC != null) { // <<< TAMBAHKAN BLOK IF INI
+            if (gp.statsManager != null && currentInteractingNPC != null) { 
                 gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
                 System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
             }
+            
+        } else {
+            //jika tidak ada npc, tidak melakukan apa-apa
         }
     }
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){
             energy -= cost;
-            return true; 
+            return true;
         } else {
             gp.gameState = gp.dialogueState;
             gp.ui.currentDialogue = "Energi tidak cukup!";
-            return false; 
+            return false;
         }
     }
 
@@ -764,13 +743,12 @@ public class Player extends Entity {
         if (image != null) {
             g2.drawImage(image, screenX, screenY, null);
         } else {
-            // Fallback jika gambar gagal dimuat
             g2.setColor(Color.red);
             g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
             System.out.println("Gambar player null untuk direction: " + direction);
         }
     }
-    // action tilling
+    // Action Tilling
     public boolean tileLand() {
         if (!hasEquippedItem("Hoe")) {
             gp.ui.currentDialogue = "Kamu harus equip Hoe terlebih dahulu untuk membajak tanah!";
@@ -843,7 +821,6 @@ public class Player extends Entity {
                     return true;
                 }
             } else {
-                // Tidak ada slot kosong lagi di inventaris, tetapi masih ada sisa item
                 gp.ui.showMessage("Inventaris penuh! Tidak semua " + itemToAdd.getName() + " bisa ditambahkan.");
                 System.out.println("Inventaris penuh. Sisa " + remainingQuantity + " " + itemToAdd.getName() + " tidak dapat ditambahkan.");
                 return originalQuantity > remainingQuantity;
@@ -861,7 +838,7 @@ public class Player extends Entity {
         return false;
     }
 
-    // action planting
+    // Action Planting
     public boolean plantSeed() {
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
         int centerY = worldY + solidArea.y + (solidArea.height / 2);
@@ -870,9 +847,7 @@ public class Player extends Entity {
 
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-        // Pastikan tile dibajak
         if (tileIndex == 56 && gp.tileM.cropMap[col][row] == null) {
-            // Cek apakah sedang equip seed
             if (equippedItem == null || !(equippedItem.getItem() instanceof Seed)) {
                 gp.ui.currentDialogue = "Kamu harus equip seed terlebih dahulu untuk menanam!";
                 gp.gameState = gp.dialogueState;
@@ -907,7 +882,7 @@ public class Player extends Entity {
         }
         return null;
     }
-    // watering 
+    // Watering 
     public boolean waterTile() {
         if (!hasEquippedItem("Watering Can")) {
             gp.ui.currentDialogue = "Kamu harus equip Watering Can terlebih dahulu untuk menyiram!";
@@ -954,7 +929,7 @@ public class Player extends Entity {
         gp.gameState = gp.dialogueState;
         return true;
     }
-    // watching
+    // Watching
     public boolean watchTV() {
         Weather todayWeather = gp.gameStateSystem.getTimeManager().getWeather();
         // Cek apakah berada di dalam rumah
@@ -967,13 +942,12 @@ public class Player extends Entity {
         // Cek energi cukup
         if (!consumeEnergy(5)) return true;
         gp.gameStateSystem.advanceTimeByMinutes(15, gp.statsManager);
-
         gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
         gp.gameState = gp.dialogueState;
         return true;
     }
 
-        // harvesting
+    // Harvesting
     public boolean harvestCrop() {
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
         int centerY = worldY + solidArea.y + (solidArea.height / 2);
@@ -987,13 +961,11 @@ public class Player extends Entity {
             return false;
         }
 
-        // Debug untuk melihat status tanaman
         int currentDay = gp.gameStateSystem.getTimeManager().getDay();
         System.out.println("DEBUG HARVEST: Current day: " + currentDay);
         System.out.println("DEBUG HARVEST: Crop planted day: " + crop.getPlantedDay());
         System.out.println("DEBUG HARVEST: Is ready: " + crop.isReadyToHarvest(currentDay));
 
-        // Cek apakah tanaman sudah siap panen
         if (!crop.isReadyToHarvest(currentDay)) {
             gp.ui.currentDialogue = "Tanaman belum siap dipanen!";
             gp.gameState = gp.dialogueState;
@@ -1002,23 +974,20 @@ public class Player extends Entity {
 
         if (!consumeEnergy(5)) return true;
 
-        // Dapatkan hasil panen berdasarkan jenis seed
         Item harvestResult = getHarvestResult(crop.getSeedName());
         if (harvestResult != null) {
             addItemToInventory(harvestResult, 1);
             gp.ui.currentDialogue = "Berhasil memanen " + harvestResult.getName() + "!";
         }
 
-        // Hapus tanaman dari cropMap
         gp.tileM.cropMap[col][row] = null;
-        // Kembalikan tile ke tanah biasa
         gp.tileM.mapTileNum[gp.currentMap][col][row] = 35;
 
         gp.gameState = gp.dialogueState;
         return true;
     }
 
-    // recovering
+    // Recovering
     public boolean recoverLand() {
         int centerX = worldX + solidArea.x + (solidArea.width / 2);
         int centerY = worldY + solidArea.y + (solidArea.height / 2);
@@ -1027,7 +996,6 @@ public class Player extends Entity {
 
         int tileIndex = gp.tileM.mapTileNum[gp.currentMap][col][row];
 
-        // Cek apakah tile perlu di-recover (misalnya tile yang rusak/kering)
         if (tileIndex == 56) { 
             if (!hasEquippedItem("Pickaxe")) {
                 gp.ui.currentDialogue = "Kamu harus equip Pickaxe untuk memperbaiki tanah!";
@@ -1080,11 +1048,8 @@ public class Player extends Entity {
             if (equippedItem != null) {
                 gp.ui.showMessage("Unequipped: " + equippedItem.getItem().getName());
             }
-            
             equippedItem = itemStack;
-            
             gp.ui.showMessage("Equipped: " + item.getName());
-            
             return true;
         }
         return false;

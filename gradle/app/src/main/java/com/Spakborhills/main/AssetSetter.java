@@ -74,7 +74,6 @@ public class AssetSetter {
                     int stoveTileY = 5;
                     gp.obj[5][i].worldX = stoveTileX * gp.tileSize;
                     gp.obj[5][i].worldY = stoveTileY * gp.tileSize;
-                    // gp.obj[0][i].name = "KomporDapur"; // Pastikan nama diset di konstruktor objeknya
                     System.out.println("AssetSetter: " + gp.obj[5][i].name + " ditempatkan di map " + 5 + " index " + i +
                                     " pada tile (" + stoveTileX + "," + stoveTileY + ")");
                 } else {

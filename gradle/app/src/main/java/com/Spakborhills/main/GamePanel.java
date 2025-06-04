@@ -169,10 +169,10 @@ public class GamePanel extends JPanel implements Runnable{
     boolean canFishAtCurrentSpot = false;
 
     final int FARM_MAP_INDEX = 0; 
-    final int MOUNTAIN_LAKE_MAP_INDEX = 3;
+    final int MOUNTAIN_LAKE_MAP_INDEX = 3; 
     final int FOREST_RIVER_MAP_INDEX = 4;  
-    final int OCEAN_MAP_INDEX = 1;  
-    
+    final int OCEAN_MAP_INDEX = 1;         
+
     boolean hasFishingRod = false;
     for (ItemStack stack : player.inventory) {
         if (stack.getItem() != null && "Fishing Rod".equals(stack.getItem().getName())) {
@@ -230,7 +230,6 @@ public class GamePanel extends JPanel implements Runnable{
 
     gameStateSystem.advanceTimeByMinutes(15, this.statsManager);
     System.out.println("GAMEPANEL: Memancing dimulai di " + currentFishingLocation + ". Waktu dimajukan 15 menit.");
-
 
     int currentHour = gameStateSystem.getTimeManager().getHour();
     boolean canFishAtThisTimeAndLocation = false;
@@ -450,9 +449,12 @@ public class GamePanel extends JPanel implements Runnable{
             if (player.energy <= -20) {
                 autoSleepMessage = "Kamu pingsan karena kelelahan!";
                 autoSleepConditionMet = true;
+                player.energy = player.maxEnergy/2;
+                gameStateSystem.getTimeManager().advanceToNextMorning(this.statsManager);
             } else if (gameStateSystem.getTimeManager().getHour() == 2) {
                 autoSleepMessage = "Sudah terlalu larut, kamu otomatis tertidur";
                 autoSleepConditionMet = true;
+                gameStateSystem.getTimeManager().advanceToNextMorning(this.statsManager);
             }
             if (autoSleepConditionMet) {
                 System.out.println("GAMEPANEL: Kondisi tidur otomatis. Pesan: " + autoSleepMessage);
@@ -538,7 +540,7 @@ public class GamePanel extends JPanel implements Runnable{
                                         ui.commandNum = 0; 
                                         System.out.println("GAMEPANEL (playState): Masuk cookingState. Energi terkonsumsi.");
                                     } else {
-                                        ui.showMessage("Tidak cukup energi untuk mulai memasak (-10 energi dibutuhkan)."); // Tampilkan pesan ke UI
+                                        ui.showMessage("Tidak cukup energi untuk mulai memasak (-10 energi dibutuhkan)."); 
                                         System.out.println("GAMEPANEL (playState): Gagal memasak, energi tidak cukup.");
                                     }
                                     interactionHandled = true;
@@ -647,64 +649,8 @@ public class GamePanel extends JPanel implements Runnable{
                 int selectedItemIndex = ui.getSelectedItemIndex(); 
 
                 if (isSelectingItemForGift && npcForGifting != null) { 
-                    System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF.");
-
-                } else {
-                    System.out.println("GAMEPANEL (inventoryState): Enter untuk equip/use item. Indeks: " + selectedItemIndex);
-
-                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
-                        ItemStack stack = player.inventory.get(selectedItemIndex);
-                        if (stack != null && stack.getItem() != null) {
-                            Item selectedItem = stack.getItem();
-                            System.out.println("INVENTORY - ENTER: Item dipilih: " + selectedItem.getName() + ", Kategori: " + selectedItem.getCategory());
-
-                            // PRIORITAS 1: Coba equip item jika bisa di-equip
-                            if (canBeEquipped(selectedItem)) {
-                                boolean equipSuccess = player.equipItem(stack);
-                                if (equipSuccess) {
-                                    ui.showMessage("Equipped: " + selectedItem.getName());
-                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' berhasil di-equip.");
-                                } else {
-                                    ui.showMessage("Gagal equip " + selectedItem.getName());
-                                }
-                            }
-                            // PRIORITAS 2: Jika tidak bisa di-equip, coba konsumsi (untuk makanan)
-                            else if (selectedItem.getCategory().equalsIgnoreCase("Fish") ||
-                                     selectedItem.getCategory().equalsIgnoreCase("Crop") || 
-                                     selectedItem.getCategory().equalsIgnoreCase("Food")) { 
-
-                                int energyGain = selectedItem.getEnergyValue(); 
-                                if (energyGain > 0) { 
-                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' dimakan. Energi: +" + energyGain);
-                                    
-                                    // Konsumsi item
-                                    player.gainEnergy(energyGain);
-                                    player.removeItem(selectedItem.getName(), 1);
-                                    
-                                    ui.showMessage("Memakan " + selectedItem.getName() + " (+"+energyGain+" energi)");
-                                    
-                                } else {
-                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak memberi energi.");
-                                    ui.showMessage("Kamu tidak bisa memakan " + selectedItem.getName() + " saat ini.");
-                                }
-                            } else {
-                                System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa di-equip atau dimakan.");
-                                ui.showMessage(selectedItem.getName() + " tidak bisa digunakan.");
-                            }
-                        } else {
-                            System.out.println("INVENTORY - ENTER: ItemStack atau Item di dalamnya null pada indeks " + selectedItemIndex);
-                            ui.showMessage("Slot yang dipilih kosong atau item bermasalah.");
-                        }
-                    } else {
-                        ui.showMessage("Tidak ada item yang dipilih.");
-                        System.out.println("INVENTORY - ENTER: selectedItemIndex tidak valid: " + selectedItemIndex); // DEBUG
-                    }
-                }
-            }
-            if (enterIsCurrentlyPressed) {
-                keyH.enterPressed = false; 
-                if (isSelectingItemForGift && npcForGifting != null) {
-                    int selectedItemIndex = ui.getSelectedItemIndex();
+                    System.out.println("GAMEPANEL (inventoryState): Mode MEMILIH HADIAH AKTIF untuk " + npcForGifting.name);
+                    
                     if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
                         ItemStack itemToGift = player.inventory.get(selectedItemIndex);
                         if (itemToGift != null && itemToGift.getItem() != null) {
@@ -723,19 +669,68 @@ public class GamePanel extends JPanel implements Runnable{
                             } else {
                                 ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
                             }
+                            // Reset gift mode
+                            isSelectingItemForGift = false;
+                            npcForGifting = null;
                             gameState = dialogueState;
+                        }
+                    }
+                } 
+                else {
+                    System.out.println("GAMEPANEL (inventoryState): Enter untuk equip/use item normal. Indeks: " + selectedItemIndex);
+
+                    if (selectedItemIndex >= 0 && selectedItemIndex < player.inventory.size()) {
+                        ItemStack stack = player.inventory.get(selectedItemIndex);
+                        if (stack != null && stack.getItem() != null) {
+                            Item selectedItem = stack.getItem();
+                            System.out.println("INVENTORY - ENTER: Item dipilih: " + selectedItem.getName() + ", Kategori: " + selectedItem.getCategory());
+                            if (canBeEquipped(selectedItem)) {
+                                boolean equipSuccess = player.equipItem(stack);
+                                if (equipSuccess) {
+                                    ui.showMessage("Equipped: " + selectedItem.getName());
+                                    gameState = playState; // Kembali ke game setelah equip
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' berhasil di-equip. Kembali ke playState.");
+                                } else {
+                                    ui.showMessage("Gagal equip " + selectedItem.getName());
+                                }
+                            }
+                            // Jika tidak bisa di-equip, coba konsumsi (untuk makanan)
+                            else if (selectedItem.getCategory().equalsIgnoreCase("Fish") ||
+                                     selectedItem.getCategory().equalsIgnoreCase("Crop") || 
+                                     selectedItem.getCategory().equalsIgnoreCase("Food")) { 
+
+                                int energyGain = selectedItem.getEnergyValue(); 
+                                if (energyGain > 0) { 
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' dimakan. Energi: +" + energyGain);
+                                    
+                                    // Konsumsi item
+                                    player.gainEnergy(energyGain);
+                                    player.removeItem(selectedItem.getName(), 1);
+                                    
+                                    ui.showMessage("Memakan " + selectedItem.getName() + " (+"+energyGain+" energi)");
+                                    
+                                    // Kembali ke game setelah makan
+                                    gameState = playState;
+                                    System.out.println("GAMEPANEL (inventoryState): Selesai makan. Kembali ke playState.");
+                                } else {
+                                    System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak memberi energi.");
+                                    ui.showMessage("Kamu tidak bisa memakan " + selectedItem.getName() + " saat ini.");
+                                }
+                            } else {
+                                System.out.println("GAMEPANEL (inventoryState): Item '" + selectedItem.getName() + "' tidak bisa di-equip atau dimakan.");
+                                ui.showMessage(selectedItem.getName() + " tidak bisa digunakan.");
+                            }
                         } else {
-                            System.err.println("GAMEPANEL (inventoryState): Item yang dipilih di slot " + selectedItemIndex + " adalah null atau itemnya null.");
+                            System.out.println("INVENTORY - ENTER: ItemStack atau Item di dalamnya null pada indeks " + selectedItemIndex);
+                            ui.showMessage("Slot yang dipilih kosong atau item bermasalah.");
                         }
                     } else {
-                        System.out.println("GAMEPANEL (inventoryState): Indeks item tidak valid (" + selectedItemIndex + ").");
+                        ui.showMessage("Tidak ada item yang dipilih.");
+                        System.out.println("INVENTORY - ENTER: selectedItemIndex tidak valid: " + selectedItemIndex); // DEBUG
                     }
-                } else {
-                    System.out.println("GAMEPANEL (inventoryState): Enter ditekan, TAPI BUKAN mode gifting ATAU npcForGifting null.");
                 }
             }
-        } else if (gameState == sleepState) {
-            
+        } else if (gameState == sleepState) { 
 
         } else if (gameState == characterCreationState) {
             if (keyH.enterPressed) { 
@@ -1085,6 +1080,9 @@ public class GamePanel extends JPanel implements Runnable{
                             } else {
                                 ui.currentDialogue = "Tidak cukup energi untuk memberi hadiah.";
                             }
+                            // Reset gift mode
+                            isSelectingItemForGift = false;
+                            npcForGifting = null;
                             gameState = dialogueState;
                         } 
                     }
@@ -1231,9 +1229,7 @@ public class GamePanel extends JPanel implements Runnable{
                 milestoneReached = true;
                 System.out.println("GAMEPANEL: Milestone Gold Tercapai!");
             }
-            
-            if (player.partner != null && !player.partner.equalsIgnoreCase("None") && !player.partner.isEmpty()) { // [cite: 196]
-
+            if (player.partner != null && !player.partner.equalsIgnoreCase("None") && !player.partner.isEmpty()) { 
                 milestoneReached = true;
                 System.out.println("GAMEPANEL: Milestone Menikah Tercapai!");
             }

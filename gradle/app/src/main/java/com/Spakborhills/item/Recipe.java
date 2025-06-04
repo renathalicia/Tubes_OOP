@@ -11,9 +11,6 @@ public class Recipe {
     private String unlockMethodDescription; 
     private boolean isDefaultRecipe;    
 
-    /**
-     * Inner class untuk merepresentasikan satu jenis bahan dalam resep.
-     */
     public static class Ingredient {
         public String itemNameOrCategory;
         public int quantityRequired;

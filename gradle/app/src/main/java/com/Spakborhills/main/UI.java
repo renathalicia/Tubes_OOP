@@ -107,6 +107,7 @@ public class UI {
     public void drawCharacterCreationScreen() {
         g2.setColor(invPanelBg); 
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
         g2.setFont(stardewFont.deriveFont(Font.BOLD, 30f)); 
         g2.setColor(stardewDialogText); 
 
@@ -748,12 +749,22 @@ public void drawTitleScreen() {
     for (int i = 0; i < options.length; i++) {
         text = options[i];
         x = getXforCenteredText(text);
+<<<<<<< HEAD
         y += gp.tileSize; 
         g2.setColor(stardewText); 
         if (commandNum == i) {
             g2.setColor(stardewHighlightBorder); 
             g2.drawString(">", x - gp.tileSize, y); 
             g2.drawString(text, x, y); 
+=======
+        y += gp.tileSize; // Jarak antar item menu
+        // Warna teks menu (misalnya, putih atau stardewText)
+        g2.setColor(stardewText); 
+        if (commandNum == i) {
+            g2.setColor(stardewHighlightBorder); // Warna highlight untuk opsi yang dipilih
+            g2.drawString(">", x - gp.tileSize, y); 
+            g2.drawString(text, x, y); // Gambar teks opsi dengan warna highlight jika perlu, atau tetap
+>>>>>>> f86a93cd37bd71d5357f10d0ca90e7cbbf0b94e9
         } else {
             g2.drawString(text, x, y);
         }

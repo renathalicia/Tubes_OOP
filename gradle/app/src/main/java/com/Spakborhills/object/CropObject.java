@@ -39,7 +39,6 @@ public class CropObject {
             growingImage = ImageIO.read(getClass().getResourceAsStream("/item/seeds/" + baseName + "2.png"));
             readyImage = ImageIO.read(getClass().getResourceAsStream("/item/seeds/" + baseName + "3.png"));
 
-            // Scale semua gambar
             int tileSize = 48; // Sesuaikan dengan tileSize game
             seedImage = uTool.scaleImage(seedImage, tileSize, tileSize);
             growingImage = uTool.scaleImage(growingImage, tileSize, tileSize);
