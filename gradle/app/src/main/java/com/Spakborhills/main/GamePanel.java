@@ -1,23 +1,35 @@
 package com.Spakborhills.main;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+
 import com.Spakborhills.data.SaveLoad;
-import com.Spakborhills.entity.*;
-import com.Spakborhills.object.SuperObject;
-import com.Spakborhills.tile.TileManager;
+import com.Spakborhills.entity.Entity;
+import com.Spakborhills.entity.NPC_1_MayorTadi;
+import com.Spakborhills.entity.NPC_2_Caroline;
+import com.Spakborhills.entity.NPC_3_Perry;
+import com.Spakborhills.entity.NPC_4_Dasco;
+import com.Spakborhills.entity.NPC_5_Emily;
+import com.Spakborhills.entity.NPC_6_Abigail;
+import com.Spakborhills.entity.Player;
+import com.Spakborhills.environment.EnvironmentManager;
 import com.Spakborhills.environment.GameState;
-import com.Spakborhills.item.ItemStack;
 import com.Spakborhills.item.Fish;
 import com.Spakborhills.item.Item;
 import com.Spakborhills.item.ItemRepository;
-import com.Spakborhills.environment.EnvironmentManager;
-import com.Spakborhills.item.Store;
+import com.Spakborhills.item.ItemStack;
 import com.Spakborhills.item.Recipe;
 import com.Spakborhills.item.RecipeRepository;
+import com.Spakborhills.item.Store;
+import com.Spakborhills.object.SuperObject;
+import com.Spakborhills.tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
@@ -156,14 +168,11 @@ public class GamePanel extends JPanel implements Runnable{
     String currentFishingLocation = "Unknown";
     boolean canFishAtCurrentSpot = false;
 
-    // 0. DEFINISIKAN INDEKS PETA ANDA DENGAN BENAR
-    final int FARM_MAP_INDEX = 0; // Sesuaikan jika indeks peta Farm Anda berbeda
-    final int MOUNTAIN_LAKE_MAP_INDEX = 3; // Anda memberi nilai 3 di kode GamePanel
-    final int FOREST_RIVER_MAP_INDEX = 4;  // Anda memberi nilai 4 di kode GamePanel
-    final int OCEAN_MAP_INDEX = 1;         // Anda memberi nilai 1 di kode GamePanel
-
-    // 1. PENGECEKAN SYARAT AWAL UMUM (Alat Pancing & Energi)
-    //    Dilakukan sebelum menentukan spot agar lebih efisien.
+    final int FARM_MAP_INDEX = 0; 
+    final int MOUNTAIN_LAKE_MAP_INDEX = 3;
+    final int FOREST_RIVER_MAP_INDEX = 4;  
+    final int OCEAN_MAP_INDEX = 1;  
+    
     boolean hasFishingRod = false;
     for (ItemStack stack : player.inventory) {
         if (stack.getItem() != null && "Fishing Rod".equals(stack.getItem().getName())) {
@@ -178,18 +187,15 @@ public class GamePanel extends JPanel implements Runnable{
         return;
     }
 
-    if (!player.consumeEnergy(5)) { // consumeEnergy akan menampilkan dialog jika energi kurang
+    if (!player.consumeEnergy(5)) { 
         System.out.println("GAMEPANEL: Gagal memulai memancing, energi tidak cukup.");
-        return; // Keluar jika energi tidak cukup (consumeEnergy sudah set gameState ke dialogueState)
+        return; 
     }
 
-    // 2. TENTUKAN APAKAH PEMAIN MENGHADAP TEMPAT MEMANCING YANG VALID
-    // Prioritaskan pengecekan objek "Pond" jika di Farm Map
     if (currentMap == FARM_MAP_INDEX) {
         int objIndex = cChecker.checkObject(player, true); // Cek objek di depan pemain
         if (objIndex != 999 && obj[currentMap][objIndex] != null) {
             String objectName = obj[currentMap][objIndex].name;
-            // Pastikan nama objek Pond Anda konsisten
             if (objectName.equals("Pond") || objectName.equals("OBJ_Pond") || objectName.equals("Kolam")) { // Sesuaikan
                 currentFishingLocation = "Pond";
                 canFishAtCurrentSpot = true;
@@ -198,7 +204,6 @@ public class GamePanel extends JPanel implements Runnable{
         }
     }
 
-    // Jika bukan objek Pond (atau tidak di Farm Map), cek tile di depan pemain
     if (!canFishAtCurrentSpot) {
         int tileNumInFront = player.getTileInFront(); // Metode dari Player.java
         System.out.println("GAMEPANEL: Tile di depan pemain: " + tileNumInFront + " di peta: " + currentMap);
@@ -212,29 +217,21 @@ public class GamePanel extends JPanel implements Runnable{
         } else if (currentMap == OCEAN_MAP_INDEX && (tileNumInFront == 247 || tileNumInFront == 248 || tileNumInFront == 249 || tileNumInFront == 250 || tileNumInFront == 251)) {
             currentFishingLocation = "Ocean";
             canFishAtCurrentSpot = true;
-        }
-        // Anda bisa menambahkan 'else if' untuk tile air umum (misal 37) di Farm Map jika Pond tidak terdeteksi
-        // else if (currentMap == FARM_MAP_INDEX && tileNumInFront == 37) {
-        //     currentFishingLocation = "FarmWater"; // Atau nama lokasi air umum di farm
-        //     canFishAtCurrentSpot = true;
-        // }
+        } 
     }
 
-    // Jika setelah semua pengecekan tidak ada spot memancing valid
     if (!canFishAtCurrentSpot) {
         ui.setDialogue("Kamu tidak bisa memancing di sini atau tidak menghadap tempat yang benar.", "SYSTEM_MESSAGE");
         gameState = dialogueState;
-        player.gainEnergy(5); // Kembalikan energi karena aksi memancing tidak jadi dimulai
+        player.gainEnergy(5); 
         System.out.println("GAMEPANEL: Gagal memulai memancing, tidak ada spot valid. Energi dikembalikan.");
         return;
     }
 
-    // 3. MAJUKAN WAKTU (setelah semua syarat terpenuhi dan spot valid)
     gameStateSystem.advanceTimeByMinutes(15, this.statsManager);
     System.out.println("GAMEPANEL: Memancing dimulai di " + currentFishingLocation + ". Waktu dimajukan 15 menit.");
 
 
-    // 4. PENGECEKAN BATASAN WAKTU MEMANCING PER LOKASI
     int currentHour = gameStateSystem.getTimeManager().getHour();
     boolean canFishAtThisTimeAndLocation = false;
     switch (currentFishingLocation) {
@@ -252,10 +249,7 @@ public class GamePanel extends JPanel implements Runnable{
         case "Pond": // Bisa kapan saja
             canFishAtThisTimeAndLocation = true;
             break;
-        // case "FarmWater": // Jika Anda menambahkan lokasi air umum di farm
-        //     canFishAtThisTimeAndLocation = true; // Atau beri batasan waktu sendiri
-        //     break;
-        default: // Seharusnya tidak terjadi karena sudah divalidasi di atas
+        default: 
             System.err.println("GAMEPANEL: Lokasi memancing tidak dikenal saat pengecekan waktu: " + currentFishingLocation);
             break;
     }
@@ -263,17 +257,13 @@ public class GamePanel extends JPanel implements Runnable{
     if (!canFishAtThisTimeAndLocation) {
         ui.setDialogue("Kamu tidak bisa memancing di " + currentFishingLocation + " pada jam " + String.format("%02d:00", currentHour) + ".", "SYSTEM_MESSAGE");
         gameState = dialogueState;
-        // Waktu sudah dimajukan, energi sudah dikonsumsi. Mungkin ini adalah konsekuensi.
-        // Atau, jika ingin lebih ramah, batalkan pemajuan waktu dan kembalikan energi jika di sini gagal.
         System.out.println("GAMEPANEL: Waktu tidak valid (" + currentHour + "h) untuk memancing di " + currentFishingLocation);
         return;
     }
-
-    // 5. DAPATKAN DAN FILTER DAFTAR IKAN
-    List<Fish> allFishInGame = ItemRepository.getAllFishInstances(this); // Pastikan metode ini ada dan mengembalikan List<Fish>
+    List<Fish> allFishInGame = ItemRepository.getAllFishInstances(this); 
     List<Fish> catchableFishToday = new ArrayList<>();
     String currentSeason = gameStateSystem.getTimeManager().getSeason().toString();
-    String currentWeather = gameStateSystem.getTimeManager().getWeather().toString(); // Asumsi Enum: "SUNNY", "RAINY"
+    String currentWeather = gameStateSystem.getTimeManager().getWeather().toString(); 
 
     if (allFishInGame == null || allFishInGame.isEmpty()) {
         ui.setDialogue("Ada masalah dengan data ikan...", "SYSTEM_MESSAGE");
@@ -286,7 +276,6 @@ public class GamePanel extends JPanel implements Runnable{
                        ", Jam: " + currentHour + ", Musim: " + currentSeason + ", Cuaca: " + currentWeather);
 
     for (Fish fish : allFishInGame) {
-        // Asumsi metode isCatchable di Fish.java menerima parameter ini dan memiliki logika pengecekan internal
         if (fish.isCatchable(currentFishingLocation, currentHour, currentSeason, currentWeather)) {
             catchableFishToday.add(fish);
         }
@@ -542,14 +531,11 @@ public class GamePanel extends JPanel implements Runnable{
                                     }
                                     interactionHandled = true;
                                 } 
-                                else if ("Stove".equals(interactedObject.name) || "KomporDapur".equals(interactedObject.name)) { // <<<---- 
+                                else if ("Stove".equals(interactedObject.name)){ 
                                     System.out.println("GAMEPANEL (playState): Berinteraksi dengan '" + interactedObject.name + "'. Memulai sesi memasak.");
-                                    
-                                    // Sesuai spesifikasi, memulai memasak butuh -10 energi (Source 217)
-                                    if (player.consumeEnergy(10)) { // Anda perlu metode consumeEnergy(int cost) di Player
-                                        gameState = cookingState; // Ganti ke cookingState
-                                        ui.commandNum = 0; // Reset pilihan menu resep di UI (jika menggunakan commandNum)
-                                                        // atau ui.cookingCommandNum = 0; jika Anda punya variabel terpisah untuk UI masak
+                                    if (player.consumeEnergy(10)) { 
+                                        gameState = cookingState; 
+                                        ui.commandNum = 0; 
                                         System.out.println("GAMEPANEL (playState): Masuk cookingState. Energi terkonsumsi.");
                                     } else {
                                         ui.showMessage("Tidak cukup energi untuk mulai memasak (-10 energi dibutuhkan)."); // Tampilkan pesan ke UI
@@ -759,7 +745,7 @@ public class GamePanel extends JPanel implements Runnable{
         
                 // Terapkan data yang dikumpulkan dari UI ke objek player
                 player.name = ui.tempPlayerName.isEmpty() ? "Petani" : ui.tempPlayerName;
-                player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; // Asumsi 0=Laki, 1=Perempuan
+                player.gender = (ui.tempGenderSelection == 0) ? "Laki-laki" : "Perempuan"; 
                 player.farmName = ui.tempFarmName.isEmpty() ? "Kebunku" : ui.tempFarmName;
                 if (player.favoriteItem != null) { 
                     player.favoriteItem = ui.tempFavoriteItem.isEmpty() ? "None" : ui.tempFavoriteItem; 
@@ -1074,83 +1060,6 @@ public class GamePanel extends JPanel implements Runnable{
                 ui.shopCommandNum = 0;
             }
         }
-        
-        else if (gameState == cookingState) {
-            if (isCookingInProgress) {
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - cookingStartTime >= cookingDuration) {
-                    Item foodResult = ItemRepository.getItemByName(cookingRecipe.getOutputFoodName());
-                    if (foodResult != null) {
-                        player.addItemToInventory(foodResult, cookingRecipe.getOutputFoodQuantity());
-                        ui.showMessage(cookingRecipe.getOutputFoodName() + " berhasil dimasak!");
-                        gameStateSystem.advanceTimeByMinutes(60, statsManager); // Advance time by 1 hour
-                        System.out.println("COOKING - " + cookingRecipe.getOutputFoodName() + " selesai dimasak!");
-                    } else {
-                        ui.showMessage("Error: Makanan hasil resep tidak ditemukan!");
-                        System.err.println("COOKING ERROR: Output food '" + cookingRecipe.getOutputFoodName() + "' not found.");
-                    }
-                    isCookingInProgress = false;
-                    cookingRecipe = null;
-                    gameState = playState;
-                } else {
-                    // Show progress in UI
-                    double progress = (double) (currentTime - cookingStartTime) / cookingDuration;
-                    ui.showMessage("Memasak " + cookingRecipe.getOutputFoodName() + "... (" + (int) (progress * 100) + "%)");
-                }
-            } else if (keyH.enterPressed) {
-                keyH.enterPressed = false;
-
-                List<Recipe> knownRecipes = new ArrayList<>();
-                for (String recipeId : player.getLearnedRecipeIds()) {
-                    Recipe r = RecipeRepository.getRecipeById(recipeId);
-                    if (r != null) knownRecipes.add(r);
-                }
-
-                int selectedOption = ui.commandNum;
-                if (knownRecipes.isEmpty()) {
-                    if (selectedOption == 0) { 
-                        gameState = playState;
-                        System.out.println("COOKING - Kembali ke playState (tidak ada resep).");
-                    }
-                } else {
-                    if (selectedOption < knownRecipes.size()) { // Pilih resep
-                        Recipe recipeToCook = knownRecipes.get(selectedOption);
-                        System.out.println("COOKING - Mencoba memasak: " + recipeToCook.getOutputFoodName());
-                        String ingredientCheckMessage = player.checkEnoughIngredients(recipeToCook);
-                        if (ingredientCheckMessage != null) {
-                            ui.showMessage(ingredientCheckMessage);
-                        } else {
-                            String availableFuel = player.getAvailableFuel();
-                            if (availableFuel == null) {
-                                ui.showMessage("Tidak ada bahan bakar (Kayu/Arang)!");
-                            } else {
-                                // Start cooking
-                                player.consumeIngredients(recipeToCook);
-                                player.consumeFuel(availableFuel);
-                                isCookingInProgress = true;
-                                cookingRecipe = recipeToCook;
-                                cookingStartTime = System.currentTimeMillis();
-                                ui.showMessage("Memulai memasak " + recipeToCook.getOutputFoodName() + "...");
-                                System.out.println("COOKING - Memulai memasak: " + recipeToCook.getOutputFoodName());
-                            }
-                        }
-                    } else if (selectedOption == knownRecipes.size()) { // Kembali
-                        gameState = playState;
-                        System.out.println("COOKING - Kembali ke playState.");
-                    }
-                }
-            } else if (keyH.escapePressed) {
-                keyH.escapePressed = false;
-                if (isCookingInProgress) {
-                    ui.showMessage("Memasak dibatalkan!");
-                    isCookingInProgress = false;
-                    cookingRecipe = null;
-                }
-                gameState = playState;
-                ui.commandNum = 0;
-                System.out.println("COOKING - Escape, kembali ke playState.");
-            }
-}
 
         else if (gameState == inventoryState) {
             if (keyH.enterPressed) {
@@ -1227,29 +1136,29 @@ public class GamePanel extends JPanel implements Runnable{
 
             ui.slotCol = 0;
             final int maxRowsOnScreen = 5; 
-            int totalRows = learnedRecipes.size();
+            int totalRows = learnedRecipes.isEmpty() ? 1 : learnedRecipes.size() + 1;
 
             if (keyH.upPressed) {
                 keyH.upPressed = false;
-                ui.slotRow--;
-                if (ui.slotRow < 0) {
-                    ui.slotRow = 0;
+                ui.commandNum--;
+                if (ui.commandNum < 0) {
+                    ui.commandNum = totalRows - 1;
                 }
-                if (ui.slotRow < ui.recipeScrollOffset) {
-                    ui.recipeScrollOffset = ui.slotRow;
+                if (ui.commandNum < ui.recipeScrollOffset) {
+                    ui.recipeScrollOffset = ui.commandNum;
                 }
-                System.out.println("COOKING: Pilih resep ke atas, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+                System.out.println("COOKING: Pilih resep ke atas, commandNum: " + ui.commandNum + ", scrollOffset: " + ui.recipeScrollOffset);
             }
             if (keyH.downPressed) {
                 keyH.downPressed = false;
-                ui.slotRow++;
-                if (ui.slotRow >= totalRows) {
-                    ui.slotRow = totalRows - 1;
+                ui.commandNum++;
+                if (ui.commandNum >= totalRows) {
+                    ui.commandNum = 0;
                 }
-                if (ui.slotRow >= ui.recipeScrollOffset + maxRowsOnScreen) {
-                    ui.recipeScrollOffset = ui.slotRow - maxRowsOnScreen + 1;
+                if (ui.commandNum >= ui.recipeScrollOffset + maxRowsOnScreen) {
+                    ui.recipeScrollOffset = ui.commandNum - maxRowsOnScreen + 1;
                 }
-                System.out.println("COOKING: Pilih resep ke bawah, slotRow: " + ui.slotRow + ", scrollOffset: " + ui.recipeScrollOffset);
+                System.out.println("COOKING: Pilih resep ke bawah, commandNum: " + ui.commandNum + ", scrollOffset: " + ui.recipeScrollOffset);
             }
             if (keyH.enterPressed) {
                 keyH.enterPressed = false;
@@ -1260,7 +1169,7 @@ public class GamePanel extends JPanel implements Runnable{
                     return;
                 }
 
-                int selectedIndex = ui.slotRow;
+                int selectedIndex = ui.commandNum;
                 if (selectedIndex >= 0 && selectedIndex < learnedRecipes.size()) {
                     Recipe selectedRecipe = learnedRecipes.get(selectedIndex);
                     System.out.println("COOKING: Resep dipilih: " + selectedRecipe.getOutputFoodName());
@@ -1302,7 +1211,7 @@ public class GamePanel extends JPanel implements Runnable{
             if (keyH.escapePressed) {
                 keyH.escapePressed = false;
                 gameState = playState;
-                ui.slotRow = 0;
+                ui.commandNum = 0;
                 ui.recipeScrollOffset = 0;
                 System.out.println("COOKING: Keluar dari cookingState, kembali ke playState.");
             }
@@ -1316,42 +1225,32 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
 
-        if (gameState == playState && !statsManager.endGameStatsShown) { // Hanya cek jika statistik belum ditampilkan
+        if (gameState == playState && !statsManager.endGameStatsShown) {
             boolean milestoneReached = false;
-            if (player.gold >= 17209) { // [cite: 196]
+            if (player.gold >= 17209) { 
                 milestoneReached = true;
                 System.out.println("GAMEPANEL: Milestone Gold Tercapai!");
             }
-            // Asumsi Player memiliki field 'partner' (String) atau 'isMarried' (boolean)
-            // dan diupdate saat menikah.
+            
             if (player.partner != null && !player.partner.equalsIgnoreCase("None") && !player.partner.isEmpty()) { // [cite: 196]
-                // Atau jika Anda punya boolean player.isMarried
+
                 milestoneReached = true;
                 System.out.println("GAMEPANEL: Milestone Menikah Tercapai!");
             }
 
             if (milestoneReached) {
                 System.out.println("GAMEPANEL: Salah satu milestone tercapai. Menampilkan End Game Statistics.");
-                statsManager.endGameStatsShown = true; // Tandai agar tidak ditampilkan lagi
-                // Simpan state sebelumnya jika perlu kembali setelah statistik
-                // int previousGameState = gameState; // Mungkin tidak perlu jika selalu kembali ke playState
-                gameState = endGameStatisticsState; // Pindah ke state baru untuk menampilkan statistik
-                // Anda mungkin ingin menghentikan musik playState dan memainkan musik khusus
-                // stopMusic();
-                // playMusic(MUSIK_STATISTIK_END_GAME);
+                statsManager.endGameStatsShown = true; 
+                gameState = endGameStatisticsState; 
             }
         }
-        // ...
-
-        // Tambahkan penanganan untuk state baru
+        
         else if (gameState == endGameStatisticsState) {
-            // Logika untuk state ini (misalnya, menunggu input untuk kembali ke playState)
             if (keyH.enterPressed || keyH.escapePressed) {
                 keyH.enterPressed = false;
-                keyH.escapePressed = false; // Jika Anda pakai flag escape
+                keyH.escapePressed = false; 
                 System.out.println("GAMEPANEL: Keluar dari End Game Statistics. Kembali ke PlayState.");
-                gameState = playState; // Kembali ke permainan
-                // playMusic(MUSIK_PLAYSTATE_UTAMA); // Mainkan kembali musik playState
+                gameState = playState;
             }
         }
     }

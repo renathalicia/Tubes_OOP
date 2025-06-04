@@ -1,6 +1,6 @@
 package com.Spakborhills.main;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 public class EventHandler {
     GamePanel gp;
@@ -50,7 +50,7 @@ public class EventHandler {
             //dari FarmHouse[0] ke InteriorFarmHouse[2]
             if (hit(0, 30, 27, "any")) {
                 visiting(5, 12, 20);
-                eventRect[0][30][27].eventDone = true; //menandai bahwa visiting telah berhasil
+                eventRect[0][30][27].eventDone = true; 
             } else if (hit(5, 12, 20, "any")){
                 visiting(0, 30, 27);
                 eventRect[2][12][20].eventDone = true;
@@ -58,7 +58,7 @@ public class EventHandler {
             //dari FarmMap[0] ke Ocean[1]
             } else if (hit(0, 40, 39, "any")) {
                 visiting(1, 21, 39);
-                eventRect[1][12][13].eventDone = true; //menandai bahwa visiting telah berhasil
+                eventRect[1][12][13].eventDone = true; 
             } else if (hit(1, 21, 39, "any")){
                 visiting(0, 40, 39);
             }
@@ -116,16 +116,12 @@ public class EventHandler {
 
         // Pastikan kita berada di map yang benar
         if (map == gp.currentMap) {
-            // Ambil solidArea player dan eventRect dari default (relatif) mereka
-            // Kemudian hitung posisi dunia mereka.
-            // Gunakan RECTANGLE SEMENTARA untuk perhitungan tabrakan
-            // Ini mencegah perubahan pada objek asli gp.player.solidArea dan eventRect
 
             Rectangle playerSolidAreaWorld = new Rectangle(
                     gp.player.worldX + gp.player.solidAreaDefaultX,
                     gp.player.worldY + gp.player.solidAreaDefaultY,
-                    gp.player.solidArea.width, // Gunakan lebar dari solidArea asli
-                    gp.player.solidArea.height // Gunakan tinggi dari solidArea asli
+                    gp.player.solidArea.width, 
+                    gp.player.solidArea.height 
             );
 
             // Pastikan eventRect[map][col][row] tidak null
@@ -149,8 +145,6 @@ public class EventHandler {
                     previousEventY = gp.player.worldY;
                 }
             }
-            // TIDAK PERLU MERESET gp.player.solidArea.x/y dan eventRect[map][col][row].x/y di sini
-            // karena kita menggunakan objek Rectangle sementara yang baru dibuat setiap kali.
         }
         return hit;
     }
@@ -161,7 +155,6 @@ public class EventHandler {
         tempCol = col;
         tempRow = row;
         canTouchEvent = false;
-        // Kurangi energi player
         if (gp.player != null) {
             gp.player.consumeEnergy(10); // Kurangi 10 energi
         }

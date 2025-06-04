@@ -1,6 +1,15 @@
 package com.Spakborhills.main;
 
-import com.Spakborhills.object.*;
+import com.Spakborhills.object.OBJ_House;
+import com.Spakborhills.object.OBJ_HouseLake00;
+import com.Spakborhills.object.OBJ_HouseLake01;
+import com.Spakborhills.object.OBJ_HouseOcean;
+import com.Spakborhills.object.OBJ_HouseRiver00;
+import com.Spakborhills.object.OBJ_HouseRiver01;
+import com.Spakborhills.object.OBJ_Pond;
+import com.Spakborhills.object.OBJ_ShippingBin;
+import com.Spakborhills.object.OBJ_StoreOcean;
+import com.Spakborhills.object.OBJ_Stove;
 
 public class AssetSetter {
     GamePanel gp;
@@ -59,10 +68,8 @@ public class AssetSetter {
 
         try {
             if (0 < gp.obj.length && i < gp.obj[0].length) {
-                // Asumsi Anda punya kelas seperti object.OBJ_KitchenStove
-                gp.obj[5][i] = new OBJ_Stove(gp); // Pastikan nama kelas ini benar
+                gp.obj[5][i] = new OBJ_Stove(gp); 
                 if (gp.obj[5][i] != null) {
-                    // Tentukan koordinat untuk KomporDapur di dalam rumah
                     int stoveTileX = 14; 
                     int stoveTileY = 5;
                     gp.obj[5][i].worldX = stoveTileX * gp.tileSize;

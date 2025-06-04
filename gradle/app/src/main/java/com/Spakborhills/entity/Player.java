@@ -1,23 +1,33 @@
 package com.Spakborhills.entity;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
-import com.Spakborhills.item.*;
+import javax.imageio.ImageIO;
+
+import com.Spakborhills.environment.Weather;
+import com.Spakborhills.item.Item;
+import com.Spakborhills.item.ItemRepository;
+import com.Spakborhills.item.ItemStack;
+import com.Spakborhills.item.Recipe;
+import com.Spakborhills.item.RecipeRepository;
+import com.Spakborhills.item.Seed;
 import com.Spakborhills.main.AssetSetter;
 import com.Spakborhills.main.GamePanel;
 import com.Spakborhills.main.KeyHandler;
 import com.Spakborhills.main.UtilityTool;
-import javax.imageio.ImageIO;
-
-import com.Spakborhills.environment.Weather;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import com.Spakborhills.object.CropObject;
 import com.Spakborhills.object.SuperObject;
+
+
 
 public class Player extends Entity {
 
@@ -219,19 +229,19 @@ public class Player extends Entity {
             }
             
             else if ("Television".equals(objectName)) {
-                watchTV(); // Metode ini sudah ada di Player.java dan mengatur dialog serta gameState
+                watchTV(); 
             }
             // Logika untuk STOVE
             else if ("Stove".equals(objectName)) { 
                 System.out.println("PLAYER: Berinteraksi dengan Stove, memulai cookingState.");
-                // if (gp.currentMap != 1) { // Asumsi mapID 1 adalah rumah
-                //     gp.ui.setDialogue("Kamu hanya bisa memasak di dalam rumah!", "SYSTEM_MESSAGE");
-                //     gp.gameState = gp.dialogueState;
-                //     System.out.println("PLAYER: Tidak di rumah, tidak bisa memasak.");
-                // } 
+                if (gp.currentMap == 5) { 
+                    gp.ui.setDialogue("Kamu hanya bisa memasak di dalam rumah!", "SYSTEM_MESSAGE");
+                    gp.gameState = gp.dialogueState;
+                    System.out.println("PLAYER: Tidak di rumah, tidak bisa memasak.");
+                } 
                 if (consumeEnergy(10)) {
-                    gp.gameState = gp.cookingState; // Alihkan ke state memasak
-                    gp.ui.commandNum = 0; // Reset pilihan UI untuk layar memasak
+                    gp.gameState = gp.cookingState; 
+                    gp.ui.commandNum = 0; 
                     System.out.println("PLAYER: Energi saat ini: " + energy + ", memulai cookingState.");
                 } else {
                     gp.ui.setDialogue("Energi tidak cukup! Butuh 10 energi.", "SYSTEM_MESSAGE");
@@ -252,7 +262,7 @@ public class Player extends Entity {
             ItemStack currentItemStack = inventory.get(i);
             if (currentItemStack.getItem() != null && currentItemStack.getItem().getName().equals(itemName)) {
                 if (currentItemStack.getQuantity() >= quantityToRemove) {
-                    currentItemStack.removeQuantity(quantityToRemove); // Gunakan method dari ItemStack
+                    currentItemStack.removeQuantity(quantityToRemove); 
                     if (currentItemStack.getQuantity() <= 0) {
                         inventory.remove(i);
                     }
@@ -315,7 +325,7 @@ public class Player extends Entity {
     }
 
     public int countFishCaught() {
-        return totalFishCaught; // Ganti dengan logika aktual jika ada sistem penangkapan ikan
+        return totalFishCaught; 
     }
 
     public void checkFishingUnlocks() {
@@ -330,7 +340,7 @@ public class Player extends Entity {
     }
 
     public Set<String> getLearnedRecipeIds() {
-        return new HashSet<>(learnedRecipeIds); // Kembalikan salinan
+        return new HashSet<>(learnedRecipeIds); 
     }
 
     public void onFishCaught(String fishName) {
@@ -583,104 +593,84 @@ public class Player extends Entity {
         return image;
     }
 
-    // Di dalam kelas Player.java
-@Override
-public void update() {
-    boolean isMovingThisFrame = false; // Untuk melacak apakah pemain bergerak di frame ini
 
-    // 1. PENANGANAN INPUT UNTUK INTERAKSI (Tombol Enter)
-    if (keyH.enterPressed) {
-        System.out.println("PLAYER.UPDATE: Tombol Enter ditekan (Awal).");
-        keyH.enterPressed = false; // Langsung konsumsi/reset flag Enter di sini!
+    @Override
+    public void update() {
+        boolean isMovingThisFrame = false; 
+        if (keyH.enterPressed) {
+            keyH.enterPressed = false; 
+            boolean interactionOccurred = false;
 
-        boolean interactionOccurred = false;
-
-        // Cek Interaksi NPC
-        int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
-        if (npcIndex != 999) {
-            System.out.println("PLAYER.UPDATE: NPC terdeteksi (indeks: " + npcIndex + "), memanggil interactNPC.");
-            interactNPC(npcIndex); // interactNPC akan mengubah gameState jika perlu
-            interactionOccurred = true;
-        }
-
-        // Jika tidak ada NPC, cek Interaksi Objek
-        if (!interactionOccurred) {
-            int objIndex = gp.cChecker.checkObject(this, true); // 'true' untuk interaksi
-            if (objIndex != 999) {
-                System.out.println("PLAYER.UPDATE: Objek terdeteksi (indeks: " + objIndex + "), memanggil interactWithObject.");
-                interactWithObject(objIndex); // interactWithObject akan mengubah gameState jika perlu
+            // Cek Interaksi NPC
+            int npcIndex = gp.cChecker.checkEntity(this, gp.npc);
+            if (npcIndex != 999) {
+                interactNPC(npcIndex); 
                 interactionOccurred = true;
             }
-        }
 
-        // Jika tidak ada NPC atau Objek, cek Interaksi Tile (misalnya, untuk TV)
-        if (!interactionOccurred) {
-            int tileNumInFront = getTileInFront(); // Asumsi metode ini ada
-            System.out.println("PLAYER.UPDATE: Tile di depan: " + tileNumInFront);
-            if (tileNumInFront >= 137 && tileNumInFront <= 144) { // Contoh untuk TV tile
-                System.out.println("PLAYER.UPDATE: Tile TV (" + tileNumInFront + ") terdeteksi, memanggil watchTV().");
-                watchTV(); // watchTV akan mengubah gameState jika perlu
-                interactionOccurred = true;
+            if (!interactionOccurred) {
+                int objIndex = gp.cChecker.checkObject(this, true);
+                if (objIndex != 999) {
+                    interactWithObject(objIndex); 
+                    interactionOccurred = true;
+                }
+            }
+
+            if (!interactionOccurred) {
+                int tileNumInFront = getTileInFront();
+                if (tileNumInFront >= 137 && tileNumInFront <= 144) {
+                    System.out.println("PLAYER.UPDATE: Tile TV (" + tileNumInFront + ") terdeteksi, memanggil watchTV().");
+                    watchTV(); 
+                    interactionOccurred = true;
+                }
             }
         }
 
-        if (!interactionOccurred) {
-            System.out.println("PLAYER.UPDATE: Enter ditekan, tapi tidak ada target interaksi spesifik.");
-        }
-    }
-
-    // 2. PENANGANAN INPUT UNTUK PERGERAKAN (Tombol Arah)
-    // Hanya proses pergerakan jika TIDAK ADA INTERAKSI ENTER yang baru saja terjadi (opsional, tapi bisa mencegah "bergerak saat bicara")
-    // Namun, karena enterPressed sudah di-false-kan di atas, kita bisa langsung cek tombol arah.
-    if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
-        // Tentukan arah berdasarkan input terakhir atau prioritas
-        // (Gunakan logika penentuan 'direction' Anda yang sudah ada di sini, atau sederhanakan jika perlu)
-        // Contoh sederhana (prioritas, bukan lastPressed):
-        if (keyH.upPressed) { direction = "up"; }
-        else if (keyH.downPressed) { direction = "down"; }
-        else if (keyH.leftPressed) { direction = "left"; }
-        else if (keyH.rightPressed) { direction = "right"; }
-        // ATAU, gunakan logika lastPressedDirectionKey Anda:
-        // int lastKey = keyH.lastPressedDirectionKey; // Pastikan typo sudah diperbaiki
-        // if((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && keyH.upPressed) { direction = "up"; }
-        // else if((lastKey == KeyEvent.VK_S || lastKey == KeyEvent.VK_DOWN) && keyH.downPressed) { direction = "down"; }
-        // else if((lastKey == KeyEvent.VK_A || lastKey == KeyEvent.VK_LEFT) && keyH.leftPressed) { direction = "left"; }
-        // else if((lastKey == KeyEvent.VK_D || lastKey == KeyEvent.VK_RIGHT) && keyH.rightPressed) { direction = "right"; }
-        // else if(keyH.upPressed) { direction = "up"; }
-        // else if(keyH.downPressed) { direction = "down"; }
-        // else if(keyH.leftPressed) { direction = "left"; }
-        // else if(keyH.rightPressed) { direction = "right"; }
-
-
-        collisionOn = false; // Reset flag tabrakan sebelum pengecekan
-        gp.cChecker.checkTile(this);
-        gp.cChecker.checkObject(this, false); // 'false' untuk tabrakan fisik
-        gp.cChecker.checkEntity(this, gp.npc);    // untuk tabrakan fisik
-
-        gp.eHandler.checkEvent(); // Cek event
-
-        if (!collisionOn) {
-            switch (direction) {
-                case "up": worldY -= speed; break;
-                case "down": worldY += speed; break;
-                case "left": worldX -= speed; break;
-                case "right": worldX += speed; break;
+        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+            int lastKey = keyH.lastPressedDirectionKey;
+            if ((lastKey == KeyEvent.VK_W || lastKey == KeyEvent.VK_UP) && keyH.upPressed) {
+                direction = "up";
+            } else if ((lastKey == KeyEvent.VK_S || lastKey == KeyEvent.VK_DOWN) && keyH.downPressed) {
+                direction = "down";
+            } else if ((lastKey == KeyEvent.VK_A || lastKey == KeyEvent.VK_LEFT) && keyH.leftPressed) {
+                direction = "left";
+            } else if ((lastKey == KeyEvent.VK_D || lastKey == KeyEvent.VK_RIGHT) && keyH.rightPressed) {
+                direction = "right";
+            } else {
+                if (keyH.upPressed) direction = "up";
+                else if (keyH.downPressed) direction = "down";
+                else if (keyH.leftPressed) direction = "left";
+                else if (keyH.rightPressed) direction = "right";
             }
-            isMovingThisFrame = true;
-        }
-    }
 
-    // 3. ANIMASI PEMAIN
-    if (isMovingThisFrame) {
-        spriteCounter++;
-        if (spriteCounter > 10) { // Sesuaikan angka ini untuk kecepatan animasi
-            spriteNum = (spriteNum == 1) ? 2 : 1;
-            spriteCounter = 0;
+            collisionOn = false; 
+            gp.cChecker.checkTile(this);
+            gp.cChecker.checkObject(this, false); 
+            gp.cChecker.checkEntity(this, gp.npc);   
+
+            gp.eHandler.checkEvent(); 
+
+            if (!collisionOn) {
+                switch (direction) {
+                    case "up": worldY -= speed; break;
+                    case "down": worldY += speed; break;
+                    case "left": worldX -= speed; break;
+                    case "right": worldX += speed; break;
+                }
+                isMovingThisFrame = true;
+            }
         }
-    } else {
-        spriteNum = 1; // Kembali ke sprite idle/default jika tidak bergerak
+
+        if (isMovingThisFrame) {
+            spriteCounter++;
+            if (spriteCounter > 10) { 
+                spriteNum = (spriteNum == 1) ? 2 : 1;
+                spriteCounter = 0;
+            }
+        } else {
+            spriteNum = 1;
+        }
     }
-}
 
     public void pickUpObject(int i) {
         if (i != 999 && gp.obj[gp.currentMap][i] != null) {
@@ -693,31 +683,26 @@ public void update() {
     }
 
     public void interactNPC(int i) {
-    if (i != 999 && gp.npc[gp.currentMap][i] != null) { // Tambahkan null check untuk NPC
-        System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
-        currentInteractingNPC = gp.npc[gp.currentMap][i];
-        gp.gameState = gp.npcInteractionState; // Langsung ubah state
-        gp.ui.commandNum = 0;
-        if (gp.statsManager != null && currentInteractingNPC != null) { // <<< TAMBAHKAN BLOK IF INI
-            gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
-            System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
+        if (i != 999 && gp.npc[gp.currentMap][i] != null) { // Tambahkan null check untuk NPC
+            System.out.println("Player.interactNPC: Berinteraksi dengan NPC " + gp.npc[gp.currentMap][i].name);
+            currentInteractingNPC = gp.npc[gp.currentMap][i];
+            gp.gameState = gp.npcInteractionState; // Langsung ubah state
+            gp.ui.commandNum = 0;
+            if (gp.statsManager != null && currentInteractingNPC != null) { // <<< TAMBAHKAN BLOK IF INI
+                gp.statsManager.incrementVisitingFrequency(currentInteractingNPC.name);
+                System.out.println("STATISTICS: Visiting frequency for " + currentInteractingNPC.name + " incremented.");
+            }
         }
-        // Jangan reset keyH.enterPressed di sini. Biarkan pemanggil (Player.update) yang melakukannya.
-    } else {
-        // System.out.println("Player.interactNPC: Tidak ada NPC valid untuk diajak bicara (index: " + i + ")");
-        // Jika tidak ada NPC, jangan lakukan apa-apa terkait state dari sini.
-        // Game akan tetap di playState jika tidak ada interaksi yang terjadi.
     }
-}
 
     public boolean consumeEnergy(int cost) {
         if(energy - cost >= -20){
             energy -= cost;
-            return true; // Energi cukup untuk dikonsumsi
+            return true; 
         } else {
             gp.gameState = gp.dialogueState;
             gp.ui.currentDialogue = "Energi tidak cukup!";
-            return false; // Energi tidak cukup
+            return false; 
         }
     }
 
@@ -734,10 +719,9 @@ public void update() {
         this.gold = 0;
     }
 
-    if (gp != null && gp.statsManager != null) { // Pastikan gp dan statsManager tidak null
+    if (gp != null && gp.statsManager != null) { 
         if (amount > 0) {
             gp.statsManager.addIncome(amount);
-            // System.out.println("STATISTICS: Income added via Player.changeGold: " + amount);
         } else if (amount < 0) {
             gp.statsManager.addExpenditure(Math.abs(amount)); // Pengeluaran dicatat di sini
             System.out.println("STATISTICS: Expenditure added via Player.changeGold: " + Math.abs(amount));
@@ -814,15 +798,6 @@ public void update() {
         return false;
     }
 
-    /**
-     * Menambahkan item ke inventaris pemain.
-     * Akan mencoba menumpuk item jika stackable dan ada stack yang sama dengan ruang kosong.
-     * Jika tidak, atau jika stack penuh, akan membuat stack baru jika ada slot kosong.
-     *
-     * @param itemToAdd Item yang akan ditambahkan.
-     * @param quantity Jumlah item yang akan ditambahkan.
-     * @return true jika setidaknya sebagian item berhasil ditambahkan, false jika tidak ada yang bisa ditambahkan.
-     */
     public boolean addItemToInventory(Item itemToAdd, int quantity) {
         if (itemToAdd == null || quantity <= 0) {
             System.out.println("addItemToInventory: Item null atau quantity tidak valid.");
@@ -991,8 +966,6 @@ public void update() {
 
         // Cek energi cukup
         if (!consumeEnergy(5)) return true;
-
-        // Tambah waktu menggunakan GameState (biar konsisten)
         gp.gameStateSystem.advanceTimeByMinutes(15, gp.statsManager);
 
         gp.ui.currentDialogue = "Kamu menonton TV selama 15 menit.\nCuaca hari ini: " + todayWeather;
@@ -1093,8 +1066,7 @@ public void update() {
     private Item getHarvestResult(String seedName) {
         switch (seedName) {
             case "Parsnip Seeds":
-                return ItemRepository.Parsnip; // Asumsikan ada Parsnip di ItemRepository
-            // Tambahkan case lain sesuai seed yang ada
+                return ItemRepository.Parsnip; 
             default:
                 return null;
         }

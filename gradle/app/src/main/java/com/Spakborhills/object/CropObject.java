@@ -1,7 +1,9 @@
 package com.Spakborhills.object;
 
 import java.awt.image.BufferedImage;
+
 import javax.imageio.ImageIO;
+
 import com.Spakborhills.main.UtilityTool;
 
 public class CropObject {
@@ -31,7 +33,6 @@ public class CropObject {
     private void loadCropImages() {
         UtilityTool uTool = new UtilityTool();
         try {
-            // Format nama file: parsnip_seed.png, parsnip_growing.png, parsnip_ready.png
             String baseName = cropName.toLowerCase().replace(" ", "_");
 
             seedImage = ImageIO.read(getClass().getResourceAsStream("/item/seeds/" + baseName + "1.png"));

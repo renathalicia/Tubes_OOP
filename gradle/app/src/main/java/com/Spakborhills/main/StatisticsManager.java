@@ -22,14 +22,12 @@ public class StatisticsManager {
     public Map<String, String> npcRelationshipStatuses = new HashMap<>();
     public Map<String, Integer> npcChattingFrequency = new HashMap<>();
     public Map<String, Integer> npcGiftingFrequency = new HashMap<>();
-    public Map<String, Integer> npcVisitingFrequency = new HashMap<>(); // Perlu definisi jelas kapan "visiting" tercatat
+    public Map<String, Integer> npcVisitingFrequency = new HashMap<>(); 
 
     public int totalCropsHarvested = 0;
 
     public int totalFishCaught = 0;
-    public Map<String, Integer> fishCaughtByType = new HashMap<>(); // Key: "Common", "Regular", "Legendary"
-
-    // Flag untuk menandakan apakah statistik end game sudah pernah ditampilkan
+    public Map<String, Integer> fishCaughtByType = new HashMap<>();
     public boolean endGameStatsShown = false;
 
 
@@ -38,7 +36,6 @@ public class StatisticsManager {
         fishCaughtByType.put("Common", 0);
         fishCaughtByType.put("Regular", 0);
         fishCaughtByType.put("Legendary", 0);
-        // Anda mungkin perlu menginisialisasi npcRelationshipStatuses dengan semua nama NPC dan status awal "Single"
     }
 
     // --- Metode untuk memperbarui statistik ---
@@ -61,10 +58,8 @@ public class StatisticsManager {
         this.totalDaysPlayed++;
     }
 
-    // Dipanggil di akhir setiap musim (setelah 10 hari)
+    // Dipanggil di akhir setiap musim 
     public void recordEndOfSeasonStats() {
-        // Hanya catat jika ada hari yang dimainkan di musim tersebut
-        // atau jika Anda ingin mencatat musim dengan 0 income/expenditure
         this.allPastSeasonalIncomes.add(this.currentSeasonIncome);
         this.allPastSeasonalExpenditures.add(this.currentSeasonExpenditure);
         this.totalSeasonsCompletedForAverage++;
@@ -106,8 +101,6 @@ public class StatisticsManager {
     }
 
     public void incrementVisitingFrequency(String npcName) {
-        // Tentukan bagaimana "visiting" dihitung. Misalnya, saat memasuki map rumah NPC?
-        // Atau saat pertama kali berinteraksi dengan NPC di map rumahnya per hari?
         this.npcVisitingFrequency.put(npcName, this.npcVisitingFrequency.getOrDefault(npcName, 0) + 1);
          System.out.println("STATISTICS: Visiting frequency for " + npcName + " incremented to " + this.npcVisitingFrequency.get(npcName));
     }

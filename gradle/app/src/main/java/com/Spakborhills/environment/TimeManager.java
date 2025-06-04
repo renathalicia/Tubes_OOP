@@ -19,8 +19,6 @@ public class TimeManager {
             } else {
                 System.err.println("TimeManager: statsManager null di advanceToNextMorning, tidak bisa mencatat statistik musim.");
             }
-            // Tambahkan logika lain yang perlu dilakukan saat musim berganti (misalnya, tanaman mati)
-            // if (gp != null) gp.tileM.handleSeasonChange(this.season);
         }
 
         this.weather = Weather.randomWeather(); // Dapatkan cuaca acak untuk hari baru
